@@ -1,0 +1,1120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head profile="http://www.w3.org/2006/03/hcard http://dublincore.org/documents/2008/08/04/dc-html/">
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+
+  <title>TLS-KDH: Kerberos + Diffie-Hellman in TLS</title>
+
+  <style type="text/css" title="Xml2Rfc (sans serif)">
+  /*<![CDATA[*/
+	  a {
+	  text-decoration: none;
+	  }
+      /* info code from SantaKlauss at http://www.madaboutstyle.com/tooltip2.html */
+      a.info {
+          /* This is the key. */
+          position: relative;
+          z-index: 24;
+          text-decoration: none;
+      }
+      a.info:hover {
+          z-index: 25;
+          color: #FFF; background-color: #900;
+      }
+      a.info span { display: none; }
+      a.info:hover span.info {
+          /* The span will display just on :hover state. */
+          display: block;
+          position: absolute;
+          font-size: smaller;
+          top: 2em; left: -5em; width: 15em;
+          padding: 2px; border: 1px solid #333;
+          color: #900; background-color: #EEE;
+          text-align: left;
+      }
+	  a.smpl {
+	  color: black;
+	  }
+	  a:hover {
+	  text-decoration: underline;
+	  }
+	  a:active {
+	  text-decoration: underline;
+	  }
+	  address {
+	  margin-top: 1em;
+	  margin-left: 2em;
+	  font-style: normal;
+	  }
+	  body {
+	  color: black;
+	  font-family: verdana, helvetica, arial, sans-serif;
+	  font-size: 10pt;
+	  max-width: 55em;
+	  
+	  }
+	  cite {
+	  font-style: normal;
+	  }
+	  dd {
+	  margin-right: 2em;
+	  }
+	  dl {
+	  margin-left: 2em;
+	  }
+	
+	  ul.empty {
+	  list-style-type: none;
+	  }
+	  ul.empty li {
+	  margin-top: .5em;
+	  }
+	  dl p {
+	  margin-left: 0em;
+	  }
+	  dt {
+	  margin-top: .5em;
+	  }
+	  h1 {
+	  font-size: 14pt;
+	  line-height: 21pt;
+	  page-break-after: avoid;
+	  }
+	  h1.np {
+	  page-break-before: always;
+	  }
+	  h1 a {
+	  color: #333333;
+	  }
+	  h2 {
+	  font-size: 12pt;
+	  line-height: 15pt;
+	  page-break-after: avoid;
+	  }
+	  h3, h4, h5, h6 {
+	  font-size: 10pt;
+	  page-break-after: avoid;
+	  }
+	  h2 a, h3 a, h4 a, h5 a, h6 a {
+	  color: black;
+	  }
+	  img {
+	  margin-left: 3em;
+	  }
+	  li {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol p {
+	  margin-left: 0em;
+	  }
+	  p {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  pre {
+	  margin-left: 3em;
+	  background-color: lightyellow;
+	  padding: .25em;
+	  }
+	  pre.text2 {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f0f0f0;
+	  width: 69em;
+	  }
+	  pre.inline {
+	  background-color: white;
+	  padding: 0em;
+	  }
+	  pre.text {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  width: 69em;
+	  }
+	  pre.drawing {
+	  border-style: solid;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  padding: 2em;
+	  }
+	  table {
+	  margin-left: 2em;
+	  }
+	  table.tt {
+	  vertical-align: top;
+	  }
+	  table.full {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.headers {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.tt td {
+	  vertical-align: top;
+	  }
+	  table.full td {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.tt th {
+	  vertical-align: top;
+	  }
+	  table.full th {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.headers th {
+	  border-style: none none inset none;
+	  border-width: 1px;
+	  }
+	  table.left {
+	  margin-right: auto;
+	  }
+	  table.right {
+	  margin-left: auto;
+	  }
+	  table.center {
+	  margin-left: auto;
+	  margin-right: auto;
+	  }
+	  caption {
+	  caption-side: bottom;
+	  font-weight: bold;
+	  font-size: 9pt;
+	  margin-top: .5em;
+	  }
+	
+	  table.header {
+	  border-spacing: 1px;
+	  width: 95%;
+	  font-size: 10pt;
+	  color: white;
+	  }
+	  td.top {
+	  vertical-align: top;
+	  }
+	  td.topnowrap {
+	  vertical-align: top;
+	  white-space: nowrap; 
+	  }
+	  table.header td {
+	  background-color: gray;
+	  width: 50%;
+	  }
+	  table.header a {
+	  color: white;
+	  }
+	  td.reference {
+	  vertical-align: top;
+	  white-space: nowrap;
+	  padding-right: 1em;
+	  }
+	  thead {
+	  display:table-header-group;
+	  }
+	  ul.toc, ul.toc ul {
+	  list-style: none;
+	  margin-left: 1.5em;
+	  margin-right: 0em;
+	  padding-left: 0em;
+	  }
+	  ul.toc li {
+	  line-height: 150%;
+	  font-weight: bold;
+	  font-size: 10pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  ul.toc li li {
+	  line-height: normal;
+	  font-weight: normal;
+	  font-size: 9pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  li.excluded {
+	  font-size: 0pt;
+	  }
+	  ul p {
+	  margin-left: 0em;
+	  }
+	
+	  .comment {
+	  background-color: yellow;
+	  }
+	  .center {
+	  text-align: center;
+	  }
+	  .error {
+	  color: red;
+	  font-style: italic;
+	  font-weight: bold;
+	  }
+	  .figure {
+	  font-weight: bold;
+	  text-align: center;
+	  font-size: 9pt;
+	  }
+	  .filename {
+	  color: #333333;
+	  font-weight: bold;
+	  font-size: 12pt;
+	  line-height: 21pt;
+	  text-align: center;
+	  }
+	  .fn {
+	  font-weight: bold;
+	  }
+	  .hidden {
+	  display: none;
+	  }
+	  .left {
+	  text-align: left;
+	  }
+	  .right {
+	  text-align: right;
+	  }
+	  .title {
+	  color: #990000;
+	  font-size: 18pt;
+	  line-height: 18pt;
+	  font-weight: bold;
+	  text-align: center;
+	  margin-top: 36pt;
+	  }
+	  .vcardline {
+	  display: block;
+	  }
+	  .warning {
+	  font-size: 14pt;
+	  background-color: yellow;
+	  }
+	
+	
+	  @media print {
+	  .noprint {
+		display: none;
+	  }
+	
+	  a {
+		color: black;
+		text-decoration: none;
+	  }
+	
+	  table.header {
+		width: 90%;
+	  }
+	
+	  td.header {
+		width: 50%;
+		color: black;
+		background-color: white;
+		vertical-align: top;
+		font-size: 12pt;
+	  }
+	
+	  ul.toc a::after {
+		content: leader('.') target-counter(attr(href), page);
+	  }
+	
+	  ul.ind li li a {
+		content: target-counter(attr(href), page);
+	  }
+	
+	  .print2col {
+		column-count: 2;
+		-moz-column-count: 2;
+		column-fill: auto;
+	  }
+	  }
+	
+	  @page {
+	  @top-left {
+		   content: "Internet-Draft"; 
+	  } 
+	  @top-right {
+		   content: "December 2010"; 
+	  } 
+	  @top-center {
+		   content: "Abbreviated Title";
+	  } 
+	  @bottom-left {
+		   content: "Doe"; 
+	  } 
+	  @bottom-center {
+		   content: "Expires June 2011"; 
+	  } 
+	  @bottom-right {
+		   content: "[Page " counter(page) "]"; 
+	  } 
+	  }
+	
+	  @page:first { 
+		@top-left {
+		  content: normal;
+		}
+		@top-right {
+		  content: normal;
+		}
+		@top-center {
+		  content: normal;
+		}
+	  }
+  /*]]>*/
+  </style>
+
+  <link href="#rfc.toc" rel="Contents"/>
+<link href="#rfc.section.1" rel="Chapter" title="1 Introduction"/>
+<link href="#rfc.section.2" rel="Chapter" title="2 Relations to Prior Work"/>
+<link href="#rfc.section.3" rel="Chapter" title="3 CipherSuites for Kerberos with Forward Secrecy"/>
+<link href="#rfc.section.4" rel="Chapter" title="4 ClientHello: TLS-KDH CipherSuites"/>
+<link href="#rfc.section.4.1" rel="Chapter" title="4.1 Indicating the Server Name"/>
+<link href="#rfc.section.5" rel="Chapter" title="5 ServerHello: Selecting a TLS-KDH CipherSuite"/>
+<link href="#rfc.section.6" rel="Chapter" title="6 No ServerCertificate"/>
+<link href="#rfc.section.7" rel="Chapter" title="7 ServerKeyExchange: Ephemeral Diffie-Hellman"/>
+<link href="#rfc.section.7.1" rel="Chapter" title="7.1 TicketRequestFlags"/>
+<link href="#rfc.section.8" rel="Chapter" title="8 Obtaining a Service Ticket on the Client"/>
+<link href="#rfc.section.9" rel="Chapter" title="9 ClientKeyExchange: Kerberos ticket with Diffie-Hellman"/>
+<link href="#rfc.section.9.1" rel="Chapter" title="9.1 Impact of Anonymous Client Tickets"/>
+<link href="#rfc.section.10" rel="Chapter" title="10 Master Secret Calculation"/>
+<link href="#rfc.section.11" rel="Chapter" title="11 Finished: Mutual Validation"/>
+<link href="#rfc.section.12" rel="Chapter" title="12 Freshness of Diffie-Hellman Keys"/>
+<link href="#rfc.section.12.1" rel="Chapter" title="12.1 Managing a Pool of Fresh Keys"/>
+<link href="#rfc.section.12.2" rel="Chapter" title="12.2 Impact on Replay Attacks"/>
+<link href="#rfc.section.12.3" rel="Chapter" title="12.3 Impact on Denial-Of-Service Attacks"/>
+<link href="#rfc.section.13" rel="Chapter" title="13 TLS Connection Expiration"/>
+<link href="#rfc.section.14" rel="Chapter" title="14 Mandatody CipherSuites"/>
+<link href="#rfc.section.15" rel="Chapter" title="15 Comparison to Earlier Work"/>
+<link href="#rfc.section.16" rel="Chapter" title="16 Efficiency Considerations"/>
+<link href="#rfc.section.17" rel="Chapter" title="17 Privacy Considerations"/>
+<link href="#rfc.section.18" rel="Chapter" title="18 Security Considerations"/>
+<link href="#rfc.section.19" rel="Chapter" title="19 IANA Considerations"/>
+<link href="#rfc.references" rel="Chapter" title="20 References"/>
+<link href="#rfc.references.1" rel="Chapter" title="20.1 Normative References"/>
+<link href="#rfc.references.2" rel="Chapter" title="20.2 Informative References"/>
+<link href="#rfc.appendix.A" rel="Chapter" title="A Acknowledgements"/>
+<link href="#rfc.authors" rel="Chapter"/>
+
+
+  <meta name="generator" content="xml2rfc version 2.4.8 - http://tools.ietf.org/tools/xml2rfc" />
+  <link rel="schema.dct" href="http://purl.org/dc/terms/" />
+
+  <meta name="dct.creator" content="Van Rein, R." />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-vanrein-tls-kdh-00" />
+  <meta name="dct.issued" scheme="ISO8601" content="2015-10-1" />
+  <meta name="dct.abstract" content="This specification extends TLS with a Kerberos-based method of mutual authentication, and binds in Diffie-Hellman to achieve Perfect Forward Secrecy for the session." />
+  <meta name="description" content="This specification extends TLS with a Kerberos-based method of mutual authentication, and binds in Diffie-Hellman to achieve Perfect Forward Secrecy for the session." />
+
+</head>
+
+<body>
+
+  <table class="header">
+    <tbody>
+    
+    	<tr>
+  <td class="left">Network Working Group</td>
+  <td class="right">R. Van Rein</td>
+</tr>
+<tr>
+  <td class="left">Internet-Draft</td>
+  <td class="right">ARPA2.net</td>
+</tr>
+<tr>
+  <td class="left">Intended status: Standards Track</td>
+  <td class="right">October 1, 2015</td>
+</tr>
+<tr>
+  <td class="left">Expires: April 3, 2016</td>
+  <td class="right"></td>
+</tr>
+
+    	
+    </tbody>
+  </table>
+
+  <p class="title">TLS-KDH: Kerberos + Diffie-Hellman in TLS<br />
+  <span class="filename">draft-vanrein-tls-kdh-00</span></p>
+  
+  <h1 id="rfc.abstract">
+  <a href="#rfc.abstract">Abstract</a>
+</h1>
+<p>This specification extends TLS with a Kerberos-based method of mutual authentication, and binds in Diffie-Hellman to achieve Perfect Forward Secrecy for the session.</p>
+<h1 id="rfc.status">
+  <a href="#rfc.status">Status of This Memo</a>
+</h1>
+<p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
+<p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
+<p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
+<p>This Internet-Draft will expire on April 3, 2016.</p>
+<h1 id="rfc.copyrightnotice">
+  <a href="#rfc.copyrightnotice">Copyright Notice</a>
+</h1>
+<p>Copyright (c) 2015 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
+<p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
+
+  
+  <hr class="noprint" />
+  <h1 class="np" id="rfc.toc"><a href="#rfc.toc">Table of Contents</a></h1>
+  <ul class="toc">
+
+  	<li>1.   <a href="#rfc.section.1">Introduction</a></li>
+<li>2.   <a href="#rfc.section.2">Relations to Prior Work</a></li>
+<li>3.   <a href="#rfc.section.3">CipherSuites for Kerberos with Forward Secrecy</a></li>
+<li>4.   <a href="#rfc.section.4">ClientHello: TLS-KDH CipherSuites</a></li>
+<li>4.1.   <a href="#rfc.section.4.1">Indicating the Server Name</a></li>
+<li>5.   <a href="#rfc.section.5">ServerHello: Selecting a TLS-KDH CipherSuite</a></li>
+<li>6.   <a href="#rfc.section.6">No ServerCertificate</a></li>
+<li>7.   <a href="#rfc.section.7">ServerKeyExchange: Ephemeral Diffie-Hellman</a></li>
+<li>7.1.   <a href="#rfc.section.7.1">TicketRequestFlags</a></li>
+<li>8.   <a href="#rfc.section.8">Obtaining a Service Ticket on the Client</a></li>
+<li>9.   <a href="#rfc.section.9">ClientKeyExchange: Kerberos ticket with Diffie-Hellman</a></li>
+<li>9.1.   <a href="#rfc.section.9.1">Impact of Anonymous Client Tickets</a></li>
+<li>10.   <a href="#rfc.section.10">Master Secret Calculation</a></li>
+<li>11.   <a href="#rfc.section.11">Finished: Mutual Validation</a></li>
+<li>12.   <a href="#rfc.section.12">Freshness of Diffie-Hellman Keys</a></li>
+<li>12.1.   <a href="#rfc.section.12.1">Managing a Pool of Fresh Keys</a></li>
+<li>12.2.   <a href="#rfc.section.12.2">Impact on Replay Attacks</a></li>
+<li>12.3.   <a href="#rfc.section.12.3">Impact on Denial-Of-Service Attacks</a></li>
+<li>13.   <a href="#rfc.section.13">TLS Connection Expiration</a></li>
+<li>14.   <a href="#rfc.section.14">Mandatody CipherSuites</a></li>
+<li>15.   <a href="#rfc.section.15">Comparison to Earlier Work</a></li>
+<li>16.   <a href="#rfc.section.16">Efficiency Considerations</a></li>
+<li>17.   <a href="#rfc.section.17">Privacy Considerations</a></li>
+<li>18.   <a href="#rfc.section.18">Security Considerations</a></li>
+<li>19.   <a href="#rfc.section.19">IANA Considerations</a></li>
+<li>20.   <a href="#rfc.references">References</a></li>
+<li>20.1.   <a href="#rfc.references.1">Normative References</a></li>
+<li>20.2.   <a href="#rfc.references.2">Informative References</a></li>
+<li>Appendix A.   <a href="#rfc.appendix.A">Acknowledgements</a></li>
+<li><a href="#rfc.authors">Author's Address</a></li>
+
+
+  </ul>
+
+  <h1 id="rfc.section.1"><a href="#rfc.section.1">1.</a> <a href="#intro" id="intro">Introduction</a></h1>
+<p id="rfc.section.1.p.1">Kerberos lends itself well to infrastructure-supported mutual authentication, and can even be used to crossover between realms. A downside of this infrastructure is that a crack of one key can lead to a cascade of reverse-engineered keys.  Diffie-Hellman key exchange can be used to incorporate the desirable property of Perfect Forward Secrecy, but its vulnerability for man-in-the-middle attacks must then be overcome by cryptographically binding it to an authentication mechanism.</p>
+<p id="rfc.section.1.p.2">The protocol described in this specification forms a cryptographic binding between Kerberos and Diffie-Hellman, leading to the combined advantages of infrastructure-supported mutual authentication and Perfect Forward Secrecy.</p>
+<p id="rfc.section.1.p.3">The flow of the TLS-KDH protocol is informally presented in the following chart:</p>
+<pre>
+    Client                                               Server
+
+    ClientHello                  --------&gt;
+                                                    ServerHello
+                                              ServerKeyExchange
+                                 &lt;--------      ServerHelloDone
+    ClientKeyExchange
+    [ChangeCipherSpec]
+    Finished                     --------&gt;
+                                             [ChangeCipherSpec]
+                                 &lt;--------             Finished
+    Application Data             &lt;-------&gt;     Application Data
+</pre>
+<p id="rfc.section.1.p.4">* Indicates optional or situation-dependent messages that are not always sent.</p>
+<p id="rfc.section.1.p.5">[] Indicates that ChangeCipherSpec is an independent TLS protocol content type; it is not actually a TLS handshake message.</p>
+<h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#priorwork" id="priorwork">Relations to Prior Work</a></h1>
+<p id="rfc.section.2.p.1">Prior work exists for Kerberos authentication within TLS <a href="#RFC2712">[RFC2712]</a>.  This work has a few drawbacks that are addressed in this new specification.  Specifically, it is useful to combine Kerberos mutual authentication with the Perfect Forward Secrecy of Diffie-Hellman.</p>
+<p id="rfc.section.2.p.2">Specifically for the HTTP and HTTPS protocols, the Negotiate header <a href="#RFC4559">[RFC4559]</a> can provide Kerberos authentication, but its use is not considered a strong security practice.  Applications that currently rely on this mechanism can strengthen their security by moving to HTTP over TLS-KDH.  Note that this provides an alternative for Kerberos, not to SPNEGO and not for general GSS-API protocols.  This restriction of TLS-KDH to Kerberos, rather than a more general GSS-API protocol, is a result of the limited number of message exchanges available within TLS.</p>
+<p id="rfc.section.2.p.3">Many other protocols incorporate Kerberos through GSS-API, usually via SASL.  This is considered secure, but has the disadvantage of separating encryption and authentication layers, and quite possibly also the identities involved in these layers.  Furthermore, encryption through SASL is not commonly used.  In situations where Kerberos is used for GSS-API over SASL, TLS-KDH offers a comparable but more efficient and tighter-coupled mechanism for encryption and mutual authentication, in a way that also lends itself for non-SASL applications.  Specifically useful in this respect is that there is no longer a requirement to setup X.509 certificates plus infrastructure and validation mechanisms, just to satisfy encryption requirements with their own authentication infrastructure.  In applications that use SASL, the EXTERNAL mechanism <a href="#RFC4422">[RFC4422]</a> can be used to extract the remote identity from a Kerberos ticket, and make it available to the application layer; SASL EXTERNAL is also used when TLS authenticates peers through X.509 certificates.</p>
+<p id="rfc.section.2.p.4">The following paragraph is an informational suggestion: When a SASL EXTERNAL mechanism is used to communicate an identity between the application and the TLS stack, then a good alignment with X.509 certificates is possible when both aim to derive a Network Access Identifier <a href="#RFC4282">[RFC4282]</a> and/or a domain name.  In the case of a Kerberos principal name, this would involve translation between case-sensitive realm names to DNS names whose case is not reliably [Section 4.1 of <a href="#RFC4343">[RFC4343]</a>] reproduced; this may be done by ignoring or lowering the case of the realm name while upholding the requirement that no two realm names may differ only in their case [Section 7.2.3.1 of <a href="#RFC4120">[RFC4120]</a>].</p>
+<h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#ciphersuites" id="ciphersuites">CipherSuites for Kerberos with Forward Secrecy</a></h1>
+<p id="rfc.section.3.p.1">This specification extends TLS <a href="#RFC5246">[RFC5246]</a> with a number of CiperSuites that subject ephemeral Diffie-Hellman key exchange to Kerberos mutual authentication.  The names of the new CipherSuites are listed under IANA Considerations, and will collectively be referred to as TLS-KDH CipherSuites in this specification.  The variants of the TLS protocol variants following one of these CipherSuites will be informally referred to as TLS-KDH in this specification.</p>
+<p id="rfc.section.3.p.2">The names of the TLS-KDH CipherSuites can be split into DHE_KRB and ECDHE_KRB variants; their names start with TLS_DHE_KRB_ and TLS_ECDHE_KRB_, respectively; the corresponding KeyExchangeAlgorithm tags will be dhe_krb and ecdhe_krb, respectively.</p>
+<p id="rfc.section.3.p.3">The cipher and hash algorithm for each of the TLS-KDH CipherSuites are easily determined by examining the name; this follows the same regime that is commonly used in other TLS specifications.  The only thing that this specification adds to the CipherSuites is a new authenticated key exchange mechanism.</p>
+<h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#clienthello" id="clienthello">ClientHello: TLS-KDH CipherSuites</a></h1>
+<p id="rfc.section.4.p.1">A client willing to employ Kerberos authentication offers one or more of the TLS-KDH CipherSuites in its ClientHello message. Offering these is no guarantee that a token has already been found for the server, but it expresses a willingness to look for one.</p>
+<p id="rfc.section.4.p.2">Whether a client is willing to employ Kerberos authentication MAY depend on its context.  Following is an informative example of situations that could be considered, with a rising level of willingness: </p>
+
+<ol>
+  <li>Kerberos software is available on the client system</li>
+  <li>The client context holds a Ticket Granting Ticket that is currently valid</li>
+  <li>The client context holds a Ticket Granting Ticket that may have expired</li>
+  <li>The client context will go through Kerberos signup if need be</li>
+</ol>
+
+<p> The last two options may require interaction with the user, and are not suitable for all kinds of applications.  The first and last options are too extreme to be defaults, but depending on the ability to interact, the middle two can be useful as defaults that may be modified by users if they want to.</p>
+<p id="rfc.section.4.p.3">TLS defines a gmt_unix_time field in the Random substructure of a ClientHello.  This field is not always used.  With Kerberos however, time is very important and upfront hints of a peer's time can be helpful.  For this reason, the gmt_unix_time field in a ClientHello MUST always be filled if TLS-KDH is being requested.</p>
+<h1 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a> <a href="#SNI" id="SNI">Indicating the Server Name</a></h1>
+<p id="rfc.section.4.1.p.1">If the ClientHello includes the server_name extension <a href="#RFC6066">[RFC6066]</a>, and if that extension includes the HostName variant, then this will be the default domain or host name that the client would use when requesting for a service ticket.  The Kerberos protocol name is considered to be provided by the application level.  The realm name used should either be clear from the context (such as the login realm or static configuration) or it can be found in secure DNS records <a href="#KREALM">[KREALM]</a> by either the Kerberos client or its KDC.</p>
+<p id="rfc.section.4.1.p.2">The server_name extension is optional, but recommended for all uses of TLS-KDH because it provides useful hints to the server about assumptions made in the client.</p>
+<p id="rfc.section.4.1.p.3">Aside from its current use in other parts of TLS, the server_name extension can be used by the server as a hint towards desired Kerberos configuration settings; such settings can then be different for different host names, as per the server-side configuration.  A server MAY fall back to a default Kerberos configuration for clients that provide no server_name extension, and this default configuration MAY be less functional when insufficient information is available for optimal support of the client.</p>
+<h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#serverhello" id="serverhello">ServerHello: Selecting a TLS-KDH CipherSuite</a></h1>
+<p id="rfc.section.5.p.1">After the client has offered one or more TLS-KDH CipherSuites, the TLS-KDH server configures its schemas of authentication and encryption by choosing one of these CipherSuites.  The server MUST NOT choose a TLS-KDH CipherSuite if it knows that it cannot process a Kerberos principal ticket for the requested service under any realm.  When the service_name is processed to select a Kerberos configuration, then this specialised information MUST be taken into account in making this decision.</p>
+<p id="rfc.section.5.p.2">When constructing the ServerHello, the TLS-KDH server fills the gmt_unix_time field in the Random substructure.  When the difference between the client and server time setting digresses to far, a server MAY also choose to reject a client's proposed TLS-KDH CipherSuites.</p>
+<p id="rfc.section.5.p.3">There are more subtle possibilities too; a server may queue clients in a way that gradually disadvantages clients more as their gmt_unix_time digresses farther from that of the server.  Specifically, sending a Diffie-Hellman public key may get deferred by such a policy.  Section <a href="#freshreplay">Section 12.2</a> describes a use case that could benefit from this approach.</p>
+<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#servercert" id="servercert">No ServerCertificate</a></h1>
+<p id="rfc.section.6.p.1">The ServerCertificate message MUST NOT be included in TLS-KDH.  The Kerberos exchanges implemented by TLS-KDH provide mutual authentication.  As a result, there is no need for additional proof of server authenticity through X.509 certificates.</p>
+<h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#serverkex" id="serverkex">ServerKeyExchange: Ephemeral Diffie-Hellman</a></h1>
+<p id="rfc.section.7.p.1">When one of the TLS-KDH CipherSuites is selected, the ServerKeyExchange MUST include an ephemeral Diffie-Hellman offer. This is done through an extension of the ServerKeyExchange structure:</p>
+<pre>
+struct {
+    select (KeyExchangeAlgorithm) {
+        /* existing cases defined elsewhere */
+        case dhe_krb:
+            TicketRequestFlags ticket_request_flags;
+            ServerDHParams params;
+        case ecdhe_krb:
+            TicketRequestFlags ec_ticket_request_flags;
+            ServerECDHParams ec_params;
+    };
+} ServerKeyExchange;
+</pre>
+<p id="rfc.section.7.p.2">DISCUSS: Consider removing the dhe_krb case, leaving just ecdhe_krb</p>
+<p id="rfc.section.7.p.3">Note that the new structure variations are not signed; instead of using an X.509 server certificate the Kerberos extension relies on the session key that Kerberos establishes for a session between a client and server, and from which a proof of authenticity will be derived.</p>
+<p id="rfc.section.7.p.4">The ticket_request_flags and ec_ticket_request_flags field perform the same function for different key exchange algorithms.  They express flags that hint at properties for acceptable service tickets.</p>
+<h1 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a> <a href="#ticketrequestflags" id="ticketrequestflags">TicketRequestFlags</a></h1>
+<p id="rfc.section.7.1.p.1">DISCUSS: Do we want this?  Not having it would mean that a client can have a local policy that defaults to anonymous credentials, and leave it to the server how to deal with it.  OTOH, a flag indicating a unique identity for the client, perhaps in a service-specific pseudonymic identity, could be useful to all parties involved.</p>
+<p id="rfc.section.7.1.p.2">This structure is an extensible list of flag values that indicate constraints on the ticket that the client should supply.  These should be seen as hints how the client should present its identity, as the server can always decide to reject a client on grounds that are or are not expressible in this form.</p>
+<p id="rfc.section.7.1.p.3">Flag values defined in this specification are: </p>
+
+<dl>
+  <dt>VisibleClientRealm (flag number 0)</dt>
+  <dd style="margin-left: 6">requests that the client's realm name is revealed in the service ticket.  With the flag not set, the server MUST NOT reject the well-known anonymous realm name WELLKNOWN:ANONYMOUS [Section 3 of <a href="#RFC6112">[RFC6112]</a>] in the client realm name.</dd>
+  <dt>LocalRealmService (flag number 1)</dt>
+  <dd style="margin-left: 6">indicates that the client SHOULD NOT perform realm crossover, but instead look for a service ticket in its local realm.  When this flag is set, the client may choose whether canonicalization <a href="#RFC6806">[RFC6806]</a> is useful; when this flag is not set, the client SHOULD use canonicalization to help it crossover to all realms that the KDC can reach.  When this flag is not set, the server MUST NOT expect the client realm to match one of the server realms.</dd>
+  <dt>UniqueClientIdentity (flag number 2)</dt>
+  <dd style="margin-left: 6">requests that the client presents a unique identity, even if it is a pseudonym that is specific to this service.  Some services can make good use of identities that are also presented over other protocols, which is why the choice to share such an identity SHOULD be made during an interaction with the user, if possible.  The user MAY determine to use only a short-lived identity.  When this flag is not set, the server MUST NOT reject the client principal name WELLKNOWN/ANONYMOUS of type KRB_NT_WELLKNOWN [Section 3 of <a href="#RFC6112">[RFC6112]</a>].  Regardless of this flag, it is RECOMMENDED for the server to be open to as many forms of client principal name [Section 6.2 of <a href="#RFC4120">[RFC4120]</a>] as possible.</dd>
+</dl>
+
+<p> </p>
+<p id="rfc.section.7.1.p.4">Additional flag bit values are reserved through the publication of an RFC.  (TODO: IANA's Kerberos registry?) Future specifications of flag values may state that a flag is an alternative to another flag, including to the ones specified above.  When flag A is an alternative to flag B then the fulfillment of the requirements for A suffice to ignore flag B.  It is possible for flags to cyclically refer to each other as alternatives; also in this case one flag's requirements can be fulfilled to skip the responsibilities for the flags to which it is an alternative.  What that means precisely depends on the pattern of reference.</p>
+<p id="rfc.section.7.1.p.5">The structure holding TicketRequestFlags is a sequence of 32-bit integers.  The lower 5 bits of a flag number indicate the bit within a 32-bit integer, and the higher bits indicate the integer's index in the list.  Servers MUST send unknown flags with value 0 and clients MUST NOT act on flags they don't know.</p>
+<pre>
+struct {
+    uint32 flags&lt;0..2^16-1&gt;
+} TicketRequestFlags;
+</pre>
+<p id="rfc.section.7.1.p.6">Integers that are not present in the flags array MUST be considered to have value 0.  The last 32-bit integer MUST NOT contain all 0 bits.  Note that this implies that the TicketRequestFlags can be an array of zero integers, namely when all flag values are 0.</p>
+<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#serviceticket" id="serviceticket">Obtaining a Service Ticket on the Client</a></h1>
+<p id="rfc.section.8.p.1">The client may have locally configured realms, and/or it may lookup realm specifications in secure DNS <a href="#KREALM">[KREALM]</a>.  Combined with the service protocol and server name, this helps the client to form one or more service principal names.  These can be used in ticket requests.</p>
+<p id="rfc.section.8.p.2">Before obtaining a Kerberos ticket, several considerations could be taken into account by the TLS-KDH client to select and/or order suitability of principal names for a desired ticket: </p>
+
+<ul>
+  <li>Local policy could specify a service principal name to always use for a particular service protocol and/or server name and/or realm name;</li>
+  <li>Local policy could specify a client principal name to always use for a particular service protocol and/or server name and/or realm name;</li>
+  <li>A realm name match with a principal ticket&#8217;s realm could suggest using that;</li>
+  <li>Prior availability of a service ticket could suggest using the service principal name in that ticket;</li>
+  <li>Prior availability of a service ticket could suggest using the client principal name in that ticket;</li>
+  <li>Prior availability of a ticket granting ticket could suggest using that.</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.8.p.3">In addition to this choice in service name to request, the client may wish to modify its own name, perhaps to a group name or a pseudonym, according to local policy and/or historic choices made.  Such mechanisms need not be standardised, as they are a local matter to the client-side Kerberos solution.  One default procedure is however RECOMMENDED, namely to send an anonymous ticket <a href="#RFC6112">[RFC6112]</a> when the server has not sent the UniqueClientIdentity flag; but to instead use a non-anonymous ticket when the anonymous ticket includes the anonymous realm name while the sever has sent the VisibleClientRealm flag.  The client SHOULD interact with the user to request permission for releasing the identifying information if possible, but the mechanism MAY store choices for future use in similar situations.  Finally, the client-side Kerberos solution MAY obtain a pseudonymous name such as one based on NT-UID principal names [Section 6.2 of <a href="#RFC4120">[RFC4120]</a>] when the server has sent the UniqueClientIdentity flag; it is up the client whether this is a short-lived or long-lived identity.</p>
+<p id="rfc.section.8.p.4">Given the options that are now available, the TLS client SHOULD proceed in attempts to obtain a service ticket, until either a ticket is assigned or all options for obtaining one have been exhausted.  When no ticket can be obtained, the TLS client MUST send a TLS Alert and shut down the connection.  The client might reconnect without offering TLS-KDH CipherSuites in response to a temporary local cache holding the negative result on a prior attempt.</p>
+<h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> <a href="#clientkex" id="clientkex">ClientKeyExchange: Kerberos ticket with Diffie-Hellman</a></h1>
+<p id="rfc.section.9.p.1">When the TLS-KDH client finds a suitable Kerberos service ticket, it sends a ClientKeyExchange messaging holding both that ticket and a Kerberos-styled authenticator constructed by the TLS-KDH client.  This authenticator is freshly created for each submission.  The message format holding these two parts is formally specified as:</p>
+<pre>
+struct {
+    select (KeyExchangeAlgorithm) {
+        /* definitions from other RFCs */
+        case dhe_krb:
+            opaque krb_ticket&lt;0..2^16-1&gt;;
+            opaque authenticator_with_dh_ad&lt;0..2^16-1&gt;;
+        case ecdhe_krb:
+            opaque krb_ticket&lt;0..2^16-1&gt;;
+            opaque authenticator_with_ecdh_ad&lt;0..2^16-1&gt;;
+    } exchange_keys;
+} ClientKeyExchange;
+</pre>
+<p id="rfc.section.9.p.2">The selected krb_ticket byte string field MUST hold the literal bytes of a Kerberos Ticket structure [Section 5.3 of <a href="#RFC4120">[RFC4120]</a>].</p>
+<p id="rfc.section.9.p.3">When selected, the authenticator_with_dh_ad field MUST contain an Authenticator [Section 5.5.1 of <a href="#RFC4120">[RFC4120]</a> encrypted with the session key that is presented to the service through the ticket in the krb_ticket field.  This Authenticator's AuthorizationData MUST contain an element with ad-type AD-DH-PUBKEY <a href="#KRB5-KDH">[KRB5-KDH]</a> and ad-data holding a BITSTRING containing a DHPubkey <a href="#KRB5-KDH">[KRB5-KDH]</a>.  This supplies the same dh_Yc value that is supplied in the ClientDiffieHellmanPublic structure <a href="#RFC5246">[RFC5246]</a> as part of other CipherSuites whose names start with TLS_DHE_.</p>
+<p id="rfc.section.9.p.4">When selected, the authenticator_with_ecdh_ad field MUST contain an Authenticator [Section 5.5.1 of <a href="#RFC4120">[RFC4120]</a>] encrypted with the session key that is presented to the service through the ticket in the krb_ticket field.  This Authenticator's AuthorizationData MUST contain an element with ad-type AD-ECDH-PUBKEY <a href="#KRB5-KDH">[KRB5-KDH]</a> and ad-data holding a BITSTRING containing an ECDHPubkey <a href="#KRB5-KDH">[KRB5-KDH]</a>.  This supplies the same ecdh_Yc value that is supplied in the ClientECDiffieHellmanPublic structure <a href="#RFC4492">[RFC4492]</a> as part of other CipherSuites whose name starts with TLS_ECDHE_.</p>
+<p id="rfc.section.9.p.5">The values of the authorization data types are:</p>
+<pre>
+AD-DH-PUBKEY	(TBD)
+AD-ECDH-PUBKEY	(TBD)
+</pre>
+<h1 id="rfc.section.9.1"><a href="#rfc.section.9.1">9.1.</a> <a href="#impactanon" id="impactanon">Impact of Anonymous Client Tickets</a></h1>
+<p id="rfc.section.9.1.p.1">When sending the ClientKeyExchange, a ticket is always provided.  It is possible however, to use an anonymous ticket [Section 3 of <a href="#RFC6112">[RFC6112]</a>], Section 3] that conceals the client principal name (the cname field in the ticket) and possibly also the client realm name (the crealm field in the ticket).  It is RECOMMENDED to use this kind of service ticket inasfar as it is permitted by the TicketRequestFlags that the server sent.</p>
+<p id="rfc.section.9.1.p.2">The impact of using an anonymous ticket is that the server cannot establish the identity of the client, except perhaps that the same service ticket may be used repeatedly during its short period of validity.  This means that the ability to trace the client is limited for both server and client.  Under X.509 authentication, the customary interpretation of not sending the CertificateRequest is that the server does not care for the client identity; anonymous tickets provide a mechanism for achieving a similar pattern under TLS-KDH.</p>
+<p id="rfc.section.9.1.p.3">The presence of a ticket enables the server to conclude that the client has procured a ticket through the formal pathways of Kerberos, ending in the server-side realm; the reason this can be assumed is that the ticket holds an encrypted part that the server can decrypt and thereby validate with its own key, as setup in its KDC for sharing in service tickets.  In other words, even an anonymous ticket establishes that the server may trust that the client was checked along the way to the service.  As a result, the Diffie-Hellman key exchange to follow, is known to be protected by a suitable ticket.</p>
+<p id="rfc.section.9.1.p.4">Briefly put, we can speak of mutual authentication in this specification, even when the client uses an anonymous ticket.  The thing that is missing under an anonymous ticket is simply a validated (unique) identity for the client.</p>
+<h1 id="rfc.section.10"><a href="#rfc.section.10">10.</a> <a href="#keycalc" id="keycalc">Master Secret Calculation</a></h1>
+<p id="rfc.section.10.p.1">The Kerberos ticket holds a session key, which the KDC only makes available to a pair of authentic principals; we follow the Kerberos assumption of trust in the KDC (or path of KDCs) connecting the TLS-KDH client and the TLS-KDH server.</p>
+<p id="rfc.section.10.p.2">Using the standard Diffie-Hellman procedures for TLS [Section 8.1.2 of <a href="#RFC5246">[RFC5246]</a>] [Section 5.10 of <a href="#RFC4492">[RFC4492]</a>], a shared secret SHALL be calculated independently on the TLS-KDH client and the TLS-KDH server.  The shared secret value (Z) is used as the pre-master secret, after stripping all leading bytes that contain only zero bits.  The master secret is then determined as is customary for TLS.</p>
+<h1 id="rfc.section.11"><a href="#rfc.section.11">11.</a> <a href="#finished" id="finished">Finished: Mutual Validation</a></h1>
+<p id="rfc.section.11.p.1">The security of TLS-KDH relies more heavily on the Finished messages than Diffie-Hellman under Kerberos <a href="#KRB5-KDH">[KRB5-KDH]</a>; TLS-KDH has an analogue for AP-REQ but not for AP-REP, so the client must still verify the server's proper use of the session key, or something decoded with it, as a proof of its authenticity.  Furthermore, the server-sent Diffie-Hellman public key, as sent in the ServerKeyExchange, has not been authenticated yet.  The use of the master secret based on the outcome of the key exchange, hashed together with the preceding handshake that includes the server-sent public key, and relying on the server's ability to decode the client-sent public key, together prove the server's authenticity to the client, and all this is arranged by the Finished message in TLS-KDH.</p>
+<p id="rfc.section.11.p.2">The security of TLS-KDH also relies more heavily on the Finished messages than other TLS CipherSuites; the lack of a server signature on the ServerKeyExchange means that its authenticity can only be established once it has proven its ability to decrypt the authenticator holding the other half of the key exchange, and this verification is taken care of in the Finished exchange.</p>
+<p id="rfc.section.11.p.3">The TLS specification is strict about verification of the verify_data contained in Finished messages, but leaves room for shorter verification data than cryptographically desirable for TLS-KDH.</p>
+<p id="rfc.section.11.p.4">A "good size" for the verify_data_length is twice the bitsize of the key used in the symmetric algorithm, rounded up to an integer number of bytes; in the case of TLS-KDH, that would be based on the symmetric key algorithm specified as part of the CipherSuite.  For TLS_DHE_KRB_WITH_ARIA_256_GCM_SHA384 it would be 64 bytes and for TLS_DHE_KRB_WITH_3DES_EDE_CBC_SHA it would be 42 bytes.</p>
+<p id="rfc.section.11.p.5">TODO: twice follows http://www.keylength.com/en/4/ -- is it necessary here?</p>
+<p id="rfc.section.11.p.6">Negotiable values for verify_data_length were introduced in TLS 1.2; in earlier versions, the value was fixed to 12 bytes and TLS 1.2 still uses 12 bytes as a default size. Because of this, TLS-KDH authentication SHOULD NOT be implemented for any SSL version, nor for TLS versions up to and including TLS 1.1.</p>
+<p id="rfc.section.11.p.7">When a TLS-KDH CipherSuite is selected on TLS 1.2 and later versions, the value of verify_data_length is defined to be the CipherSuite-dependent "good size" of the previous paragraph, although it is still possible to explicitly negotiate another value.  In general, implementations SHOULD NOT accept values of verify_data_length below the "good size" for the applicable CipherSuite.  Furthermore, specific mechanisms may fall under a lowest threshold that an administrator would like to enforce in their software; a client could prevent rejection on those grounds by proposing a higher verify_data_length and a server could enforce it while selecting the CipherSuite to use.  Both parties SHOULD be willing to support twice the "good size" for the given CipherSuite.</p>
+<h1 id="rfc.section.12"><a href="#rfc.section.12">12.</a> <a href="#dhkeygen" id="dhkeygen">Freshness of Diffie-Hellman Keys</a></h1>
+<p id="rfc.section.12.p.1">This specification refers to the use of "fresh" Diffie-Hellman keys.  This section defines when such keys are considered fresh, and what operational impact this definition has.</p>
+<p id="rfc.section.12.p.2">In some cases, there is no need to use a fresh Diffie-Hellman key; servers may reuse a Diffie-Hellman key use in the same TLS connection when it undergoes secure renegotation <a href="#RFC5746">[RFC5746]</a>.  Diffie-Hellman keys MUST NOT be reused by TLS-KDH clients.</p>
+<p id="rfc.section.12.p.3">In line with commonly accepted TLS procedures, the server dictates the Diffie-Hellman key parameters, without negotiation options for the client, except the choice between TLS_DHE_KRB_ and TLS_ECDHE_KRB_ variations.  The client's sole prerogative is to reject an offered Diffie-Hellman public key if something about it (size, blacklistedness) is not considered agreeable.  It is generally assumed that a TLS server is setup to provide sufficiently secure Diffie-Hellman exchanges.  It should be noted that the security is additionally protected by the KDC-supplied session key, and that the only danger is that this is replaced with a Diffie-Hellman key of a lesser size.  For that reason, servers MUST supply Diffie-Hellman public keys that generate session keys of at least the number of bytes (rounded down) as the number of bytes (rounded up) in the symmetric key of the selected CipherSuite.</p>
+<h1 id="rfc.section.12.1"><a href="#rfc.section.12.1">12.1.</a> <a href="#freshpool" id="freshpool">Managing a Pool of Fresh Keys</a></h1>
+<p id="rfc.section.12.1.p.1">Any newly generated Diffie-Hellman key is considered fresh; this includes pregenerated keys that may have been stored in a pool of fresh keys.  The remainder of this section details when half-used keys may be recycled to this pool.</p>
+<p id="rfc.section.12.1.p.2">It is quite possible for such a pool of fresh keys to be shared between application instances (such as virtual hosts) and even between different application protocols that rely on TLS for security.  It is not recommended however, to share the pool of fresh keys between redundant or even distributed server machines, as that would introduce communication delays and usually not have any benefit.</p>
+<p id="rfc.section.12.1.p.3">For a client, a key can never become fresh after it has been used in a ClientKeyExchange.  Had this been any different, then two servers might get hold of the same Diffie-Hellman public key, in which case they might be in a position to tap traffic, or mount a man-in-the-middle attack.</p>
+<p id="rfc.section.12.1.p.4">For a server, some reuse of keys is possible.  This is largely due to the fact that the Diffie-Hellman public key is visible in plaintext, and should therefore be considered something that is easily shared with any players, rogue ones included.</p>
+<p id="rfc.section.12.1.p.5">TLS connections might terminate before the handshake is complete, including as a result of time-outs caused by unresponsive clients.  When no ClientKeyExchange has been received over such a connection, then the server's Diffie-Hellman public key can be returned to the pool of fresh keys after the connection has been completely shut down.</p>
+<p id="rfc.section.12.1.p.6">When a ClientKeyExchange has been received, but the contained Kerberos ticket failed on account of authentication, access control or anything else that avoids completing the Diffie-Hellman key exchange, then the server's public key has not been put to use, and there is no risk of reuse.  The one thing to care for is that Kerberos authentication uses a time stamp, which the server accepts within a certain time window.  Upon failure to authenticate a ticket, the server's public key must not be returned to the pool of fresh keys until the full duration of this server-side time window has passed.</p>
+<p id="rfc.section.12.1.p.7">Anytime this specification calls for a fresh Diffie-Hellman key, it may be taken from this pool of fresh keys, even if that involves reuse of previously failed keys.</p>
+<h1 id="rfc.section.12.2"><a href="#rfc.section.12.2">12.2.</a> <a href="#freshreplay" id="freshreplay">Impact on Replay Attacks</a></h1>
+<p id="rfc.section.12.2.p.1">Kerberos authentication is valid over a certain period starting and ending at a time stamp embedded in the Authenticator that is attached to the ticket.  The server verifies these times, usually tolerating a small time window to deal with clock skew.  This is the normal procedure for handling a ticket in a successful TLS-KDH flow.</p>
+<p id="rfc.section.12.2.p.2">One of the attacks of which a Kerberos system must be aware, is replay.  This is the situation where a rogue party taps the ticket and authenticator, and resends it as part of its own communication.  It is especially useful in protocols that only check the Kerberos login but make no further use of the keys contained in it, or in protocols that are susceptible to other clever attacks.</p>
+<p id="rfc.section.12.2.p.3">The traditional solution to this is to permit a time window around the server's current time, to compensate for clock skew between machines, and demand that the timestamp in the Authenticator falls within that window.  During this period, the server must not accept the same Authenticator, which is usually arranged by caching it during the window time.  In TLS-KDH however, the Authenticator contains a Diffie-Hellman public key which is paired with that of the server to form the master secret used in all of TLS, so as long as the server sends another Diffie-Hellman public key the result will be another master secret.</p>
+<p id="rfc.section.12.2.p.4">This is why it is not good to reinsert a server's public key in the pool of fresh keys until the entire window period has passed; which never applies when authentication succeeds, but it might when it fails.  The client's timestamp might have been in the beginning of the clock skew window, leaving room for rogue resubmissions until the end of the window.  By keeping the server's public key out of circulation until the entire clock skew window has passed, this has been mitigated with certainty.</p>
+<p id="rfc.section.12.2.p.5">The previous paragraph assumed that the Authenticator does not contain a timestamp that lies (far) in the future, which was assumed because it is not in the client's interest to lie.</p>
+<p id="rfc.section.12.2.p.6">It is possible to tighten the signature check beyond the clock skew window, by observing the difference between the gmt_unix_time fields in ClientHello and ServerHello.  After correcting for this initial skew, the remaining clock skew is limited to the effects of communication delays, clock drift and relativistic effects.  The check on the remaining clock skew can be made within a much tighter time window than before, without disadvantaging clients that function normally.</p>
+<p id="rfc.section.12.2.p.7">When applying this tighter check, the total window period to compensate for clock skew still includes the acceptable time difference between the gmt_unix_time fields, so this does not get tighter.  What this tighter check does however, is that it forces attackers to modify the gmt_unix_time that they send in a ClientHello, and as explained in Section <a href="#serverhello">Section 5</a>, this can be used to the disadvantage of such clients.</p>
+<h1 id="rfc.section.12.3"><a href="#rfc.section.12.3">12.3.</a> <a href="#freshdos" id="freshdos">Impact on Denial-Of-Service Attacks</a></h1>
+<p id="rfc.section.12.3.p.1">The TLS-KDH CipherSuites enable fast authentication of clients, based on symmetric key cryptography.  Only for the assurance of Perfect Forward Secrecy is there a need to use some public key cryptography.  Since public key operations impose a higher computational load on a system than symmetric key operations, they are attractive targets for denial-of-service attacks.  Within TLS-KDH, the willingness to provide different Diffie-Hellman public keys to each client, without having authenticated them, opens an opportunity of attack.</p>
+<p id="rfc.section.12.3.p.2">The suggested use of a pool of fresh keys can help to thwart this attack.  Especially the ability to recycle keys into fresh keys drastically limits the impact of a denial-of-service attack through the computational complexity of public-key operations.  Note that recycling is always possible for clients that failed to authenticate; which is a suitable criterium to distinguish rogue clients from normal ones.</p>
+<p id="rfc.section.12.3.p.3">The pool size may either prepare for denial-of-service attacks by filling up to a size that can withstand the constant bashing of the attack, and doing little more than the Kerberos authentication computations; or a pool may be adaptively sized and fill up, thus reducing the responsiveness of the server in the beginning of an attack, but returning to full service soon after the start of the attack.  Note that it is helpful in this respect that the pool can be shared among the various application instances and application protocols on a system.</p>
+<p id="rfc.section.12.3.p.4">Furhter concerns that help with the mitigation of an attack including reduction of the timeout after which a client connection is torn down.  This may be approached through timing, or by timing out the most stagnated client connections when the pool of fresh keys runs empty.  One of the ways to implement this operationally could be to sidetrack traffic with the patterns of an attack to a service that is setup especially to deal with denial-of-service attacks.</p>
+<p id="rfc.section.12.3.p.5">Based on normal behaviour, and especially focussing on successful authentications, it should be possible to find a probability distribution for timeouts that can help to separate proper clients from those who are trying to drain the pool of fresh keys.  It is very likely that a cut-off of the slow tail of proper authentications would only disadvantage clients that need to interact with their KDC or human user, while it would drastically reduce the effect of pool drainage.  The clients that are cut off because they need interaction time are setting up a new connection to a new service, and a simple reconnection attempt should help them to quickly use the information that would be cached by then.  Under a denial-of-service attack, this appears to be an acceptable condition.</p>
+<p id="rfc.section.12.3.p.6">As explained in Section <a href="#freshreplay">Section 12.2</a>, it is possible to force a rogue client to offset its time in the ClientHello message, and this can be used to delay such rogue servers as explained in Section <a href="#serverhello">Section 5</a>; this is especially important when an attack is mounted on the capacity for producing fresh Diffie-Hellman public keys, and the ability to immediately have a suspicion of which clients might be rogue really helps in getting proper traffic to pass through.</p>
+<h1 id="rfc.section.13"><a href="#rfc.section.13">13.</a> <a href="#cnxrefresh" id="cnxrefresh">TLS Connection Expiration</a></h1>
+<p id="rfc.section.13.p.1">TLS-KDH connections expire when their authenticating Kerberos tickets expire.  This is not a reason for termination of the TLS connection, but instead it is a trigger for refreshing the ticket.  Such a refresh should be executed by the TLS-KDH client, where it may trigger user interaction.  Note that Kerberos' facility of ticket renewal [Section 2.3 of <a href="#RFC4120">[RFC4120]</a>] may provide some relief from such user interaction.</p>
+<p id="rfc.section.13.p.2">When the TLS-KDH connection expires, neither side will send any further data records, and upon receiving any data records, each side will trigger a TLS Alert.  The other records are still accepted, to permit re-issuance of session keys.  This mode of operation is intended to block data communication until authentication has been refreshed.  Implementations MAY choose to initiate re-authentication some time before the actual expiration.  This can remedy clock skew between the TLS-KDH client and server, which might otherwise lead to undesired connection reset.</p>
+<p id="rfc.section.13.p.3">Note that this facility can form a potent combination with DTLS <a href="#RFC6347">[RFC6347]</a> by using UDP or SCTP to carry sessions that are dormant for long periods, with occasional bursts of data.  Such sessions are pre-validated, carrying data bursts that share the same credentials, that behave as though they were cached.  Only for reasons of session key expiration must such credentials be occasionally refreshed.</p>
+<h1 id="rfc.section.14"><a href="#rfc.section.14">14.</a> <a href="#krbonly" id="krbonly">Mandatody CipherSuites</a></h1>
+<p id="rfc.section.14.p.1">TLS and Kerberos have long been independent infrastructures for secure connectivity; with the introduction of the TLS-KDH CipherSuites in this specification, the worlds can merge elegantly.  The newly introduced CipherSuites are expected to integrate relatively straightforwardly with any TLS stack.</p>
+<p id="rfc.section.14.p.2">Just like the TLS-KDH CipherSuites are optimal to implement in TLS stacks, TLS-KDH should not force all Kerberos applications to process the full potential of TLS, especially not public key cryptography and the complexity of proper validation of X.509 certificates.  Some applications simply want to use Kerberos in a standardised protocol, without any added CipherSuites.  For such applications, we hereby introduce a TLS application profile under which such applications can stand on their own: </p>
+
+<ul>
+  <li>Based on TLS 1.2 or newer;</li>
+  <li>Negotiating a verify_data_size as suggested above;</li>
+  <li>Supporting the TLS-KDH CipherSuites;</li>
+  <li>Not necessarily supporting the TLS_RSA_WITH_AES_128_CBC_SHA CipherSuite that is mandatory in the default TLS application profile [Section 9 of <a href="#RFC5246">[RFC5246]</a>];</li>
+  <li>This application profile will be known as the "TLS-KDH Application Profile".</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.14.p.3">The TLS-KDH CipherSuites can be used with any TLS application profile; that includes, but is not limited to, the one specified above and the default application profile.</p>
+<h1 id="rfc.section.15"><a href="#rfc.section.15">15.</a> <a href="#comparison" id="comparison">Comparison to Earlier Work</a></h1>
+<p id="rfc.section.15.p.1">An older specification <a href="#RFC2712">[RFC2712]</a> introduces Kerberos into TLS.  This specification improves on that work in a number of ways: </p>
+
+<ul>
+  <li>The pre-master secret is no longer sent to the server under encryption with the KDC-provided session key; instead, Perfect Forward Secrecy is supported through a Diffie-Hellman key exchange;</li>
+  <li>The authenticator following the Kerberos ticket is made obligatory, as it is an intrinsic part of the mutual authentication between TLS client and TLS server to protect all in-transit application data;</li>
+  <li>The mutual authentication of TLS client and TLS server is established by TLS-KDH CipherSuites that define a stronger Finished message size;</li>
+  <li>The service name is not statically set to the literal "host", but both the TLS client and TLS service assume an application context to provide the service name to be used;</li>
+  <li>Support for modern TLS CipherSuites has been added as TLS-KDH CipherSuites, and support for ones that are currently considered deprecated or insecure have been removed;</li>
+  <li>There is no need to implement a replay cache, which means that more efficient implementation is possible, certainly on highly active and/or replicated TLS-KDH server systems.</li>
+</ul>
+
+<p> </p>
+<h1 id="rfc.section.16"><a href="#rfc.section.16">16.</a> <a href="#efficiency" id="efficiency">Efficiency Considerations</a></h1>
+<p id="rfc.section.16.p.1">The efficiency of the mechanism described here compares favourably with the more common approach of authentication through X.509 certificates.</p>
+<p id="rfc.section.16.p.2">The Kerberos mechanism is founded on symmetric cryptography, making it much more efficient than the asymmetric algorithms that are used with X.509 certificates. Furthermore, Kerberos' identity statements are short-lived, which is generally accepted to evade the need for withdrawal mechanisms based on chains of trust, CRLs <a href="#RFC3280">[RFC3280]</a>, OCSP <a href="#RFC6960">[RFC6960]</a>, DANE <a href="#RFC6698">[RFC6698]</a> and perhaps other mechanisms. As a result, the validity of a Kerberos ticket can be checked with relatively modest computational effort.</p>
+<p id="rfc.section.16.p.3">The inclusion of ephemeral Diffie-Hellman is a relatively expensive asymmetric operation, but the same introduction is needed when Perfect Forward Secrecy is introduced alongside X.509-based authentication.</p>
+<p id="rfc.section.16.p.4">The one thing that is costly about Kerberos is its reliance on a replay cache.  Such caches store recent authentication attempts to avoid that they are being replayed; an accurate clock helps to release entries, but some care for clock skew between TLS-KDH client and server must be resolved with these caches.  Their volatile nature makes them a particularly difficult problem in highly active and/or replicated and/or distributed Kerberos services.</p>
+<p id="rfc.section.16.p.5">A replay cache is not required for TLS-KDH, because this specification requires that the server uses a fresh Diffie-Hellman public key for every connection.  This is of particular use to redundant (and possibly distributed) server farms, where sharing the time-critical information of the replay cache is a performance bottle neck.  Since this is a new specification, there is no need to implement backward compatibility with older mechanisms for which a replay cache might be needed.</p>
+<h1 id="rfc.section.17"><a href="#rfc.section.17">17.</a> <a href="#privacy" id="privacy">Privacy Considerations</a></h1>
+<p id="rfc.section.17.p.1">The information that is publicly shown in the TLS-KDH protocol consists of: </p>
+
+<ul>
+  <li>Supported protocol versions, TLS extensions and CipherSuites</li>
+  <li>The server's principal name, host name and service name</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.17.p.2">A Kerberos ticket transmits less information in plaintext than an X.509 client certificate; furthermore, DNS may have to reveal the realm name(s) of server-trusted KDC(s) but neither the TLS-KDH server nor any KDC publishes long-lasting key material for TLS or Kerberos, so parties looking for a cracking challenge are constrained to a very brief period of attack on keys.</p>
+<p id="rfc.section.17.p.3">TODO: In classical Kerberos setups, the ticket must provide a few handles in plaintext to be able to locate the service key for decrypting the KDC-encrypted ticket parts.  However, given that we usually provide a Server Name Indiction, it might be possible to remove the realm and sname parts from the ticket.  That data, or other ways to reference the service key, could be incorporated into the server configuration.  This does not bring much, since (specifically) the realm will often be configured in DNS.  However, for access to local services using the client's own realm, this might be useful.  Note that the protocol is somewhat linked to the port being accessed, so that too isn't much of a leak.</p>
+<p id="rfc.section.17.p.4">When it is done within the same TLS connection and uses secure renegotiation <a href="#RFC5746">[RFC5746]</a>, it should not pose a privacy problem if only the server reuses a Diffie-Hellman public key during the renegotiation within the same TLS connection into a TLS-KDH connection.</p>
+<h1 id="rfc.section.18"><a href="#rfc.section.18">18.</a> <a href="#security" id="security">Security Considerations</a></h1>
+<p id="rfc.section.18.p.1">To mutually prove authenticity, the client and server must encrypt respectively decrypt the authenticator attached to the Kerberos ticket.  These operations require access to the session key that is provided to client and server in a form that only they can unpack.  The Finished messages verify that the two parties have performed the same derivations, which is only possible when it is based on the same Diffie-Hellman shared secret, which in turn can only be found when they were provided with the same session key by the KDC.  In terms of Kerberos, this implements mutual authentication.  Note that TLS-KDH uses the KDC-supplied session key only for encryption on the client, and only for decryption on the server, but since the encryption algorithms are symmetric, these are comparable and there is no need to also encrypt on the server or to decrypt on the client as part of the mutual authentication procedure.</p>
+<p id="rfc.section.18.p.2">In Kerberos, all key material is supplied by the KDC. This is a central point in each realm that is usually guarded well enough, but it is nonetheless a critical point in any infrastructure founded on Kerberos.  When client and server are in different realms, but have cross-signed directly or through a chain of KDC&#8217;s, then all intermediate KDC&#8217;s are potential places where the session key could be detected. The weakest KDC in the chain then defines the security of the entire chain.</p>
+<p id="rfc.section.18.p.3">Kerberos has introduced numerous refinements that are highly practical in daily use. One worth noting is S4U2Proxy, under which a service can upgrade a received ticket to one with which it can be a client using a new service ticket in the client's name.  Such provisions are usually limited in the KDC through Constrained Delegation, but nonetheless it introduces an extra degree of freedom for attackers. Especially dangerous is the combination with S4U2Self, which allows a service to obtain a client ticket without proving (in the Kerberos sense) that the client has actually authenticated to, or even contacted the server.</p>
+<p id="rfc.section.18.p.4">Kerberos requires accurate clocks in order to operate securely; without them, once-used and since-forgotten credentials could be replayed by an attacker that has been able to recover an old service ticket&#8217;s session key. This problem is worsened in cross-realm scenario&#8217;s where clock synchronisation is hard to realise.  This is however resolved by TLS-KDH, which uses fresh Diffie-Hellman keys for every connection, thus forcing new master secrets on each connection and removing the need for a replay buffer.  Note however, that ticket validity times must still be checked, and the use of accurate clocks reduces problems as a result of clock skew.</p>
+<p id="rfc.section.18.p.5">TLS makes use of cryptographic algorithms that tend to be efficient to exploit in a denial-of-service attack.  This is indeed a known problem in the operation of TLS.  With TLS-KDH, the most-used algorithms are much lighter in weight, and when using a pool of fresh keys, it is possible to recycle the most computationally expensive keys and be left with only relatively lightweight, symmetric computations.</p>
+<p id="rfc.section.18.p.6">Basic Kerberos security hinges on the secrecy of the user's password; if this password is guessed, then all captured traffic can be decoded, even in retrospect.  This means that it is highly advisable to combine Kerberos with Diffie-Hellman for Perfect Forward Secrecy. TLS-KDH implies this desirable property in all its CipherSuites.</p>
+<h1 id="rfc.section.19"><a href="#rfc.section.19">19.</a> <a href="#iana" id="iana">IANA Considerations</a></h1>
+<p id="rfc.section.19.p.1">This specification defines a number of CipherSuites that use Kerberos with Diffie-Hellman subkeys as their authentication mechanism.  These define the initial list of what is referred to as "TLS-KDH CipherSuites" in this specification:</p>
+<table cellpadding="3" cellspacing="0" class="tt full center">
+  <thead>
+    <tr>
+      <th class="left">Value</th>
+      <th class="left">CipherSuite description</th>
+      <th class="left">verify_data_length</th>
+      <th class="left">DTLS-OK</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_IDEA_CBC_SHA</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_128_CBC_SHA</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_256_CBC_SHA</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_128_CBC_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_256_CBC_SHA384</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_256_CBC_SHA256</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_128_GCM_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_256_GCM_SHA384</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_CAMELLIA_128_CBC_SHA</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_CAMELLIA_256_CBC_SHA</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_CAMELLIA_128_CBC_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_CAMELLIA_256_CBC_SHA256</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_ARIA_128_CBC_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_ARIA_256_CBC_SHA384</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_ARIA_128_GCM_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_ARIA_256_GCM_SHA384</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_128_CCM</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_256_CCM</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_128_CCM_8</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_DHE_KRB_WITH_AES_256_CCM_8</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_CAMELLIA_128_GCM_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_CAMELLIA_256_GCM_SHA384</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_AES_128_CCM</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_AES_256_CCM</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_AES_128_CCM_8</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_AES_256_CCM_8</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_AES_128_GCM_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_AES_256_GCM_SHA384</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_CAMELLIA_128_CBC_SHA</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_CAMELLIA_256_CBC_SHA</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_CAMELLIA_128_CBC_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_CAMELLIA_256_CBC_SHA256</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_ARIA_128_CBC_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_ARIA_256_CBC_SHA384</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_ARIA_128_GCM_SHA256</td>
+      <td class="left">16</td>
+      <td class="left">Y</td>
+    </tr>
+    <tr>
+      <td class="left">TBD</td>
+      <td class="left">TLS_ECDHE_KRB_WITH_ARIA_256_GCM_SHA384</td>
+      <td class="left">32</td>
+      <td class="left">Y</td>
+    </tr>
+  </tbody>
+</table>
+<p id="rfc.section.19.p.2">[TODO: 3DES_EDE_CBC is not included anymore]</p>
+<p id="rfc.section.19.p.3">[TODO: SEED does not seem to get updates, so it is not included here]</p>
+<p id="rfc.section.19.p.4">[TODO: Should we still define 160-bit _SHA CipherSuites?]</p>
+<p id="rfc.section.19.p.5">[TODO: Should we still define CBC encryption modes?  They'll probably be removed in TLS 1.3 anyway.  BEAST attacks TLS &lt; 1.1 so that is not an issue here; Lucky 13 probably applies.]</p>
+<p id="rfc.section.19.p.6">[TODO: MIT suggests dropping DHE and just to support ECDHE in <a href="#KRB5-KDH">[KRB5-KDH]</a>; the same would apply here.]</p>
+<h1 id="rfc.references"><a href="#rfc.references">20.</a> References</h1>
+<h1 id="rfc.references.1"><a href="#rfc.references.1">20.1.</a> Normative References</h1>
+<table>
+  <tbody>
+    <tr>
+      <td class="reference">
+        <b id="KRB5-KDH">[KRB5-KDH]</b>
+      </td>
+      <td class="top"><a href="mailto:rick@openfortress.nl" title="InternetWide.org">Van Rein, R.</a>, "<a>KRB5-KDH: Cryptographically binding Kerberos with Diffie-Hellman</a>", October 2014.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="KREALM">[KREALM]</b>
+      </td>
+      <td class="top"><a href="mailto:rick@openfortress.nl" title="InternetWide.org">Van Rein, R.</a>, "<a>Kerberos Realm Descriptors in DNS (KREALM)</a>", September 2015.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4120">[RFC4120]</b>
+      </td>
+      <td class="top"><a>Neuman, C.</a>, <a>Yu, T.</a>, <a>Hartman, S.</a> and <a>K. Raeburn</a>, "<a href="http://tools.ietf.org/html/rfc4120">The Kerberos Network Authentication Service (V5)</a>", RFC 4120, July 2005.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4343">[RFC4343]</b>
+      </td>
+      <td class="top"><a>Eastlake, D.</a>, "<a href="http://tools.ietf.org/html/rfc4343">Domain Name System (DNS) Case Insensitivity Clarification</a>", RFC 4343, January 2006.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4492">[RFC4492]</b>
+      </td>
+      <td class="top"><a>Blake-Wilson, S.</a>, <a>Bolyard, N.</a>, <a>Gupta, V.</a>, <a>Hawk, C.</a> and <a>B. Moeller</a>, "<a href="http://tools.ietf.org/html/rfc4492">Elliptic Curve Cryptography (ECC) Cipher Suites for Transport Layer Security (TLS)</a>", RFC 4492, May 2006.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5246">[RFC5246]</b>
+      </td>
+      <td class="top"><a>Dierks, T.</a> and <a>E. Rescorla</a>, "<a href="http://tools.ietf.org/html/rfc5246">The Transport Layer Security (TLS) Protocol Version 1.2</a>", RFC 5246, August 2008.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5746">[RFC5746]</b>
+      </td>
+      <td class="top"><a>Rescorla, E.</a>, <a>Ray, M.</a>, <a>Dispensa, S.</a> and <a>N. Oskov</a>, "<a href="http://tools.ietf.org/html/rfc5746">Transport Layer Security (TLS) Renegotiation Indication Extension</a>", RFC 5746, February 2010.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6066">[RFC6066]</b>
+      </td>
+      <td class="top"><a>Eastlake, D.</a>, "<a href="http://tools.ietf.org/html/rfc6066">Transport Layer Security (TLS) Extensions: Extension Definitions</a>", RFC 6066, January 2011.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6806">[RFC6806]</b>
+      </td>
+      <td class="top"><a>Hartman, S.</a>, <a>Raeburn, K.</a> and <a>L. Zhu</a>, "<a href="http://tools.ietf.org/html/rfc6806">Kerberos Principal Name Canonicalization and Cross-Realm Referrals</a>", RFC 6806, November 2012.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6112">[RFC6112]</b>
+      </td>
+      <td class="top"><a>Zhu, L.</a>, <a>Leach, P.</a> and <a>S. Hartman</a>, "<a href="http://tools.ietf.org/html/rfc6112">Anonymity Support for Kerberos</a>", RFC 6112, DOI 10.17487/RFC6112, April 2011.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="rfc.references.2"><a href="#rfc.references.2">20.2.</a> Informative References</h1>
+<table>
+  <tbody>
+    <tr>
+      <td class="reference">
+        <b id="RFC2712">[RFC2712]</b>
+      </td>
+      <td class="top"><a href="mailto:amedvins@excitecorp.com" title="Excite">Medvinsky, A.</a> and <a href="mailto:matt.hur@cybersafe.com" title="CyberSafe Corporation">M. Hur</a>, "<a href="http://tools.ietf.org/html/rfc2712">Addition of Kerberos Cipher Suites to Transport Layer Security (TLS)</a>", RFC 2712, October 1999.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC3280">[RFC3280]</b>
+      </td>
+      <td class="top"><a>Housley, R.</a>, <a>Polk, W.</a>, <a>Ford, W.</a> and <a>D. Solo</a>, "<a href="http://tools.ietf.org/html/rfc3280">Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile</a>", RFC 3280, April 2002.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4282">[RFC4282]</b>
+      </td>
+      <td class="top"><a>Aboba, B.</a>, <a>Beadles, M.</a>, <a>Arkko, J.</a> and <a>P. Eronen</a>, "<a href="http://tools.ietf.org/html/rfc4282">The Network Access Identifier</a>", RFC 4282, December 2005.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4422">[RFC4422]</b>
+      </td>
+      <td class="top"><a>Melnikov, A.</a> and <a>K. Zeilenga</a>, "<a href="http://tools.ietf.org/html/rfc4422">Simple Authentication and Security Layer (SASL)</a>", RFC 4422, June 2006.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4559">[RFC4559]</b>
+      </td>
+      <td class="top"><a>Jaganathan, K.</a>, <a>Zhu, L.</a> and <a>J. Brezak</a>, "<a href="http://tools.ietf.org/html/rfc4559">SPNEGO-based Kerberos and NTLM HTTP Authentication in Microsoft Windows</a>", RFC 4559, June 2006.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6347">[RFC6347]</b>
+      </td>
+      <td class="top"><a>Rescorla, E.</a> and <a>N. Modadugu</a>, "<a href="http://tools.ietf.org/html/rfc6347">Datagram Transport Layer Security Version 1.2</a>", RFC 6347, DOI 10.17487/RFC6347, January 2012.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6698">[RFC6698]</b>
+      </td>
+      <td class="top"><a>Hoffman, P.</a> and <a>J. Schlyter</a>, "<a href="http://tools.ietf.org/html/rfc6698">The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA</a>", RFC 6698, August 2012.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6960">[RFC6960]</b>
+      </td>
+      <td class="top"><a>Santesson, S.</a>, <a>Myers, M.</a>, <a>Ankney, R.</a>, <a>Malpani, A.</a>, <a>Galperin, S.</a> and <a>C. Adams</a>, "<a href="http://tools.ietf.org/html/rfc6960">X.509 Internet Public Key Infrastructure Online Certificate Status Protocol - OCSP</a>", RFC 6960, June 2013.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="rfc.appendix.A"><a href="#rfc.appendix.A">Appendix A.</a> <a href="#ack" id="ack">Acknowledgements</a></h1>
+<p id="rfc.section.A.p.1">Thanks go to Simo Sorce for useful discussions during the creation of this document.</p>
+<h1 id="rfc.authors">
+  <a href="#rfc.authors">Author's Address</a>
+</h1>
+<div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Rick van Rein</span> 
+	  <span class="n hidden">
+		<span class="family-name">Van Rein</span>
+	  </span>
+	</span>
+	<span class="org vcardline">ARPA2.net</span>
+	<span class="adr">
+	  <span class="vcardline">Haarlebrink 5</span>
+
+	  <span class="vcardline">
+		<span class="locality">Enschede</span>,  
+		<span class="region">Overijssel</span> 
+		<span class="code">7544 WP</span>
+	  </span>
+	  <span class="country-name vcardline">The Netherlands</span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:rick@openfortress.nl">rick@openfortress.nl</a></span>
+
+  </address>
+</div>
+
+</body>
+</html>

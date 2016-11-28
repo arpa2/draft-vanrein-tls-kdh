@@ -1,0 +1,1400 @@
+
+
+
+
+Network Working Group                                        R. Van Rein
+Internet-Draft                                                 ARPA2.net
+Intended status: Standards Track                       November 21, 2015
+Expires: May 24, 2016
+
+
+               TLS-KDH: Kerberos + Diffie-Hellman in TLS
+                      draft-vanrein-tls-kdh-01pre
+
+Abstract
+
+   This specification extends TLS with a Kerberos-based method of mutual
+   authentication, and binds in Elliptic-Curve Diffie-Hellman to achieve
+   Perfect Forward Secrecy for the session.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on May 24, 2016.
+
+Copyright Notice
+
+   Copyright (c) 2015 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+
+Van Rein                  Expires May 24, 2016                  [Page 1]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Relations to Prior Work . . . . . . . . . . . . . . . . . . .   3
+   3.  Extending Kerberos to support TLS . . . . . . . . . . . . . .   4
+     3.1.  Finding the PrincipalName and Realm . . . . . . . . . . .   4
+     3.2.  Checksum Types for use with TLS . . . . . . . . . . . . .   4
+     3.3.  Signatures are Authenticators . . . . . . . . . . . . . .   5
+     3.4.  X.509 Certificates with Kerberos credentials  . . . . . .   6
+     3.5.  Support for Backend Services  . . . . . . . . . . . . . .   7
+     3.6.  Interaction with Kerberos Clients . . . . . . . . . . . .   9
+   4.  Extending TLS to support Kerberos . . . . . . . . . . . . . .  11
+     4.1.  Client Certificate Type . . . . . . . . . . . . . . . . .  11
+     4.2.  Signature Algorithms  . . . . . . . . . . . . . . . . . .  11
+     4.3.  Kerberos-only CipherSuites  . . . . . . . . . . . . . . .  11
+     4.4.  TLS Extension for TicketRequestFlags  . . . . . . . . . .  13
+       4.4.1.  TicketRequestFlags Formal Definition  . . . . . . . .  13
+     4.5.  Certificate Requests for Tickets  . . . . . . . . . . . .  15
+     4.6.  Client Certificates . . . . . . . . . . . . . . . . . . .  16
+     4.7.  Client Certificate Verification . . . . . . . . . . . . .  17
+     4.8.  Master Secret Calculation . . . . . . . . . . . . . . . .  17
+     4.9.  TLS Connection Expiration . . . . . . . . . . . . . . . .  18
+     4.10. Interaction with Applications . . . . . . . . . . . . . .  18
+     4.11. Application Profile for Kerberos-only TLS . . . . . . . .  19
+   5.  Comparison to Earlier Work  . . . . . . . . . . . . . . . . .  19
+   6.  Efficiency Considerations . . . . . . . . . . . . . . . . . .  20
+   7.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  21
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  22
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  23
+   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  23
+     10.1.  Normative References . . . . . . . . . . . . . . . . . .  23
+     10.2.  Informative References . . . . . . . . . . . . . . . . .  24
+   Appendix A.  Acknowledgements . . . . . . . . . . . . . . . . . .  25
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  25
+
+1.  Introduction
+
+   Kerberos lends itself well to infrastructure-supported mutual
+   authentication, and can even be used to crossover between realms.  A
+   downside of this infrastructure is that a crack of one key can lead
+   to a cascade of reverse-engineered keys.  Diffie-Hellman key exchange
+   can be used to incorporate the desirable property of Perfect Forward
+   Secrecy, but its vulnerability for man-in-the-middle attacks must
+   then be overcome by cryptographically binding it to an authentication
+   mechanism.
+
+   This specification describes how to use Kerberos data structures for
+   optional client authentication, in a manner compatible with X.509
+
+
+
+Van Rein                  Expires May 24, 2016                  [Page 2]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   client certificates.  The server may or may not be authenticated with
+   a plain ServerCertificate with a traditional signing mechanism such
+   as RSA; if the server does not authenticated, then the TLS exchange
+   can rely on the mutual authentication that Kerberos provides between
+   a client and service.
+
+   The TLS variations described in this specification forms a
+   cryptographic binding between Kerberos and Diffie-Hellman, leading to
+   the combined advantages of infrastructure-supported mutual
+   authentication and Perfect Forward Secrecy.  We refer to any such TLS
+   variation as TLS-KDH, even when it is combined with generally used
+   server authentication mechanisms.
+
+   The normal flow of the TLS-KDH protocol is basically a standard
+   interaction with a modified form of client certificate:
+
+       Client                                               Server
+
+       ClientHello                  -------->
+                                                       ServerHello
+                                                 ServerCertificate*
+                                                 ServerKeyExchange
+                                                CertificateRequest
+                                    <--------      ServerHelloDone
+       Certificate
+       ClientKeyExchange
+       CertificateVerify
+       [ChangeCipherSpec]
+       Finished                     -------->
+                                                [ChangeCipherSpec]
+                                    <--------             Finished
+       Application Data             <------->     Application Data
+
+   * Indicates optional or situation-dependent messages that are not
+   always sent.
+
+   [] Indicates that ChangeCipherSpec is an independent TLS protocol
+   content type; it is not actually a TLS handshake message.
+
+2.  Relations to Prior Work
+
+   Prior work exists for Kerberos authentication within TLS [RFC2712].
+   This work has a few drawbacks that are addressed in this new
+   specification.  Specifically, it is useful to combine Kerberos mutual
+   authentication with the Perfect Forward Secrecy of Diffie-Hellman.
+
+   Specifically for the HTTP and HTTPS protocols, the Negotiate header
+   [RFC4559] can provide Kerberos authentication, but its use is not
+
+
+
+Van Rein                  Expires May 24, 2016                  [Page 3]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   considered a strong security practice.  Applications that currently
+   rely on this mechanism can strengthen their security by moving to
+   HTTP over TLS-KDH.  Note that this provides an alternative for
+   Kerberos, not to SPNEGO and not for general GSS-API protocols.  This
+   restriction of TLS-KDH to Kerberos, rather than a more general GSS-
+   API protocol, is a result of the limited number of message exchanges
+   available within TLS.
+
+   Many other protocols incorporate Kerberos through GSS-API, usually
+   via SASL.  This is considered secure, but has the disadvantage of
+   separating encryption and authentication layers, and quite possibly
+   also the identities involved in these layers.  Furthermore,
+   encryption through SASL is not commonly used.  In situations where
+   Kerberos is used for GSS-API over SASL, TLS-KDH offers a comparable
+   but more efficient and tighter-coupled mechanism for encryption and
+   mutual authentication, in a way that also lends itself for non-SASL
+   applications.  Specifically useful in this respect is that there is
+   no longer a requirement to setup X.509 certificates plus
+   infrastructure and validation mechanisms, just to satisfy encryption
+   requirements with their own authentication infrastructure.  In
+   applications that use SASL, the EXTERNAL mechanism [RFC4422] can be
+   used to extract the remote identity from a Kerberos ticket, and make
+   it available to the application layer; SASL EXTERNAL is also used
+   when TLS authenticates peers through X.509 certificates.
+
+3.  Extending Kerberos to support TLS
+
+   This section specifies extensions to Kerberos that make it possible
+   to use TLS.
+
+3.1.  Finding the PrincipalName and Realm
+
+   When accessing a server, the client must procure a ticket targeting
+   the remote service.  The principal name of a service typically
+   contains a service name, host name and a realm; a service name is
+   commonly known in the application run within TLS; the host name has
+   been used to lookup the server; the realm name is usually derived
+   from the host name, but the precise manner falls outside the scope of
+   this specification.  A flexible configuration of a Kerberos realm may
+   be supportive of crossover to remote realms; it is not safe to
+   suggest a remote realm in the TLS exchange itself.
+
+3.2.  Checksum Types for use with TLS
+
+   The IANA registry of Kerberos Parameters defines a number of Checksum
+   Types.  This includes keyed and non-keyed checksums.  We introduce
+   checksum types in support of those that are common for use with TLS.
+
+
+
+
+Van Rein                  Expires May 24, 2016                  [Page 4]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   There already are two values to represent SHA1.  An implementation
+   that processes Checksum Types MUST accept both as equivalent
+   indications.
+
+   The following additional Checksum Types are introduced for use with
+   TLS [Section 7.4.1.4.1 of [RFC5246]]:
+
+   o  SHA224
+
+   o  SHA256
+
+   o  SHA384
+
+   o  SHA512
+
+3.3.  Signatures are Authenticators
+
+   Kerberos has a symmetric analogon to a signature, namely an
+   Authenticator [Section 5.5.1 of [RFC4120]] with embedded secure hash
+   in the cksum field.  The checksum type used in the context of TLS
+   MUST be taken from the IANA's TLS HashAlgorithm Registry.
+
+   The Authenticator is not sent in the plain, but encrypted with a
+   Kerberos session key as EncryptedData [Section 5.2.9 of [RFC4120]]
+   and this is how it gains authoritative power: only the client and the
+   service can unpack the EncryptedData and get to the Authenticator,
+   even if it is shown to the public.
+
+   Other than the cksum field, this specification neither prescribes nor
+   forbids the use of other fields in the Authenticator.  The subkey
+   field is not normally used, except for one application below.
+
+   A standard part of an Authenticator is a timestamp with microsecond
+   accuracy.  This is validated within a small window around the
+   independently sycnchronised time of the TLS client and server.  A
+   customary time window permits 5 minutes of time difference between
+   the client and server.
+
+   To avoid replay attacks, Kerberos solutions need to remember received
+   Authenticators, or their time stamps, until the time window has
+   passed.  This be complicating, especially for replicated services.
+   When combined with Diffie-Hellman, with a different server public key
+   for every TLS connection, there is no need for such infrastructure to
+   avoid replay attacks.
+
+
+
+
+
+
+
+Van Rein                  Expires May 24, 2016                  [Page 5]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+3.4.  X.509 Certificates with Kerberos credentials
+
+   This specification leaves the certification possibilities for servers
+   in tact, even if it extends the client certification side.  This is
+   why it is not an option to define a new certificate type [RFC5801]
+   for Kerberos, as that would impact the server certificate.  Instead,
+   we define a method to encapsulate Kerberos credentials in the general
+   X.509 certificate format on the client side.
+
+   Kerberos is based on symmetric keys, but its facilities are similar
+   to a public-key cryptosystem.  The one exception is that its
+   cryptographic claims can only be verified by a targeted service, but
+   within the scope of TLS this does not present any problems.
+
+   The X.509 client certificate is constructed from Kerberos by building
+   a TBSCertificate [Section 4.1 of [RFC5280]] as follows:
+
+   o  The certificate is self-signed.  Its issuer and subject are set to
+      the distinguishedName CN=Kerberos.
+
+   o  The certificate is short-lived.  Its validity SHOULD NOT span more
+      than 5 minutes, for example with notBefore set to 2 minutes before
+      the client's current time and notAfter set to 5 minutes later.
+
+   o  The signature algorithm is set to an OID that signifies an
+      Authenticator as specified in Section 3.3 and based on a TLS-
+      accepted hash algorithm.
+
+   o  The subjectPublicKeyInfo is set to an algorithm OID that signifies
+      a Kerberos Ticket; the subjectPublicKey is filled with a Kerberos
+      Ticket [Section 5.3 of [RFC4120]] that the client wants to use to
+      access a service.
+
+   The Certificate built from the TBSCertificate adds the following
+   fields:
+
+   o  The signatureAlgorithm contains the same value as the signature
+      field in the TBSCertificate.
+
+   o  The signatureValue field is filled with the EncryptedData
+      Section 3.3 holding an Authenticator whose cksum follows the
+      secure hash algorithm specified in the signatureAlgorithm.
+
+   The Authenticator that is used to sign the X.509 certificate MUST
+   include the optional subkey field, holding an EncryptionKey that is
+   uniquely created for the current TLS-KDH protocol flow.  The field
+   helps to avoid use of the same session key across TLS-KDH
+   connections, and requiring it avoids the complexity of choice and
+
+
+
+Van Rein                  Expires May 24, 2016                  [Page 6]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   downgrade attack risks.  This field of type EncryptionKey is referred
+   to as "client certificate subkey" below.
+
+   The OIDs referred to above are defined below Section 4.2.
+
+3.5.  Support for Backend Services
+
+   The TLS server may depend on additional Kerberos-protected services,
+   generally referred to as "backend services".  As an example, an HTTP
+   service may need to access IMAP and SMTP backend services, possibly
+   under independent administrative control.  This section describes an
+   OPTIONAL Kerberos mechanism in support of such backend services.
+
+   In addition to the main Ticket supplied in the client Certificate's
+   public key field, the TLS server would need Tickets to gain access to
+   any backend services, and in fact these Tickets can help to define
+   where these backend services are located and under what client
+   identity they are accessed.  The client needs to provide these
+   additional Tickets along with the ticket for the TLS service.  This
+   can be done by passing an AuthorizationData value holding a KRB-CRED
+   message [Section 5.8 of [RFC4120]], with an ad-type field with name
+   AD-BACKEND-TICKETS (TBD).
+
+   This element may occur in the authorization-data field of a Ticket if
+   it is KDC-supplied, or it may occur in the authorization-data field
+   of the Authenticator part in a client Certificate if it is client-
+   supplied.  The server MUST at least accept the KDC-supplied form, and
+   in its absense MAY choose to accept the client-supplied form.  The
+   encryption key used for enc-part in KRB-CRED in AD-BACKEND-TICKETS
+   depends on the origin; the KDC-supplied form uses the key contained
+   in the same Ticket, and the client-supplied form uses the subkey that
+   MUST then be present in the Authenticator.  DISCUSS: This adds no
+   authentication because the key is always next to KRB-CRED.  The
+   e-type null might also be used?  It might be interesting if the
+   server provides a TGT so we can use ENC-TKT-IN-SKEY, but that would
+   limit the choices of server-side authentication with RSA certificates
+   in X.509.  DISCUSS: The Authenticator in client Certificate is only
+   client-supplied when it is generated on the spot, and not pre-signed
+   elsewhere.  Will discuss this elsewhere, as indeed other cases are
+   probably better covered with RSA signatures and extensions like CRL
+   and OCSP.
+
+   The additional Tickets SHOULD match the main Ticket's cname and
+   crealm fields, and the starttime and endtime fields SHOULD make
+   additional Tickets usable during at least the same future times as
+   the main Ticket.  Additional Tickets MUST NOT be renewable, but the
+   main Ticket MAY be, if it is the first service approached by the
+   client; when this first Ticket is renewed it SHOULD be resent with
+
+
+
+Van Rein                  Expires May 24, 2016                  [Page 7]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   the backend extension as they are setup at that time.  Additional
+   Tickets SHOULD have neither the FORWARDABLE nor the PROXIABLE flag
+   set.
+
+   Additional Tickets must be supplied every time the main Ticket is
+   supplied.  As a result, both the main and additional Tickets MAY be
+   forgotten by the TLS server whenever a TLS session ends, either
+   through connection close or renegotiation of the TLS session.
+
+   It is possible for backend services to have backend services
+   themselves; this can be facilitated by a an AD-BACKEND-TICKETS
+   element contained in the respective backend service Ticket.
+
+   The insertion of AD-BACKEND-TICKETS with Tickets in the client's name
+   is normally done by the client's KDC, where it is setup for the realm
+   as a whole by its administrator.  This means that the main Ticket
+   request MUST be directed to that KDC, which the server must send the
+   LocalRealmService flag Section 4.4.  Without this flag, the client
+   MAY choose to not supply additional Tickets.  The resulting main
+   Ticket MAY be derived from a normal service ticket, but have a
+   different service realm and perhaps even a different server host name
+   than the service's KDC supplies.  For purposes of key lookup on the
+   server, these fields are to be ignored and overruled by the known-
+   good values for the server.  The etype and kvno fields MUST NOT be
+   changed by the client's KDC, so they can be relied on by the server
+   if its needs them for key lookup.  DISCUSS: This is uglier than I'd
+   like.  Perhaps we can ensure that the remote realm always passes
+   through the local KDC, by avoiding referral tickets or finding a
+   reasoning how this is always good.
+
+   When a KDC does not implement recursion for backend Tickets, it MAY
+   require this function from its clients.  A policy in the KDC will
+   then detail which additional Tickets are required in an AD-BACKEND-
+   TICKETS extension in the Authenticator of the PA-TGS-REQ.  When these
+   additional Tickets are not provided in the desired order, then the
+   KDC sends a KRB-ERROR with the error code
+   KDC_ERR_INCOMPLETE_BACKEND_TICKETS and additional typed data of the
+   new type TD-REQUIRED-BACKEND-TICKETS:
+
+
+      TD-REQUIRED-BACKEND-TICKETS  ::=  SEQUENCE OF SEQUENCE {
+          realm    [0] Realm,
+          sname    [1] PrincipalName
+      }
+
+
+   When a KDC does not retrieve backend Tickets for its clients, it will
+   assume that the client looks for them by itself.  In this case, they
+
+
+
+Van Rein                  Expires May 24, 2016                  [Page 8]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   must be uploaded to the KDC as part of the TGS-REQ, in an AD-BACKEND-
+   TICKETS extension in the Authenticator of PA-TGS-REQ.  This makes the
+   client sign for the supplied Tickets, thereby implying the client's
+   approval of the inclusion of the Tickets in the newly produced
+   Ticket.  Kerberos clients MUST NOT retrieve backend service tickets
+   on any indication from the service, as this would turn the client
+   into a Kerberos oracle.
+
+   DISCUSS: The assumption is that the KDC is configured with a
+   principal name that overrides a remote name while adding tickets from
+   recursive TGS exchanges in the name of the client.  Renaming is the
+   only way to pull a request under the control of the client's KDC but
+   it can be a coordinated setup for both.
+
+   DISCUSS: An alternative might be to include the "real" service ticket
+   in the KRB-CRED structure in AD-BACKEND-TICKETS, so the server
+   doesn't have to assume too much about the renaming process.  This
+   seems a rather indirect authentication method though.
+
+3.6.  Interaction with Kerberos Clients
+
+   A client willing to employ Kerberos authentication offers one or more
+   of the TLS-KDH CipherSuites in its ClientHello message.  Offering
+   these is no guarantee that a token has already been found for the
+   server, but it expresses a willingness to look for one.
+
+   Whether a client is willing to employ Kerberos authentication MAY
+   depend on its context.  Following is an informative example of
+   situations that could be considered, with a rising level of
+   willingness:
+
+   1.  Kerberos software is available on the client system
+
+   2.  The client context holds a Ticket Granting Ticket that is
+       currently valid
+
+   3.  The client context holds a Ticket Granting Ticket that may have
+       expired
+
+   4.  The client context will go through Kerberos signup if need be
+
+   The last two options may require interaction with the user, and are
+   not suitable for all kinds of applications.  The first and last
+   options are too extreme to be defaults, but depending on the ability
+   to interact, the middle two can be useful as defaults that may be
+   modified by users if they want to.
+
+
+
+
+
+Van Rein                  Expires May 24, 2016                  [Page 9]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   The client may have locally configured realms, and/or it may lookup a
+   realm name in secure DNS [KREALM].  Combined with the service
+   protocol and server name, this helps the client to form one or more
+   service principal identifier.  These can be used in Kerberos' TGS
+   protocol.
+
+   Before obtaining a Kerberos ticket, several considerations could be
+   taken into account by the TLS-KDH client to select and/or order
+   suitability of principal names for a desired ticket:
+
+   o  Local policy could specify a service principal name to always use
+      for a particular service protocol and/or server name and/or realm
+      name;
+
+   o  Local policy could specify a client principal name to always use
+      for a particular service protocol and/or server name and/or realm
+      name;
+
+   o  A realm name match with a principal ticket's realm could suggest
+      using that;
+
+   o  Prior availability of a service ticket could suggest using the
+      service principal name in that ticket;
+
+   o  Prior availability of a service ticket could suggest using the
+      client principal name in that ticket;
+
+   o  Prior availability of a ticket granting ticket could suggest using
+      that.
+
+   In addition to this choice in service name to request, the client may
+   wish to modify its own name, perhaps to a group name or a pseudonym,
+   according to local policy and/or historic choices made.  Such
+   mechanisms need not be specified here, since they are a local matter
+   to the client-side Kerberos solution.  One default procedure is
+   however RECOMMENDED, namely to send an anonymous ticket [RFC6112]
+   when the server has not set the UniqueClientIdentity flag; but to
+   instead use a non-anonymous ticket when the anonymous ticket includes
+   the anonymous realm name while the sever has set the
+   VisibleClientRealm flag.  The client SHOULD interact with the user to
+   request permission for releasing the identifying information if
+   possible, but the mechanism MAY store choices for future use in
+   similar situations.  Finally, the client-side Kerberos solution MAY
+   obtain a pseudonymous name such as one based on NT-UID principal
+   names [Section 6.2 of [RFC4120]] when the server has sent the
+   UniqueClientIdentity flag; it is up the client whether this is a
+   short-lived or long-lived identity.
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 10]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   Given the options that are now available, the TLS client SHOULD
+   proceed in attempts to obtain a service ticket, until either a ticket
+   is assigned or all options for obtaining one have been exhausted.
+   When no ticket can be obtained, the TLS client MUST send a TLS Alert
+   and shut down the connection.  The client might reconnect without
+   offering TLS-KDH CipherSuites in response to a temporary local cache
+   holding the negative result on a prior attempt.
+
+4.  Extending TLS to support Kerberos
+
+   This section describes changes to TLS in support of Kerberos.
+
+4.1.  Client Certificate Type
+
+   This specification adds a new entry named kerberos_sign in IANA's TLS
+   ClientCertificateType Identifiers Registry, with the value TBD.
+
+4.2.  Signature Algorithms
+
+   This specification introduces a mechanism for signatures under
+   Kerberos Section 3.3.  This mechanism is represented in two places.
+
+   In TLS, a new SignatureAlgorithm named kerberos is allocated with
+   value TBD in IANA's TLS Parameters Registry.  This Kerberos
+   SignatureAlgorithm is usually combined with a HashAlgorithm that is
+   in common use with TLS, to for a SignatureAndHashAlgorithm.  The
+   digitally-signed structure [Section 4.7 of [RFC5246]] uses this
+   structure, followed by a variable-sized opaque byte sequence, which
+   should hold the EncryptedData holding an Authenticator Section 3.3.
+
+   In X.509 certificates, an AlgorithmIdentifier is used to represent
+   the combination of a signature and hash algorithm.  This consists of
+   an OID and optional parameters.  For the Kerberos signature
+   algorithm, the parameters are absent, and the OID is (TBD -- for now,
+   1.3.6.1.4.1.44469.666.509.88.1.1.2) concatenated with the OID of a
+   secure hash algorithm from IANA's Hash Function Textual Names
+   registry.  For example, the SHA-1 hash with OID 1.3.14.3.2.26 would
+   combine to form (TBD -- now it is
+   1.3.6.1.4.1.44469.666.509.88.1.1.2.1.3.14.3.2.26).
+
+4.3.  Kerberos-only CipherSuites
+
+   The certificates defined in this specification may be used under
+   common CipherSuites such as the TLS_ECDHE_RSA_ family.  In addition,
+   this specification defines a number of Kerberos-only CipherSuites
+   whose names start with TLS_ECDHE_KDH_ which only use a client-sent
+   Kerberos Ticket for authentication and Elliptic Curve Diffie-Hellman
+   for encryption.
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 11]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   The KeyExchangeAlgorithm for these Kerberos-only CipherSuites is
+   ec_diffie_hellman; both the ServerKeyExchange and ClientKeyExchange
+   MUST supply ephemeral ECDH public keys.
+
+   After selecting one of these Kerberos-only CipherSuites, the TLS
+   server MUST NOT send a server Certificate, but unlike ECDH_anon
+   [Section 2.5 of [RFC4492]] there MUST be a CertificateRequest, client
+   Certificate and ClientVerify messages to compensate; the client and
+   server would rely on the mutual authentication provided by Kerberos,
+   as part of the client's Ticket.  Since then the only verification of
+   the server's decryption of the Ticket supplied is the Finished
+   message, all Kerberos-only CipherSuites require a minimum
+   verify_data_length that exceeds the silent default of 12 bytes.
+   Higher defaults can only be specified by CipherSuites starting with
+   TLS version 1.2, so Kerberos-only CipherSuites cannot work on
+   versions of TLS that precede 1.2.
+
+   The following Kerberos-only CipherSuites are entered into the IANA
+   TLS Cipher Suite Registry; the list below provides their names and
+   their default verify_data_lengths between brackets:
+
+   o  TLS_ECDHE_KDH_WITH_AES_128_GCM_SHA256 (32)
+
+   o  TLS_ECDHE_KDH_WITH_AES_256_GCM_SHA384 (48)
+
+   o  TLS_ECDHE_KDH_WITH_AES_128_CCM (32)
+
+   o  TLS_ECDHE_KDH_WITH_AES_256_CCM (48)
+
+   o  TLS_ECDHE_KDH_WITH_AES_128_CCM_8 (32)
+
+   o  TLS_ECDHE_KDH_WITH_AES_256_CCM_8 (48)
+
+   o  TLS_ECDHE_KDH_WITH_ARIA_128_GCM_SHA256 (32)
+
+   o  TLS_ECDHE_KDH_WITH_ARIA_256_GCM_SHA384 (48)
+
+   o  TLS_ECDHE_KDH_WITH_CAMELLIA_128_GCM_SHA256 (32)
+
+   o  TLS_ECDHE_KDH_WITH_CAMELLIA_256_GCM_SHA384 (48)
+
+   Neither server nor client should accept lower values for
+   verify_data_lengths than given here.  TODO: the list follows
+   http://www.keylength.com/en/4/ and the hash algorithm sizes -- is
+   this agreed?
+
+   The dependency on longer Finished messages is not as stringent in
+   other CipherSuites, even when they are used in a TLS-KDH flow; those
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 12]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   other CipherSuites usually have a ServerCertificate to validate the
+   server identity to some degree, independent of the Kerberos mutual
+   exclusion framework.  These mechanisms can therefore be used safely
+   with older protocol versions than TLS 1.2.
+
+4.4.  TLS Extension for TicketRequestFlags
+
+   During the ClientHello and ServerHello phases, an extension can be
+   used to exchange details about the mutual abilities and expectations
+   for Kerberos Tickets.  The client can indicate what is able to
+   provide, and the server can indicate its requirements.  When the two
+   are compatible, it is possible for the later phases of TLS to
+   actually use Kerberos for authentication.
+
+   The extension is known as TicketRequestFlags, and contains two fields
+   of bits, namely a certain and possible field.  In the ClientHello,
+   the certain field indicates minimum requirements that the client is
+   sure to be able to meet if it manages to procure a Kerberos Ticket,
+   and possible indicates additional facilities that it offers to
+   attempt to arrange.  In the ServerHello, the certain field indicates
+   minimum requirements that the server will need to be able to accept a
+   Ticket, and the options field indicates things that the server may be
+   able to put to good use when supplied.
+
+   While sending, there MUST NOT be any TicketRequestFlags that are set
+   in both the certain and possible fields.  When receiving, flags
+   present in both fields MUST be interpreted as part of the possible
+   field.  The TicketRequestFlags sent by the TLS client and server are
+   said to be compatible when none of the bits in the server's certain
+   field is reset in both the client's certain and possible fields.
+   Note that compatible does not guarantee that a suitable Ticket will
+   actually be found, but merely that there is no structural
+   incompatibility.
+
+   When either the client or the server does not include this extension,
+   the server MUST NOT request Tickets in the CertificateRequest
+   message, and the client MUST NOT attempt to use a Ticket in a client
+   Certificate.
+
+4.4.1.  TicketRequestFlags Formal Definition
+
+   DISCUSS: Do we want this?  Not having it would mean that a client can
+   have a local policy that defaults to anonymous credentials, and leave
+   it to the server how to deal with it.  OTOH, a flag indicating a
+   unique identity for the client, perhaps in a service-specific
+   pseudonymic identity, could be useful to all parties involved.
+
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 13]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   This structure is an extensible list of flag values that indicate
+   constraints on the ticket that the client should supply.  These
+   should be seen as hints how the client should present its identity,
+   as the server can always decide to reject a client on grounds that
+   are or are not expressible in this form.
+
+   Flag values defined in this specification are:
+
+   TicketFlags (flags number 0..31)  are taken from Kerberos'
+         TicketFlags definitions [[RFC4120] and updates]; clients MUST
+         NOT accept requested TicketFlags without scrutinising their
+         security impact; servers SHOULD NOT assume that their requested
+         TicketFlags will actually be provided.  Only TicketFlags 0
+         through 31 are included in this definition; when Kerberos is
+         extended with more TicketFlags then they will be assigned a new
+         range of values as TicketRequestFlags.
+
+   LocalRealmService (flag number 32)  indicates that the client SHOULD
+         NOT perform realm crossover, but instead look for a service
+         ticket in its local realm.  When this flag is set, the client
+         may choose whether canonicalization [RFC6806] is useful; when
+         this flag is not set, the client SHOULD use canonicalization to
+         help it crossover to all realms that the KDC can reach.  When
+         this flag is not set, the server MUST NOT expect the client
+         realm to match one of the server realms; when this flag is set,
+         the server MUST make the effort to connect to the realm of the
+         client, inasfar as it is willing to support that realm.
+
+   VisibleClientRealm (flag number 33)  requests that the client's realm
+         name is revealed in the service ticket.  With the flag not set,
+         the server MUST NOT reject the well-known anonymous realm name
+         WELLKNOWN:ANONYMOUS [Section 3 of [RFC6112]] in the client
+         realm name.
+
+   UniqueClientIdentity (flag number 34)  requests that the client
+         presents a unique identity, even if it is a pseudonym that is
+         specific to this service.  Some services can make good use of
+         identities that are also presented over other protocols, which
+         is why the choice to share such an identity SHOULD be made
+         during an interaction with the user, if possible.  The user MAY
+         determine to use only a short-lived identity.  When this flag
+         is not set, the server MUST NOT reject the client principal
+         name WELLKNOWN/ANONYMOUS of type KRB_NT_WELLKNOWN [Section 3 of
+         [RFC6112]].  Regardless of this flag, it is RECOMMENDED for the
+         server to be open to as many forms of client principal name
+         [Section 6.2 of [RFC4120]] as possible.
+
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 14]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   Additional flag bit values are reserved through the publication of an
+   RFC.  (TODO: IANA's TLS registries?)  Future specifications of flag
+   values may state that a flag is an alternative to another flag,
+   including to the ones specified above.  When flag A is an alternative
+   to flag B then the fulfillment of the requirements for A suffices to
+   ignore flag B.  It is possible for flags to cyclically refer to each
+   other as alternatives; since being-an-alternative is not defined as a
+   transitive property, this need not distract from this definition.
+   This is explicitly permitted to enhance expressiveness of this
+   principle.
+
+   The structure to represent TicketRequestFlags is a sequence of 32-bit
+   integers.  The lower 5 bits of a flag number provide the number of
+   the bit within a 32-bit integer, and the higher bits indicate the
+   integer's index in the sequence of 32-bit integers.  Servers MUST
+   send unknown flags with value 0 and clients MUST NOT act on flags
+   they don't know.
+
+   struct {
+       uint32 certain<0..2^16-1>;
+       uint32 options<0..2^16-1>;
+   } TicketRequestFlags;
+
+   Integers that are not present in the flags array MUST be considered
+   to have value 0.  The last 32-bit integer MUST NOT contain all 0
+   bits.  Note that this implies that the TicketRequestFlags can be an
+   array of zero integers, namely when all flag values are 0.
+
+4.5.  Certificate Requests for Tickets
+
+   When both client and server provide the TicketRequestFlags extension,
+   and when they are compatible, and when a ServerKeyExchange was sent
+   with KeyExchangeAlgorithm ec_diffie_hellman, then the server MAY
+   request a Kerberos Ticket to be supplied by the client, in the manner
+   specified in this subsection.
+
+   To permit a client to submit a Kerberos Ticket in X.509 form
+   Section 3.4, the certificate_types field in the CertificateRequest
+   must include the value kerberos_sign.
+
+   In addition, the client must be offered suitable algorithms in the
+   the supported_signature_algorithms field of the CertificateRequest;
+   suitable values of SignatureAndHashAlgorithms are based on the
+   Kerberos signature algorithm Section 4.2.  When the CipherSuite is
+   one of the Kerberos-only CipherSuites Section 4.3 then other
+   signature algorithms MUST NOT be included in the
+   supported_signature_algorithms.
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 15]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   The certificate_authorities field has no meaning for Kerberos
+   Tickets, because their certificates are short-lived and therefore
+   always self-signed.  Any value in this field will be ignored when
+   selecting or approving a certificate based on a Ticket Section 3.4.
+
+   Usually, the fields may include other entries to permit for other
+   options.  However, when the CipherSuite is one of the Kerberos-only
+   CipherSuites Section 4.3, then extra rules MUST be followed when
+   constructing the CertificateRequest:
+
+   o  Other signature algorithms than the supported_signature_algorithms
+      MUST NOT specify SignatureAndHashAlgorithms with another signature
+      algorithm than kerberos;
+
+   o  Other certificate types than the kerberos_sign MUST NOT be
+      included in the certificate_types field;
+
+   o  The certificate_authorities list MUST NOT contain any elements.
+
+4.6.  Client Certificates
+
+   When a CertificateRequest indicates acceptance of a
+   SignatureAndHashAlgorithm, then the TLS server MUST accept the X.509
+   certificate form for Kerberos Section 3.4 using any the corresponding
+   signature algorithm OIDs Section 4.2.  It is the client's prerogative
+   to select continue following the TLS-KDH variation or another message
+   flow for TLS.
+
+   If the client follows the TLS-KDH variation, then a client
+   Certificate message MUST be provided, containing a Kerberos Ticket in
+   X.509 format Section 3.4.  It is possible however, to use an
+   anonymous ticket [Section 3 of [RFC6112]], Section 3] that conceals
+   the client principal name (the cname field in the ticket) and
+   possibly also the client realm name (the crealm field in the ticket).
+   It is RECOMMENDED to use this kind of service ticket inasfar as it
+   the TicketRequestFlags sent by the server do not suggest otherwise.
+
+   The impact of using an anonymous ticket is that the server cannot
+   establish the identity of the client, except perhaps that the same
+   service ticket may be used repeatedly during its short period of
+   validity.  This means that the ability to trace the client is limited
+   for both server and client.  Under X.509 authentication, the
+   customary interpretation of not sending the CertificateRequest is
+   that the server does not care for the client identity; anonymous
+   tickets provide a mechanism for achieving a similar pattern under
+   TLS-KDH.
+
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 16]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   The presence of a ticket enables the server to conclude that the
+   client has procured a ticket through the formal pathways of Kerberos,
+   ending in the server-side realm; the reason this can be assumed is
+   that the ticket holds an encrypted part that the server can decrypt
+   and thereby validate with its own key, as setup in its KDC for
+   sharing in service tickets.  In other words, even an anonymous ticket
+   establishes that the server may trust that the client was checked
+   along the way to the service.  As a result, the Diffie-Hellman key
+   exchange to follow, is known to be protected by a suitable ticket.
+
+   Briefly put, we can speak of mutual authentication in this
+   specification, even when the client uses an anonymous ticket.  The
+   thing that is missing under an anonymous ticket is simply a validated
+   identity for the client.
+
+4.7.  Client Certificate Verification
+
+   The CertificateVerify message contains a digitally-signed structure
+   following the usual rules Section 3.3.  The message MUST use the same
+   algorithm as for the self-signature in the client Certificate.  The
+   key used to construct the signature is the key contained in the
+   client certificate subkey.  TODO:DISCUSS: That would introduce
+   Kerberos' enctypes into TLS, which may or may not be undesirable.
+
+   The message incorporates a secure hash over any preceding messages in
+   the TLS exchange, including the random material from the Hello phase,
+   the KeyExchange from both sides and the client and server
+   Certificate.  By signing this with the session key, the client proves
+   access to the session key included in the Ticket.  By decrypting the
+   EncryptedData to extract the Authenticator, and then verifying the
+   cksum to match the expectation, the server can validate the client to
+   be the rightful sender of the Ticket.
+
+4.8.  Master Secret Calculation
+
+   The TLS-KDH flow overrides the usual program flow by providing it
+   with a Kerberos Ticket.  This leads to a potentially different
+   calculation for the Master Secret.
+
+   The pre-master secret is formed as follows.  First, perform the
+   Elliptic-Curve Diffie-Hellman computation in the same way as for
+   other Elliptic-Curve Diffie-Hellman-based CipherSuites [RFC4492].
+   Let Z be the value produced by this computation (with leading zero
+   bytes stripped as in other Elliptic-Curve Diffie-Hellman-based
+   CipherSuites).  Concatenate a uint16 containing the length of Z (in
+   octets), Z itself, a uint16 containing the length of the client
+   certificate subkey Kerberos Ticket (in octets), and the bytes of the
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 17]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   client certificate subkey itself, following the format of an
+   EncryptionKey [Section 5.2.9 of [RFC4120]].
+
+   The master secret is derived from the pre-master secret using the
+   extended master secret computation [Section 4 of [RFC7627].
+
+4.9.  TLS Connection Expiration
+
+   TLS-KDH connections expire when their authenticating Kerberos tickets
+   expire.  This is not a reason for termination of the TLS connection,
+   but instead it is a trigger for refreshing the ticket.  Such a
+   refresh should be executed by the TLS-KDH client, where it may
+   trigger user interaction.  Note that Kerberos' facility of ticket
+   renewal [Section 2.3 of [RFC4120]] may provide some relief from such
+   user interaction.
+
+   When the TLS-KDH connection expires, neither side will send any
+   further data records, and upon receiving any data records, each side
+   will trigger a TLS Alert.  The other records are still accepted, to
+   permit re-issuance of session keys.  This mode of operation is
+   intended to block data communication until authentication has been
+   refreshed.  Implementations MAY choose to initiate re-authentication
+   some time before the actual expiration.  This can remedy clock skew
+   between the TLS-KDH client and server, which might otherwise lead to
+   undesired connection reset.
+
+   Note that this facility can form a potent combination with DTLS
+   [RFC6347] by using UDP or SCTP to carry sessions that are dormant for
+   long periods, with occasional bursts of data.  Such sessions are pre-
+   validated, carrying data bursts that share the same credentials, that
+   behave as though they were cached.  Only for reasons of session key
+   expiration must such credentials be occasionally refreshed.
+
+4.10.  Interaction with Applications
+
+   Application protocols that run over TLS need a few pieces of
+   information to be able to use Kerberos.  These include the service
+   name to use, the certain and optional TicketRequestFlags, and on the
+   server a location of a keytab.  Local configuration may supply this
+   information from the application to the TLS implementation.
+
+   When a SASL EXTERNAL mechanism is used to communicate an identity
+   between the application and the TLS stack, then a good alignment with
+   X.509 certificates is possible when both aim to derive a Network
+   Access Identifier [RFC4282] and/or a domain name.  In the case of a
+   Kerberos principal name, this would involve translation between case-
+   sensitive realm names to DNS names whose case is not reliably
+   [Section 4.1 of [RFC4343]] reproduced; this may be done by ignoring
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 18]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   or lowering the case of the realm name while upholding the
+   requirement that no two realm names may differ only in their case
+   [Section 7.2.3.1 of [RFC4120]].
+
+4.11.  Application Profile for Kerberos-only TLS
+
+   TLS and Kerberos have long been independent infrastructures for
+   secure connectivity; with the introduction of the Kerberos-only
+   CipherSuites in this specification, the worlds can merge elegantly.
+   The newly introduced CipherSuites are expected to integrate
+   relatively straightforwardly with any TLS stack.
+
+   Just like the TLS-KDH CipherSuites are optimal to implement in TLS
+   stacks, TLS-KDH should not force all Kerberos applications to process
+   the full potential of TLS, especially not public key cryptography and
+   the complexity of proper validation of X.509 certificates.  Some
+   applications simply want to use Kerberos in a standardised protocol,
+   without any added CipherSuites.  For such applications, we hereby
+   introduce a TLS application profile under which such applications can
+   stand on their own:
+
+   o  Based on TLS 1.2 or newer;
+
+   o  Setting a default verify_data_size dependent on the CipherSuite;
+
+   o  Supporting the TLS-KDH CipherSuite
+      TLS_ECDHE_KDH_WITH_AES_256_GCM_SHA384;
+
+   o  Not necessarily supporting the TLS_RSA_WITH_AES_128_CBC_SHA
+      CipherSuite that is mandatory in the default TLS application
+      profile [Section 9 of [RFC5246]];
+
+   o  This application profile will be known as the "Kerberos-Only TLS
+      Application Profile".
+
+   The Kerberos-only CipherSuites can be used with any TLS application
+   profile; that includes, but is not limited to, the one specified
+   above and the default application profile.
+
+5.  Comparison to Earlier Work
+
+   An older specification [RFC2712] introduces Kerberos into TLS.  That
+   specification is hereby deprecated because this new specification
+   improves on it work in a number of ways:
+
+   o  The pre-master secret is no longer sent to the server under
+      encryption with the KDC-provided session key; instead, Perfect
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 19]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+      Forward Secrecy is supported through a Diffie-Hellman key
+      exchange;
+
+   o  The authenticator following the Kerberos ticket is made
+      obligatory, as it is an intrinsic part of replay protection and
+      the mutual authentication between TLS client and TLS server to
+      protect all in-transit application data;
+
+   o  The mutual authentication of TLS client and TLS server is
+      established by TLS-KDH CipherSuites that define a stronger
+      Finished message size;
+
+   o  The service name is not statically set to the literal "host", but
+      both the TLS client and server stacks assume an application
+      context to provide the service name to be used;
+
+   o  Support for modern TLS CipherSuites has been added as TLS-KDH
+      CipherSuites, and support for ones that are currently considered
+      deprecated or insecure have been removed;
+
+   o  There is no need to implement a replay cache, which means that
+      more efficient implementation is possible, certainly on highly
+      active and/or replicated TLS-KDH server systems.
+
+6.  Efficiency Considerations
+
+   The efficiency of the mechanism described here compares favourably
+   with the more common approach of authentication through X.509
+   certificates based on public-key algorithms.
+
+   The Kerberos mechanism is founded on symmetric cryptography, which
+   are more efficient than asymmetric algorithms used with public-key
+   X.509 certificates.  Furthermore, Kerberos' identity statements are
+   short-lived, which is generally accepted to evade the need for
+   withdrawal mechanisms based on chains of trust, CRLs [RFC3280], OCSP
+   [RFC6960], DANE [RFC6698] and perhaps other mechanisms.  As a result,
+   the validity of a Kerberos ticket can be checked with relatively
+   modest computational effort.
+
+   The inclusion of ephemeral Elliptic-Curve Diffie-Hellman is a
+   relatively expensive asymmetric operation, but the same introduction
+   is needed when Perfect Forward Secrecy is introduced alongside
+   public-key authentication.
+
+   The one thing that is costly about Kerberos is its reliance on a
+   replay cache.  Such caches store recent authentication attempts to
+   avoid that they are being replayed; an accurate clock helps to
+   release entries, but some care for clock skew between TLS-KDH client
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 20]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   and server must be resolved with these caches.  Their volatile nature
+   makes them a particularly difficult problem in highly active and/or
+   replicated and/or distributed Kerberos services.
+
+   A replay cache is not required for any of the TLS-KDH protocol flows,
+   because this specification requires that the server uses an ephemeral
+   Elliptic-Curve Diffie-Hellman public key for every connection.  This
+   is of particular use to redundant (and possibly distributed) server
+   farms, where sharing the time-critical information of the replay
+   cache is a performance bottle neck.  Since this is a new
+   specification, there is no need to implement backward compatibility
+   with older mechanisms for which a replay cache might be needed.
+
+7.  Privacy Considerations
+
+   The information that is publicly shown in the TLS-KDH protocol flows
+   consists of:
+
+   o  Supported protocol versions, TLS extensions and CipherSuites
+
+   o  For other than Kerberos-only CipherSuites, the server's
+      Certificate
+
+   o  The server's principal name, host name and service name
+
+   A Kerberos ticket transmits less information in plaintext than a
+   public-key X.509 client certificate; furthermore, DNS may have to
+   reveal the realm name(s) of server-trusted KDC(s) but neither the
+   TLS-KDH server nor any KDC publishes long-lasting key material for
+   TLS or Kerberos, so parties looking for a cracking challenge are
+   constrained to a brief period of attack on keys.
+
+   The TicketRequestFlags may provide information about Tickets present
+   in the client, but that would take the risk of leaking information
+   prior to authentication of the server, and in plaintext.
+
+   TODO: In classical Kerberos setups, the ticket must provide a few
+   handles in plaintext to be able to locate the service key for
+   decrypting the KDC-encrypted ticket parts.  However, given that we
+   usually provide a Server Name Indiction, it might be possible to
+   remove the realm and sname parts from the ticket.  That data, or
+   other ways to reference the service key, could be incorporated into
+   the server configuration.  This does not bring much, since
+   (specifically) the realm will often be configured in DNS.  However,
+   for access to local services using the client's own realm, this might
+   be useful.  Note that the protocol is somewhat linked to the port
+   being accessed, so that too isn't much of a leak.
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 21]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+8.  Security Considerations
+
+   To mutually prove authenticity under a Kerberos-only CipherSuite, the
+   client and server must encrypt respectively decrypt the authenticator
+   attached to the Kerberos ticket.  These operations require access to
+   the session key that is provided to client and server in a form that
+   only they can unpack.  The Finished messages verify that the two
+   parties have performed the same derivations, which is only possible
+   when it is based on the same Diffie-Hellman shared secret, which in
+   turn can only be found when they were provided with the same session
+   key by the KDC.  In terms of Kerberos, this implements mutual
+   authentication.  Note that TLS-KDH uses the KDC-supplied session key
+   only for encryption on the client, and only for decryption on the
+   server, but since the encryption algorithms are symmetric, these are
+   comparable and there is no need to also encrypt on the server or to
+   decrypt on the client as part of the mutual authentication procedure.
+
+   In Kerberos, all key material is supplied by the KDC.  This is a
+   central point in each realm that is usually guarded well enough, but
+   it is nonetheless a critical point in any infrastructure founded on
+   Kerberos.  When client and server are in different realms, but have
+   cross-signed directly or through a chain of KDC's, then all
+   intermediate KDC's are potential places where the session key could
+   be detected.  The weakest KDC in the chain then defines the security
+   of the entire chain.
+
+   Kerberos has introduced numerous refinements that are highly
+   practical in daily use.  One worth noting is S4U2Proxy, under which a
+   service can upgrade a received ticket to one with which it can be a
+   client using a new service ticket in the client's name.  Such
+   provisions are usually limited in the KDC through Constrained
+   Delegation, but nonetheless it introduces an extra degree of freedom
+   for attackers.  Especially dangerous is the combination with
+   S4U2Self, which allows a service to obtain a client ticket without
+   proving (in the Kerberos sense) that the client has actually
+   authenticated to, or even contacted the server.
+
+   Kerberos requires accurate clocks in order to operate securely;
+   without them, once-used and since-forgotten credentials could be
+   replayed by an attacker that has been able to recover an old service
+   ticket's session key.  This problem is worsened in cross-realm
+   scenario's where clock synchronisation is hard to realise.  This is
+   however resolved in all TLS-KDH flows by using ephemeral Elliptic-
+   Curve Diffie-Hellman keys, thus forcing new master secrets on each
+   connection and removing the need for a replay buffer.  Note however,
+   that ticket validity times must still be checked, and the use of
+   accurate clocks reduces problems as a result of clock skew.
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 22]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   TLS makes use of cryptographic algorithms that tend to be efficient
+   to exploit in a denial-of-service attack.  This is indeed a known
+   problem in the operation of TLS.  With TLS-KDH, the most-used
+   algorithms are much lighter in weight, and when using a pool of fresh
+   keys, it is possible to recycle the most computationally expensive
+   keys and be left with only relatively lightweight, symmetric
+   computations.
+
+   Basic Kerberos security hinges on the secrecy of the user's password;
+   if this password is guessed, then all captured traffic can be
+   decoded, even in retrospect.  This means that it is highly advisable
+   to combine Kerberos with Diffie-Hellman for Perfect Forward Secrecy.
+   TLS-KDH implies this desirable property in all its CipherSuites.
+
+9.  IANA Considerations
+
+   TODO - for Kerberos:
+
+   o  ChecksumTypes SHA-xxx
+
+   o  AD-BACKEND-TICKETS
+
+   o  KDC_ERR_INCOMPLETE_BACKEND_TICKETS
+
+   o  TD-REQUIRED-BACKEND-TICKETS
+
+   TODO - for TLS:
+
+   o  ClientCertificateType "kerberos_sign"
+
+   o  SignatureAlgorithm "kerberos"
+
+   o  CipherSuites TLS_ECDHE_KDH_xxx
+
+   o  ExtensionType for TicketRequestFlags
+
+10.  References
+
+10.1.  Normative References
+
+   [KREALM]   Van Rein, R., "Declaring Kerberos Realm Names in DNS
+              (_kerberos TXT)", September 2015.
+
+   [RFC4120]  Neuman, C., Yu, T., Hartman, S., and K. Raeburn, "The
+              Kerberos Network Authentication Service (V5)", RFC 4120,
+              July 2005.
+
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 23]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   [RFC4343]  Eastlake, D., "Domain Name System (DNS) Case Insensitivity
+              Clarification", RFC 4343, January 2006.
+
+   [RFC4492]  Blake-Wilson, S., Bolyard, N., Gupta, V., Hawk, C., and B.
+              Moeller, "Elliptic Curve Cryptography (ECC) Cipher Suites
+              for Transport Layer Security (TLS)", RFC 4492, May 2006.
+
+   [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
+              (TLS) Protocol Version 1.2", RFC 5246, August 2008.
+
+   [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
+              Housley, R., and W. Polk, "Internet X.509 Public Key
+              Infrastructure Certificate and Certificate Revocation List
+              (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
+              <http://www.rfc-editor.org/info/rfc5280>.
+
+   [RFC6806]  Hartman, S., Raeburn, K., and L. Zhu, "Kerberos Principal
+              Name Canonicalization and Cross-Realm Referrals", RFC
+              6806, November 2012.
+
+   [RFC6112]  Zhu, L., Leach, P., and S. Hartman, "Anonymity Support for
+              Kerberos", RFC 6112, DOI 10.17487/RFC6112, April 2011,
+              <http://www.rfc-editor.org/info/rfc6112>.
+
+   [RFC7627]  Bhargavan, K., Ed., Delignat-Lavaud, A., Pironti, A.,
+              Langley, A., and M. Ray, "Transport Layer Security (TLS)
+              Session Hash and Extended Master Secret Extension", RFC
+              7627, DOI 10.17487/RFC7627, September 2015,
+              <http://www.rfc-editor.org/info/rfc7627>.
+
+10.2.  Informative References
+
+   [RFC2712]  Medvinsky, A. and M. Hur, "Addition of Kerberos Cipher
+              Suites to Transport Layer Security (TLS)", RFC 2712,
+              October 1999.
+
+   [RFC3280]  Housley, R., Polk, W., Ford, W., and D. Solo, "Internet
+              X.509 Public Key Infrastructure Certificate and
+              Certificate Revocation List (CRL) Profile", RFC 3280,
+              April 2002.
+
+   [RFC4282]  Aboba, B., Beadles, M., Arkko, J., and P. Eronen, "The
+              Network Access Identifier", RFC 4282, December 2005.
+
+   [RFC4422]  Melnikov, A. and K. Zeilenga, "Simple Authentication and
+              Security Layer (SASL)", RFC 4422, June 2006.
+
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 24]
+
+Internet-Draft                   TLS-KDH                   November 2015
+
+
+   [RFC4559]  Jaganathan, K., Zhu, L., and J. Brezak, "SPNEGO-based
+              Kerberos and NTLM HTTP Authentication in Microsoft
+              Windows", RFC 4559, June 2006.
+
+   [RFC5801]  Josefsson, S. and N. Williams, "Using Generic Security
+              Service Application Program Interface (GSS-API) Mechanisms
+              in Simple Authentication and Security Layer (SASL): The
+              GS2 Mechanism Family", RFC 5801, DOI 10.17487/RFC5801,
+              July 2010, <http://www.rfc-editor.org/info/rfc5801>.
+
+   [RFC6347]  Rescorla, E. and N. Modadugu, "Datagram Transport Layer
+              Security Version 1.2", RFC 6347, DOI 10.17487/RFC6347,
+              January 2012, <http://www.rfc-editor.org/info/rfc6347>.
+
+   [RFC6698]  Hoffman, P. and J. Schlyter, "The DNS-Based Authentication
+              of Named Entities (DANE) Transport Layer Security (TLS)
+              Protocol: TLSA", RFC 6698, August 2012.
+
+   [RFC6960]  Santesson, S., Myers, M., Ankney, R., Malpani, A.,
+              Galperin, S., and C. Adams, "X.509 Internet Public Key
+              Infrastructure Online Certificate Status Protocol - OCSP",
+              RFC 6960, June 2013.
+
+Appendix A.  Acknowledgements
+
+   Thanks go to Simo Sorce for useful discussions during the creation of
+   this document.
+
+Author's Address
+
+   Rick van Rein
+   ARPA2.net
+   Haarlebrink 5
+   Enschede, Overijssel  7544 WP
+   The Netherlands
+
+   Email: rick@openfortress.nl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Van Rein                  Expires May 24, 2016                 [Page 25]

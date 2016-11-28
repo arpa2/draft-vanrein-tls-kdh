@@ -1,0 +1,887 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head profile="http://www.w3.org/2006/03/hcard http://dublincore.org/documents/2008/08/04/dc-html/">
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+
+  <title>TLS-KDH: Kerberos + Diffie-Hellman in TLS</title>
+
+  <style type="text/css" title="Xml2Rfc (sans serif)">
+  /*<![CDATA[*/
+	  a {
+	  text-decoration: none;
+	  }
+      /* info code from SantaKlauss at http://www.madaboutstyle.com/tooltip2.html */
+      a.info {
+          /* This is the key. */
+          position: relative;
+          z-index: 24;
+          text-decoration: none;
+      }
+      a.info:hover {
+          z-index: 25;
+          color: #FFF; background-color: #900;
+      }
+      a.info span { display: none; }
+      a.info:hover span.info {
+          /* The span will display just on :hover state. */
+          display: block;
+          position: absolute;
+          font-size: smaller;
+          top: 2em; left: -5em; width: 15em;
+          padding: 2px; border: 1px solid #333;
+          color: #900; background-color: #EEE;
+          text-align: left;
+      }
+	  a.smpl {
+	  color: black;
+	  }
+	  a:hover {
+	  text-decoration: underline;
+	  }
+	  a:active {
+	  text-decoration: underline;
+	  }
+	  address {
+	  margin-top: 1em;
+	  margin-left: 2em;
+	  font-style: normal;
+	  }
+	  body {
+	  color: black;
+	  font-family: verdana, helvetica, arial, sans-serif;
+	  font-size: 10pt;
+	  max-width: 55em;
+	  
+	  }
+	  cite {
+	  font-style: normal;
+	  }
+	  dd {
+	  margin-right: 2em;
+	  }
+	  dl {
+	  margin-left: 2em;
+	  }
+	
+	  ul.empty {
+	  list-style-type: none;
+	  }
+	  ul.empty li {
+	  margin-top: .5em;
+	  }
+	  dl p {
+	  margin-left: 0em;
+	  }
+	  dt {
+	  margin-top: .5em;
+	  }
+	  h1 {
+	  font-size: 14pt;
+	  line-height: 21pt;
+	  page-break-after: avoid;
+	  }
+	  h1.np {
+	  page-break-before: always;
+	  }
+	  h1 a {
+	  color: #333333;
+	  }
+	  h2 {
+	  font-size: 12pt;
+	  line-height: 15pt;
+	  page-break-after: avoid;
+	  }
+	  h3, h4, h5, h6 {
+	  font-size: 10pt;
+	  page-break-after: avoid;
+	  }
+	  h2 a, h3 a, h4 a, h5 a, h6 a {
+	  color: black;
+	  }
+	  img {
+	  margin-left: 3em;
+	  }
+	  li {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol p {
+	  margin-left: 0em;
+	  }
+	  p {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  pre {
+	  margin-left: 3em;
+	  background-color: lightyellow;
+	  padding: .25em;
+	  }
+	  pre.text2 {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f0f0f0;
+	  width: 69em;
+	  }
+	  pre.inline {
+	  background-color: white;
+	  padding: 0em;
+	  }
+	  pre.text {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  width: 69em;
+	  }
+	  pre.drawing {
+	  border-style: solid;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  padding: 2em;
+	  }
+	  table {
+	  margin-left: 2em;
+	  }
+	  table.tt {
+	  vertical-align: top;
+	  }
+	  table.full {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.headers {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.tt td {
+	  vertical-align: top;
+	  }
+	  table.full td {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.tt th {
+	  vertical-align: top;
+	  }
+	  table.full th {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.headers th {
+	  border-style: none none inset none;
+	  border-width: 1px;
+	  }
+	  table.left {
+	  margin-right: auto;
+	  }
+	  table.right {
+	  margin-left: auto;
+	  }
+	  table.center {
+	  margin-left: auto;
+	  margin-right: auto;
+	  }
+	  caption {
+	  caption-side: bottom;
+	  font-weight: bold;
+	  font-size: 9pt;
+	  margin-top: .5em;
+	  }
+	
+	  table.header {
+	  border-spacing: 1px;
+	  width: 95%;
+	  font-size: 10pt;
+	  color: white;
+	  }
+	  td.top {
+	  vertical-align: top;
+	  }
+	  td.topnowrap {
+	  vertical-align: top;
+	  white-space: nowrap; 
+	  }
+	  table.header td {
+	  background-color: gray;
+	  width: 50%;
+	  }
+	  table.header a {
+	  color: white;
+	  }
+	  td.reference {
+	  vertical-align: top;
+	  white-space: nowrap;
+	  padding-right: 1em;
+	  }
+	  thead {
+	  display:table-header-group;
+	  }
+	  ul.toc, ul.toc ul {
+	  list-style: none;
+	  margin-left: 1.5em;
+	  margin-right: 0em;
+	  padding-left: 0em;
+	  }
+	  ul.toc li {
+	  line-height: 150%;
+	  font-weight: bold;
+	  font-size: 10pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  ul.toc li li {
+	  line-height: normal;
+	  font-weight: normal;
+	  font-size: 9pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  li.excluded {
+	  font-size: 0pt;
+	  }
+	  ul p {
+	  margin-left: 0em;
+	  }
+	
+	  .comment {
+	  background-color: yellow;
+	  }
+	  .center {
+	  text-align: center;
+	  }
+	  .error {
+	  color: red;
+	  font-style: italic;
+	  font-weight: bold;
+	  }
+	  .figure {
+	  font-weight: bold;
+	  text-align: center;
+	  font-size: 9pt;
+	  }
+	  .filename {
+	  color: #333333;
+	  font-weight: bold;
+	  font-size: 12pt;
+	  line-height: 21pt;
+	  text-align: center;
+	  }
+	  .fn {
+	  font-weight: bold;
+	  }
+	  .hidden {
+	  display: none;
+	  }
+	  .left {
+	  text-align: left;
+	  }
+	  .right {
+	  text-align: right;
+	  }
+	  .title {
+	  color: #990000;
+	  font-size: 18pt;
+	  line-height: 18pt;
+	  font-weight: bold;
+	  text-align: center;
+	  margin-top: 36pt;
+	  }
+	  .vcardline {
+	  display: block;
+	  }
+	  .warning {
+	  font-size: 14pt;
+	  background-color: yellow;
+	  }
+	
+	
+	  @media print {
+	  .noprint {
+		display: none;
+	  }
+	
+	  a {
+		color: black;
+		text-decoration: none;
+	  }
+	
+	  table.header {
+		width: 90%;
+	  }
+	
+	  td.header {
+		width: 50%;
+		color: black;
+		background-color: white;
+		vertical-align: top;
+		font-size: 12pt;
+	  }
+	
+	  ul.toc a::after {
+		content: leader('.') target-counter(attr(href), page);
+	  }
+	
+	  ul.ind li li a {
+		content: target-counter(attr(href), page);
+	  }
+	
+	  .print2col {
+		column-count: 2;
+		-moz-column-count: 2;
+		column-fill: auto;
+	  }
+	  }
+	
+	  @page {
+	  @top-left {
+		   content: "Internet-Draft"; 
+	  } 
+	  @top-right {
+		   content: "December 2010"; 
+	  } 
+	  @top-center {
+		   content: "Abbreviated Title";
+	  } 
+	  @bottom-left {
+		   content: "Doe"; 
+	  } 
+	  @bottom-center {
+		   content: "Expires June 2011"; 
+	  } 
+	  @bottom-right {
+		   content: "[Page " counter(page) "]"; 
+	  } 
+	  }
+	
+	  @page:first { 
+		@top-left {
+		  content: normal;
+		}
+		@top-right {
+		  content: normal;
+		}
+		@top-center {
+		  content: normal;
+		}
+	  }
+  /*]]>*/
+  </style>
+
+  <link href="#rfc.toc" rel="Contents"/>
+<link href="#rfc.section.1" rel="Chapter" title="1 Introduction"/>
+<link href="#rfc.section.2" rel="Chapter" title="2 Related Work"/>
+<link href="#rfc.section.3" rel="Chapter" title="3 Extending Kerberos to support TLS"/>
+<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Checksum Types for use with TLS"/>
+<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Authenticators as Signatures"/>
+<link href="#rfc.section.3.3" rel="Chapter" title="3.3 Tickets in X.509 Certificates"/>
+<link href="#rfc.section.3.4" rel="Chapter" title="3.4 AuthorizationData for Backend Services"/>
+<link href="#rfc.section.4" rel="Chapter" title="4 Extending TLS to support Kerberos"/>
+<link href="#rfc.section.4.1" rel="Chapter" title="4.1 Client Certificate Type"/>
+<link href="#rfc.section.4.2" rel="Chapter" title="4.2 Signature Algorithms"/>
+<link href="#rfc.section.4.3" rel="Chapter" title="4.3 KDH-only CipherSuites"/>
+<link href="#rfc.section.4.4" rel="Chapter" title="4.4 TicketRequestFlags Extension"/>
+<link href="#rfc.section.4.5" rel="Chapter" title="4.5 TLS Connection Expiration"/>
+<link href="#rfc.section.4.6" rel="Chapter" title="4.6 Interaction with Applications"/>
+<link href="#rfc.section.4.7" rel="Chapter" title="4.7 Application Profile for Kerberos-only TLS"/>
+<link href="#rfc.section.5" rel="Chapter" title="5 The Message Flow of TLS-KDH"/>
+<link href="#rfc.section.5.1" rel="Chapter" title="5.1 ClientHello"/>
+<link href="#rfc.section.5.2" rel="Chapter" title="5.2 ServerHello"/>
+<link href="#rfc.section.5.3" rel="Chapter" title="5.3 Server's Certificate"/>
+<link href="#rfc.section.5.4" rel="Chapter" title="5.4 ServerKeyExchange"/>
+<link href="#rfc.section.5.5" rel="Chapter" title="5.5 CertificateRequest"/>
+<link href="#rfc.section.5.6" rel="Chapter" title="5.6 Client's Certificate"/>
+<link href="#rfc.section.5.7" rel="Chapter" title="5.7 ClientKeyExhange"/>
+<link href="#rfc.section.5.8" rel="Chapter" title="5.8 CertificateVerify"/>
+<link href="#rfc.section.5.9" rel="Chapter" title="5.9 Finished"/>
+<link href="#rfc.section.6" rel="Chapter" title="6 Comparison to Earlier Work"/>
+<link href="#rfc.section.7" rel="Chapter" title="7 Efficiency Considerations"/>
+<link href="#rfc.section.8" rel="Chapter" title="8 Privacy Considerations"/>
+<link href="#rfc.section.9" rel="Chapter" title="9 Security Considerations"/>
+<link href="#rfc.section.10" rel="Chapter" title="10 IANA Considerations"/>
+<link href="#rfc.references" rel="Chapter" title="11 References"/>
+<link href="#rfc.references.1" rel="Chapter" title="11.1 Normative References"/>
+<link href="#rfc.references.2" rel="Chapter" title="11.2 Informative References"/>
+<link href="#rfc.authors" rel="Chapter"/>
+
+
+  <meta name="generator" content="xml2rfc version 2.4.8 - http://tools.ietf.org/tools/xml2rfc" />
+  <link rel="schema.dct" href="http://purl.org/dc/terms/" />
+
+  <meta name="dct.creator" content="Van Rein, R." />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-vanrein-tls-kdh-01" />
+  <meta name="dct.issued" scheme="ISO8601" content="2015-12-7" />
+  <meta name="dct.abstract" content="This specification defines a TLS message flow with Kerberos-based (mutual) authentication, binding in Elliptic-Curve Diffie-Hellman to achieve Perfect Forward Secrecy for the session." />
+  <meta name="description" content="This specification defines a TLS message flow with Kerberos-based (mutual) authentication, binding in Elliptic-Curve Diffie-Hellman to achieve Perfect Forward Secrecy for the session." />
+
+</head>
+
+<body>
+
+  <table class="header">
+    <tbody>
+    
+    	<tr>
+  <td class="left">Network Working Group</td>
+  <td class="right">R. Van Rein</td>
+</tr>
+<tr>
+  <td class="left">Internet-Draft</td>
+  <td class="right">ARPA2.net</td>
+</tr>
+<tr>
+  <td class="left">Intended status: Standards Track</td>
+  <td class="right">December 7, 2015</td>
+</tr>
+<tr>
+  <td class="left">Expires: June 9, 2016</td>
+  <td class="right"></td>
+</tr>
+
+    	
+    </tbody>
+  </table>
+
+  <p class="title">TLS-KDH: Kerberos + Diffie-Hellman in TLS<br />
+  <span class="filename">draft-vanrein-tls-kdh-01</span></p>
+  
+  <h1 id="rfc.abstract">
+  <a href="#rfc.abstract">Abstract</a>
+</h1>
+<p>This specification defines a TLS message flow with Kerberos-based (mutual) authentication, binding in Elliptic-Curve Diffie-Hellman to achieve Perfect Forward Secrecy for the session.</p>
+<h1 id="rfc.status">
+  <a href="#rfc.status">Status of This Memo</a>
+</h1>
+<p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
+<p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
+<p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
+<p>This Internet-Draft will expire on June 9, 2016.</p>
+<h1 id="rfc.copyrightnotice">
+  <a href="#rfc.copyrightnotice">Copyright Notice</a>
+</h1>
+<p>Copyright (c) 2015 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
+<p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
+
+  
+  <hr class="noprint" />
+  <h1 class="np" id="rfc.toc"><a href="#rfc.toc">Table of Contents</a></h1>
+  <ul class="toc">
+
+  	<li>1.   <a href="#rfc.section.1">Introduction</a></li>
+<li>2.   <a href="#rfc.section.2">Related Work</a></li>
+<li>3.   <a href="#rfc.section.3">Extending Kerberos to support TLS</a></li>
+<li>3.1.   <a href="#rfc.section.3.1">Checksum Types for use with TLS</a></li>
+<li>3.2.   <a href="#rfc.section.3.2">Authenticators as Signatures</a></li>
+<li>3.3.   <a href="#rfc.section.3.3">Tickets in X.509 Certificates</a></li>
+<li>3.4.   <a href="#rfc.section.3.4">AuthorizationData for Backend Services</a></li>
+<li>4.   <a href="#rfc.section.4">Extending TLS to support Kerberos</a></li>
+<li>4.1.   <a href="#rfc.section.4.1">Client Certificate Type</a></li>
+<li>4.2.   <a href="#rfc.section.4.2">Signature Algorithms</a></li>
+<li>4.3.   <a href="#rfc.section.4.3">KDH-only CipherSuites</a></li>
+<li>4.4.   <a href="#rfc.section.4.4">TicketRequestFlags Extension</a></li>
+<li>4.5.   <a href="#rfc.section.4.5">TLS Connection Expiration</a></li>
+<li>4.6.   <a href="#rfc.section.4.6">Interaction with Applications</a></li>
+<li>4.7.   <a href="#rfc.section.4.7">Application Profile for Kerberos-only TLS</a></li>
+<li>5.   <a href="#rfc.section.5">The Message Flow of TLS-KDH</a></li>
+<li>5.1.   <a href="#rfc.section.5.1">ClientHello</a></li>
+<li>5.2.   <a href="#rfc.section.5.2">ServerHello</a></li>
+<li>5.3.   <a href="#rfc.section.5.3">Server's Certificate</a></li>
+<li>5.4.   <a href="#rfc.section.5.4">ServerKeyExchange</a></li>
+<li>5.5.   <a href="#rfc.section.5.5">CertificateRequest</a></li>
+<li>5.6.   <a href="#rfc.section.5.6">Client's Certificate</a></li>
+<li>5.7.   <a href="#rfc.section.5.7">ClientKeyExhange</a></li>
+<li>5.8.   <a href="#rfc.section.5.8">CertificateVerify</a></li>
+<li>5.9.   <a href="#rfc.section.5.9">Finished</a></li>
+<li>6.   <a href="#rfc.section.6">Comparison to Earlier Work</a></li>
+<li>7.   <a href="#rfc.section.7">Efficiency Considerations</a></li>
+<li>8.   <a href="#rfc.section.8">Privacy Considerations</a></li>
+<li>9.   <a href="#rfc.section.9">Security Considerations</a></li>
+<li>10.   <a href="#rfc.section.10">IANA Considerations</a></li>
+<li>11.   <a href="#rfc.references">References</a></li>
+<li>11.1.   <a href="#rfc.references.1">Normative References</a></li>
+<li>11.2.   <a href="#rfc.references.2">Informative References</a></li>
+<li><a href="#rfc.authors">Author's Address</a></li>
+
+
+  </ul>
+
+  <h1 id="rfc.section.1"><a href="#rfc.section.1">1.</a> <a href="#intro" id="intro">Introduction</a></h1>
+<p id="rfc.section.1.p.1">Kerberos lends itself well to infrastructure-supported mutual authentication, and can even be used to crossover between realms. A downside of this infrastructure is that a crack of one key can lead to a cascade of reverse-engineered keys.  Diffie-Hellman key exchange, nowadays primarily in its Elliptic-Curve variation, can be used to incorporate the desirable property of Perfect Forward Secrecy, but its vulnerability for man-in-the-middle attacks must then be overcome by cryptographically binding it to an authentication mechanism.</p>
+<p id="rfc.section.1.p.2">This specification describes how to use Kerberos data structures for optional client authentication, in a manner compatible with X.509 client certificates.  When the server presents a Certificate with a traditional signing mechanism such as RSA for authentication, then this specification speaks of a KDH-enhanced exchange that incorporates this special X.509 format; in absense of a server Certificate the same X.509 format can be used for mutual authentication as part of the KDH-only CipherSuites defined herein.  Both KDH-enhanced and KDH-only message flows will be referred to as TLS-KDH.</p>
+<p id="rfc.section.1.p.3">Both variations of TLS-KDH form a cryptographic binding between Kerberos and Elliptic-Curve Diffie-Hellman (ECDH), leading to the combined advantages of infrastructure-supported mutual authentication and Perfect Forward Secrecy.  We refer to any such TLS variation as TLS-KDH, even when it is combined with generally used server authentication mechanisms.</p>
+<p id="rfc.section.1.p.4">The normal flow of TLS-KDH messages is basically a standard interaction with a modified form of client Certificate and CertificateVerify:</p>
+<pre>
+    Client                                               Server
+
+    ClientHello                  --------&gt;
+                                                    ServerHello
+                                              ServerCertificate*
+                                              ServerKeyExchange
+                                             CertificateRequest
+                                 &lt;--------      ServerHelloDone
+    Certificate
+    ClientKeyExchange
+    CertificateVerify
+    [ChangeCipherSpec]
+    Finished                     --------&gt;
+                                             [ChangeCipherSpec]
+                                 &lt;--------             Finished
+    Application Data             &lt;-------&gt;     Application Data
+</pre>
+<p id="rfc.section.1.p.5">* Indicates that ServerCertificate is an optional message; it is present for KDH-enhanced message flows, and absent for KDH-only message flows.</p>
+<p id="rfc.section.1.p.6">[] Indicates that ChangeCipherSpec is an independent TLS protocol content type; it is not actually a TLS handshake message.</p>
+<h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#priorwork" id="priorwork">Related Work</a></h1>
+<p id="rfc.section.2.p.1">Prior work exists for Kerberos authentication within TLS <a href="#RFC2712">[RFC2712]</a>.  This work has a few drawbacks that are addressed in this new specification.  Specifically, it is useful to combine Kerberos mutual authentication with the Perfect Forward Secrecy of Diffie-Hellman.</p>
+<p id="rfc.section.2.p.2">Specifically for the HTTP and HTTPS protocols, the Negotiate header <a href="#RFC4559">[RFC4559]</a> can provide Kerberos authentication, but its use is not considered a strong security practice.  Applications that currently rely on this mechanism can strengthen their security by moving to HTTP over TLS-KDH.  Note that this provides an alternative for Kerberos, not to SPNEGO and not for general GSS-API protocols.  This restriction of TLS-KDH to Kerberos, rather than a more general GSS-API protocol, is a result of the limited number of message exchanges available within TLS.</p>
+<p id="rfc.section.2.p.3">Many other protocols incorporate Kerberos through GSS-API, usually via SASL.  This is considered secure, but has the disadvantage of separating encryption and authentication layers, and quite possibly also the identities involved in these layers.  Furthermore, encryption through SASL is not commonly used.  In situations where Kerberos is used for GSS-API over SASL, TLS-KDH offers a comparable but more efficient and tighter-coupled mechanism for encryption and mutual authentication, in a way that also lends itself for non-SASL applications.  Specifically useful in this respect is that there is no longer a requirement to setup X.509 certificates plus infrastructure and validation mechanisms, just to satisfy encryption requirements with their own authentication infrastructure.  In applications that use SASL, the EXTERNAL mechanism <a href="#RFC4422">[RFC4422]</a> can be used to extract the remote identity from a Kerberos ticket, and make it available to the application layer; SASL EXTERNAL is also used when TLS authenticates peers through X.509 certificates.</p>
+<h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#ext.krb" id="ext.krb">Extending Kerberos to support TLS</a></h1>
+<p id="rfc.section.3.p.1">This section specifies extensions to Kerberos that make it possible to use TLS.</p>
+<h1 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a> <a href="#ext.krb.csumtypes" id="ext.krb.csumtypes">Checksum Types for use with TLS</a></h1>
+<p id="rfc.section.3.1.p.1">The IANA registry of Kerberos Parameters defines a number of Checksum Types.  This includes keyed and non-keyed checksums.  We introduce checksum types to match the secure hash algorithms that are used in TLS.</p>
+<p id="rfc.section.3.1.p.2">There already are two values to represent SHA1.  An implementation that processes Checksum Types MAY send either and MUST accept both as equivalent indications.</p>
+<p id="rfc.section.3.1.p.3">The following additional Checksum Types are introduced for use with TLS [Section 7.4.1.4.1 of <a href="#RFC5246">[RFC5246]</a>]: </p>
+
+<ul>
+  <li>SHA224</li>
+  <li>SHA256</li>
+  <li>SHA384</li>
+  <li>SHA512</li>
+</ul>
+
+<p> </p>
+<h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#ext.krb.authsig" id="ext.krb.authsig">Authenticators as Signatures</a></h1>
+<p id="rfc.section.3.2.p.1">Kerberos has a symmetric analogon to a signature, namely an Authenticator [Section 5.5.1 of <a href="#RFC4120">[RFC4120]</a>] that MUST have a secure hash embedded in the cksum field.  The checksum type used in the context of TLS MUST be taken to match one of the entries in IANA's TLS HashAlgorithm Registry.</p>
+<p id="rfc.section.3.2.p.2">The Authenticator is not sent in the plain, but encrypted with a Kerberos session key as EncryptedData [Section 5.2.9 of <a href="#RFC4120">[RFC4120]</a>] and this is how it gains authoratitative power: only the client and the service can unpack the EncryptedData and process the Authenticator, even if the encrypted value is shown to the public.</p>
+<p id="rfc.section.3.2.p.3">The Authenticator can contain a subkey field holding a new encryption key.  This field MUST be ignored by the service, except in the ClientVerify message during a KDH-only exchange, in which case the field MUST be present in the Authenticator.</p>
+<p id="rfc.section.3.2.p.4">A standard part of an Authenticator is a timestamp with microsecond accuracy.  This is validated within a small window around the independently sycnchronised time of the TLS client and server.  A customary time window permits 5 minutes of time difference between the client and server.</p>
+<p id="rfc.section.3.2.p.5">To avoid replay attacks, Kerberos solutions need to remember received Authenticators, or their time stamps, until the time window has passed.  This be complicating, especially for replicated services.  When combined with Diffie-Hellman, with a different server public key for every TLS connection, there is no need for such infrastructure to avoid replay attacks.</p>
+<p id="rfc.section.3.2.p.6">Other fields in the Authenticator than specified above MUST be ignored by the recipient.</p>
+<h1 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a> <a href="#ext.krb.x509" id="ext.krb.x509">Tickets in X.509 Certificates</a></h1>
+<p id="rfc.section.3.3.p.1">This specification leaves the certification possibilities for servers in tact, even if it extends the client certification side.  This is why it is not an option to define a new certificate type <a href="#RFC5801">[RFC5801]</a> for Kerberos, as that would impact the server certificate.  Instead, we define a method to encapsulate Kerberos credentials in the general X.509 certificate format on the client side.</p>
+<p id="rfc.section.3.3.p.2">Kerberos is based on symmetric keys, but its facilities are similar to a public-key cryptosystem.  The main difference is that its cryptographic claims can only be verified by a targeted service, but within the scope of TLS this does not present any problems.</p>
+<p id="rfc.section.3.3.p.3">The X.509 client certificate is constructed from Kerberos by building a TBSCertificate [Section 4.1 of <a href="#RFC5280">[RFC5280]</a>] as follows: </p>
+
+<ul>
+  <li>The certificate is self-signed.  Its issuer and subject are set to the distinguishedName CN=Kerberos.</li>
+  <li>The certificate MUST NOT claim validity before its contained Ticket is valid, and MUST NOT claim validity after the Ticket expires.  The certificate MAY be short lived, lasting for example from 2 minutes before the client's current time to 3 minutes after the current time.</li>
+  <li>The signature algorithm is set to an OID that signifies an Authenticator as specified in <a href="#ext.krb.authsig">Section 3.2</a> and based on a TLS-accepted hash algorithm.  The Authenticator MUST NOT contain a subkey field.</li>
+  <li>The subjectPublicKeyInfo is set to an algorithm OID that signifies a Kerberos Ticket; the subjectPublicKey is filled with a Kerberos Ticket [Section 5.3 of <a href="#RFC4120">[RFC4120]</a>] that the client wants to use to access a service.</li>
+</ul>
+
+<p> The Certificate built from the TBSCertificate adds the following fields: </p>
+
+<ul>
+  <li>The signatureAlgorithm contains the same value as the signature field in the TBSCertificate.</li>
+  <li>The signatureValue field is filled with the EncryptedData <a href="#ext.krb.authsig">Section 3.2</a> holding an Authenticator whose cksum is computed over the TBSCertficate using the secure hash algorithm specified in the signatureAlgorithm.</li>
+</ul>
+<p id="rfc.section.3.3.p.4">The OIDs referred to above are defined below <a href="#tls.ext.sigalg">Section 4.2</a>.</p>
+<h1 id="rfc.section.3.4"><a href="#rfc.section.3.4">3.4.</a> <a href="#tls.ext.backend" id="tls.ext.backend">AuthorizationData for Backend Services</a></h1>
+<p id="rfc.section.3.4.p.1">The TLS server may depend on additional Kerberos-protected services, generally referred to as "backend services".  As an example, an HTTP service may need to access IMAP and SMTP backend services, possibly under independent administrative control.  This section describes an OPTIONAL Kerberos mechanism in support of such backend services.</p>
+<p id="rfc.section.3.4.p.2">In addition to the main Ticket supplied in the client Certificate's public key field, the TLS server would need Tickets to gain access to any backend services, and in fact these Tickets can help to define where these backend services are located and under what client identity they are accessed.  The client needs to provide these additional Tickets in an AuthorizationData element whose ad-type is AD-BACKEND-TICKETS (TBD) and whose ad-data holds a KRB-CRED message [Section 5.8 of <a href="#RFC4120">[RFC4120]</a>] whose enc-part uses NULL encryption [Section 6.3.1 of <a href="#RFC1510">[RFC1510]</a>].  The element may be carried in the authorization-data field of either the service Ticket or an Authenticator.</p>
+<p id="rfc.section.3.4.p.3">Additional Tickets MUST NOT be renewable, but the main Ticket MAY be, if it is the first service approached by the client; when this first Ticket is renewed it SHOULD be resent with the backend extension as they are setup at that time.  Additional Tickets SHOULD have neither the FORWARDABLE nor the PROXIABLE flag set.</p>
+<p id="rfc.section.3.4.p.4">Additional Tickets should be supplied every time the main Ticket is supplied for TLS-KDH.  As a result, both the main and additional Tickets MAY be forgotten by the server whenever a TLS-KDH session ends.  However, when needed for longer-lasting or deferred backend processing, the server MAY hold the Tickets longer.</p>
+<p id="rfc.section.3.4.p.5">It is possible for backend services to have backend services themselves; this can be facilitated by a an AD-BACKEND-TICKETS element contained in the respective backend service Ticket.</p>
+<p id="rfc.section.3.4.p.6">The generation of AD-BACKEND-TICKETS at the client falls outside the scope of this document, but it usually involves requesting the TLS-KDH service Ticket from the client's KDC.  To facilitate that, the server desiring additional Tickets SHOULD set the LocalRealmService flag <a href="#tls.ext.tickreq">Section 4.4</a>; without this flag, the client MAY choose not to supply additional Tickets.  The use of this flag may imply that the server needs to be flexible in the identity that the client uses for its service.</p>
+<p id="rfc.section.3.4.p.7">The client MUST NOT take hints from the server or any non-local KDC about required backend Tickets; this might make the client's identity vulnerable.  </p>
+<h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#tls.ext" id="tls.ext">Extending TLS to support Kerberos</a></h1>
+<p id="rfc.section.4.p.1">This section describes changes to TLS in support of Kerberos.</p>
+<h1 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a> <a href="#tls.ext.clicerttp" id="tls.ext.clicerttp">Client Certificate Type</a></h1>
+<p id="rfc.section.4.1.p.1">This specification adds a new entry named kerberos_sign in IANA's TLS ClientCertificateType Identifiers Registry, with the value TBD.</p>
+<h1 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a> <a href="#tls.ext.sigalg" id="tls.ext.sigalg">Signature Algorithms</a></h1>
+<p id="rfc.section.4.2.p.1">This specification introduces a mechanism for signatures under Kerberos <a href="#ext.krb.authsig">Section 3.2</a>.  This mechanism is represented in two places.</p>
+<p id="rfc.section.4.2.p.2">In TLS, a new SignatureAlgorithm named kerberos is allocated with value TBD in IANA's TLS Parameters Registry.  This Kerberos SignatureAlgorithm is usually combined with a HashAlgorithm that is in common use with TLS, to for a SignatureAndHashAlgorithm.  The digitally-signed structure [Section 4.7 of <a href="#RFC5246">[RFC5246]</a>] uses this structure, followed by a variable-sized opaque byte sequence, which should hold the EncryptedData holding an Authenticator <a href="#ext.krb.authsig">Section 3.2</a>.</p>
+<p id="rfc.section.4.2.p.3">In X.509 certificates, an AlgorithmIdentifier is used to represent the combination of a signature and hash algorithm.  This consists of an OID and optional parameters.  For the Kerberos signature algorithm, the parameters are absent, and the OID is (TBD -- for now, 1.3.6.1.4.1.44469.666.509.88.1.1.2) concatenated with the OID of a secure hash algorithm from IANA's Hash Function Textual Names registry.  For example, the SHA-1 hash with OID 1.3.14.3.2.26 would combine to form (TBD -- now it is 1.3.6.1.4.1.44469.666.509.88.1.1.2.1.3.14.3.2.26).</p>
+<h1 id="rfc.section.4.3"><a href="#rfc.section.4.3">4.3.</a> <a href="#ext.tls.krbonly" id="ext.tls.krbonly">KDH-only CipherSuites</a></h1>
+<p id="rfc.section.4.3.p.1">KDH-enhanced message flows can use existing ECDHE CipherSuites using server certificates that may be signed with RSA or other common algorithms.  In addition, this specification introduces a number of KDH-only CipherSuites with names that start with TLS_ECDHE_KDH_.  These new CipherSuites rely on Kerberos' mutual authentication plus ECDHE but not on a server Certificate.  They may be used starting from TLS 1.2.  They default to a higher verify_data_length than the default 12.</p>
+<p id="rfc.section.4.3.p.2">The following Kerberos-only CipherSuites are entered into the IANA TLS Cipher Suite Registry; the list below provides their names and their desired verify_data_lengths between brackets: </p>
+
+<ul>
+  <li>TLS_ECDHE_KDH_WITH_AES_128_GCM_SHA256 (32)</li>
+  <li>TLS_ECDHE_KDH_WITH_AES_256_GCM_SHA384 (48)</li>
+  <li>TLS_ECDHE_KDH_WITH_AES_128_CCM (32)</li>
+  <li>TLS_ECDHE_KDH_WITH_AES_256_CCM (48)</li>
+  <li>TLS_ECDHE_KDH_WITH_AES_128_CCM_8 (32)</li>
+  <li>TLS_ECDHE_KDH_WITH_AES_256_CCM_8 (48)</li>
+  <li>TLS_ECDHE_KDH_WITH_ARIA_128_GCM_SHA256 (32)</li>
+  <li>TLS_ECDHE_KDH_WITH_ARIA_256_GCM_SHA384 (48)</li>
+  <li>TLS_ECDHE_KDH_WITH_CAMELLIA_128_GCM_SHA256 (32)</li>
+  <li>TLS_ECDHE_KDH_WITH_CAMELLIA_256_GCM_SHA384 (48)</li>
+</ul>
+
+<p> Neither server nor client should accept lower values for verify_data_lengths than given here.  TODO: the list follows http://www.keylength.com/en/4/ and the hash algorithm sizes -- is this agreed?</p>
+<p id="rfc.section.4.3.p.3">The premaster secret for KDH-only CipherSuites is composed from an ECDHE shared secret and a client-sent, session-specific Kerberos key.  Use S to refer to the DER representation of the EncryptionKey [Section 5.2.9 of <a href="#RFC4120">[RFC4120]</a>] in the key contained in the Ticket in the client's Certificate.  Use E to refer to the DER representation of the EncryptionKey in the subkey field of the Authentication in the ClientVerify message, which MUST be present.  Perform the ECDH computation in the common manner <a href="#RFC4492">[RFC4492]</a> and let Z be the value produced by this computation (with leading zero bytes kept as they are).  The premaster secret is the concatenation of an uint16 containing the length of Z (in octets), Z itself, an uint16 containing the lenght of S (in octets), S itself, the length of E (in octets) and E itself.</p>
+<p id="rfc.section.4.3.p.4">The master secret is derived from the premaster secret using the extended master secret computation [Section 4 of <a href="#RFC7627">[RFC7627]</a>.</p>
+<h1 id="rfc.section.4.4"><a href="#rfc.section.4.4">4.4.</a> <a href="#tls.ext.tickreq" id="tls.ext.tickreq">TicketRequestFlags Extension</a></h1>
+<p id="rfc.section.4.4.p.1">Some clients may be able to offer more facilities in Tickets than others, and some servers need more than others.  To communicate this, an Extension known as TicketRequestFlags is hereby defined.  This extension is optional for TLS in general, but it is required for TLS-KDH.  The client uses the Extension to specify the flags that it understands and may be able to fulfil.  The server uses the Extension to indicate the flags that it requires to be fulfilled.</p>
+<p id="rfc.section.4.4.p.2">The Extension's structure is an extensible list of flag values that indicate constraints on the ticket that the client should supply.  These should be seen as hints how the client should present its identity, as the server can always decide to reject a client on grounds that are or are not expressible in this form.</p>
+<p id="rfc.section.4.4.p.3">Flag values defined in this specification are: </p>
+
+<dl>
+  <dt>TicketFlags (flags number 0..31)</dt>
+  <dd style="margin-left: 6">are taken from Kerberos' TicketFlags definitions [<a href="#RFC4120">[RFC4120]</a> and updates]; clients MUST NOT accept requested TicketFlags without scrutinising their security impact; servers SHOULD NOT assume that their requested TicketFlags will actually be provided.  Only TicketFlags 0 through 31 are included in this definition; when Kerberos is extended with more TicketFlags then they will be assigned a new range of values as TicketRequestFlags.</dd>
+  <dt>LocalRealmService (flag number 32)</dt>
+  <dd style="margin-left: 6">indicates that the client SHOULD NOT perform realm crossover, but instead look for a service ticket in its local realm.  When this flag is set, the client may choose whether canonicalization <a href="#RFC6806">[RFC6806]</a> is useful; when this flag is not set, the client SHOULD use canonicalization to help it crossover to all realms that the KDC can reach.  When this flag is not set, the server MUST NOT expect the client realm to match one of the server realms; when this flag is set, the server MUST make the effort to connect to the realm of the client, inasfar as it is willing to support that realm.</dd>
+  <dt>VisibleClientRealm (flag number 33)</dt>
+  <dd style="margin-left: 6">requests that the client's realm name is revealed in the service ticket.  With the flag not set, the server MUST NOT reject the well-known anonymous realm name WELLKNOWN:ANONYMOUS [Section 3 of <a href="#RFC6112">[RFC6112]</a>] in the client realm name.</dd>
+  <dt>UniqueClientIdentity (flag number 34)</dt>
+  <dd style="margin-left: 6">requests that the client presents a unique identity, even if it is a pseudonym that is specific to this service.  Some services can make good use of identities that are also presented over other protocols, which is why the choice to share such an identity SHOULD be made during an interaction with the user, if possible.  The user MAY determine to use only a short-lived identity.  When this flag is not set, the server MUST NOT reject the client principal name WELLKNOWN/ANONYMOUS of type KRB_NT_WELLKNOWN [Section 3 of <a href="#RFC6112">[RFC6112]</a>].  Regardless of this flag, it is RECOMMENDED for the server to be open to as many forms of client principal name [Section 6.2 of <a href="#RFC4120">[RFC4120]</a>] as possible.</dd>
+</dl>
+
+<p> </p>
+<p id="rfc.section.4.4.p.4">Additional flag bit values are reserved through the publication of an RFC.  (TODO: IANA's TLS registries?) Future specifications of flag values may state that a flag is an alternative to another flag, including to the ones specified above.  When flag A is an alternative to flag B then the fulfillment of the requirements for A suffices to ignore flag B.  It is possible for flags to cyclically refer to each other as alternatives; since being-an-alternative is not defined as a transitive property, this need not distract from this definition.  This is explicitly permitted to enhance expressiveness of this principle.</p>
+<p id="rfc.section.4.4.p.5">The wire format representing TicketRequestFlags is a sequence of 32-bit integers.  The lower 5 bits of a flag number provide the number of the bit within a 32-bit integer, and the higher bits indicate the integer's index in the sequence of 32-bit integers.  Senders MUST set unknown flags to value 0 and recipients MUST NOT act on flags they cannot interpret.</p>
+<p id="rfc.section.4.4.p.6">Integers that are not present in the flags array MUST be considered to have value 0.  The last 32-bit integer MUST NOT contain all 0 bits.  Note that this implies that the TicketRequestFlags can be an array of zero integers, namely when all flag values are 0.</p>
+<h1 id="rfc.section.4.5"><a href="#rfc.section.4.5">4.5.</a> <a href="#cnxrefresh" id="cnxrefresh">TLS Connection Expiration</a></h1>
+<p id="rfc.section.4.5.p.1">TLS-KDH connections expire when their authenticating Kerberos tickets expire.  This is not a reason for termination of the TLS connection, but instead it is a trigger for refreshing the ticket.  Such a refresh should be executed by the TLS-KDH client, where it may trigger user interaction.  Note that Kerberos' facility of ticket renewal [Section 2.3 of <a href="#RFC4120">[RFC4120]</a>] may provide some relief from such user interaction.</p>
+<p id="rfc.section.4.5.p.2">When the TLS-KDH connection expires, neither side will send any further data records, and both sides will, upon receiving any data records, trigger a TLS Alert.  The other records are still accepted, to permit re-issuance of session keys.  This mode of operation is intended to block data communication until authentication has been refreshed.  Implementations MAY choose to initiate and permit re-authentication some time before the actual expiration.  This can remedy clock skew between the TLS-KDH client and server, which might otherwise lead to undesired connection reset.</p>
+<h1 id="rfc.section.4.6"><a href="#rfc.section.4.6">4.6.</a> <a href="#tls.ext.apps" id="tls.ext.apps">Interaction with Applications</a></h1>
+<p id="rfc.section.4.6.p.1">To be able to use Kerberos, application protocols that run over TLS must pass some configuration information to the TLS stack.  This includes the service name and a realm, the TicketRequestFlags, and on the server a keytab.</p>
+<p id="rfc.section.4.6.p.2">When a SASL EXTERNAL mechanism is used to communicate an identity between the application and the TLS stack, then a good alignment with X.509 certificates is possible when both aim to derive a Network Access Identifier <a href="#RFC7542">[RFC7542]</a> and/or a domain name.  In the case of a Kerberos principal name, this would involve translation between case-sensitive realm names to DNS names whose case is not reliably [Section 4.1 of <a href="#RFC4343">[RFC4343]</a>] reproduced; this may be done by ignoring or lowering the case of the realm name while upholding the requirement that no two realm names may differ only in their case [Section 7.2.3.1 of <a href="#RFC4120">[RFC4120]</a>].</p>
+<h1 id="rfc.section.4.7"><a href="#rfc.section.4.7">4.7.</a> <a href="#ext.tls.profile" id="ext.tls.profile">Application Profile for Kerberos-only TLS</a></h1>
+<p id="rfc.section.4.7.p.1">TLS and Kerberos have long been independent infrastructures for secure connectivity; with the introduction of the Kerberos-only CipherSuites in this specification, the worlds can merge elegantly.  The newly introduced CipherSuites are expected to integrate relatively straightforwardly with any TLS stack.</p>
+<p id="rfc.section.4.7.p.2">Just like the TLS-KDH CipherSuites are optimal to implement in TLS stacks, TLS-KDH should not force all Kerberos applications to process the full potential of TLS, especially not public key cryptography and the complexity of proper validation of X.509 certificates.  Some applications simply want to use Kerberos in a standardised protocol, without any added CipherSuites.  For such applications, we hereby introduce a TLS application profile under which such applications can stand on their own: </p>
+
+<ul>
+  <li>Based on TLS 1.2 or newer;</li>
+  <li>Setting a default verify_data_size dependent on the CipherSuite;</li>
+  <li>Supporting the TLS-KDH CipherSuite TLS_ECDHE_KDH_WITH_AES_256_GCM_SHA384;</li>
+  <li>Not necessarily supporting the TLS_RSA_WITH_AES_128_CBC_SHA CipherSuite that is mandatory in the default TLS application profile [Section 9 of <a href="#RFC5246">[RFC5246]</a>];</li>
+  <li>This application profile will be known as the "Kerberos-Only TLS Application Profile".</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.4.7.p.3">The Kerberos-only CipherSuites can be used with any TLS application profile; that includes, but is not limited to, the one specified above and the default application profile.</p>
+<h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> The Message Flow of TLS-KDH</h1>
+<p id="rfc.section.5.p.1">This specification introduces the name TLS-KDH to certain message flows within the TLS framework.  The two versions KDH-only and KDH-enhanced both fall under TLS-KDH.  This section defines constraints to the message flow for it to be a TLS-KDH message flow.  This guides the use of the extensions defined in this specification.</p>
+<p id="rfc.section.5.p.2">TLS endpoints that find that the other side of the TLS connection only implements some of the TLS-KDH constraints MUST NOT continue the connection with the TLS-KDH extensions of this specification (unless future specifications assign a meaningful procedure for such situations).  If the remote endpoint does not implement all requirements for TLS-KDH but also enforces it, for instance by sending required information that can only be interpreted under this specification, then it MUST send a suitable TLS Alert and close the connection.</p>
+<h1 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> <a href="#clienthello" id="clienthello">ClientHello</a></h1>
+<p id="rfc.section.5.1.p.1">To support TLS-KDH, a client's ClientHello message MUST include the TicketRequestFlags extension, and it MUST mention the kerberos SignatureAlgorithm in at least one of the supported_signature_algorithms.</p>
+<p id="rfc.section.5.1.p.2">In addition, the ClientHello MAY include one or more KDH-only CipherSuites in the list of cipher_suites, but if that is done the protocol used MUST be TLS 1.2 or later, indicated on the record layer with ProtocolVersion 3,3 or later.</p>
+<p id="rfc.section.5.1.p.3">The client MUST NOT send TicketRequestFlags that it does not understand and it MUST NOT offer all the TicketFlags that are defined for Kerberos, but instead apply some form of filtering.</p>
+<h1 id="rfc.section.5.2"><a href="#rfc.section.5.2">5.2.</a> <a href="#serverhello" id="serverhello">ServerHello</a></h1>
+<p id="rfc.section.5.2.p.1">To support TLS-KDH, a ServerHello message MUST include the TicketRequestFlags extension, and it MUST mention the kerberos SignatureAlgorithm in at least one of the supported_signature_algorithms.  To continue the message flow as TLS-KDH, the server MUST select a cipher_suite with ephemeral ECDH key exchange; aside from generally available CipherSuites, the server MAY select a KDH-only cipher_suite.</p>
+<p id="rfc.section.5.2.p.2">The server MUST ignore TicketRequestFlags from the client that it does not understand; it MUST NOT send TicketRequestFlags that it does not understand and it MUST NOT send TicketRequestFlags that were not set in the ClientHello.</p>
+<p id="rfc.section.5.2.p.3">Note that none of the Anonymous CipherSuites can be made to work with TLS-KDH, because it is not permitted [Section 2.5 of <a href="#RFC4492">[RFC4492]</a>] to send a CertificateRequest, client Certificate or CertificateVerify message.  The KDH-only CipherSuite does not employ a server Certificate but that it is not anonymous, because it employs Kerberos' mutual authentication.</p>
+<h1 id="rfc.section.5.3"><a href="#rfc.section.5.3">5.3.</a> <a href="#srvcert" id="srvcert">Server's Certificate</a></h1>
+<p id="rfc.section.5.3.p.1">When a KDH-only CipherSuite was selected in the ServerHello, then the server MUST NOT send a Certificate message.  For KDH-enhanced CipherSuites, the server Certificate message MUST be sent, following the definitions of the server-selected cipher_suite.</p>
+<h1 id="rfc.section.5.4"><a href="#rfc.section.5.4">5.4.</a> <a href="#serverkex" id="serverkex">ServerKeyExchange</a></h1>
+<p id="rfc.section.5.4.p.1">All TLS-KDH connections MUST use ephemeral ECDH.  Under KDH-enhanced CipherSuites, this implies the case ec_diffie_hellman [Section 5.4 of <a href="#RFC4492">[RFC4492]</a>].  Under KDH-only CipherSuites, the same case is used, but without signatures, in the same way as for ECDH_anon CipherSuites.</p>
+<h1 id="rfc.section.5.5"><a href="#rfc.section.5.5">5.5.</a> <a href="#certificaterequest" id="certificaterequest">CertificateRequest</a></h1>
+<p id="rfc.section.5.5.p.1">Under TLS-KDH, a CertificateRequest MUST be sent by the server, and it MUST include at least one SignatureAndHashAlgorithm based on the kerberos SignatureAlgorithm, and it MUST list the kerberos_sign CertificateType.  For KDH-only CipherSuites, no other CertificateTypes and SignatureAndHashAlgorithms are permitted.  The list of certificate_authorities is not used by TLS-KDH and MUST be empty for KDH-only CipherSuites.</p>
+<p id="rfc.section.5.5.p.2">When sending a CertificateRequest under TLS-KDH, the TLS server MUST be prepared to accept the X.509 certificate form for Kerberos <a href="#ext.krb.x509">Section 3.3</a> using any the corresponding signature algorithm OIDs <a href="#tls.ext.sigalg">Section 4.2</a>.</p>
+<h1 id="rfc.section.5.6"><a href="#rfc.section.5.6">5.6.</a> <a href="#clicert" id="clicert">Client's Certificate</a></h1>
+<p id="rfc.section.5.6.p.1">A client MAY choose any of the certificate and signature types to fulfil the CertificateRequest.  In order to continue the TLS-KDH message flow, it MUST select the kerberos_sign CertificateType and a SignatureAndHashAlgorithm with the kerberos SignatureAlgorithm.  Under TLS-KDH the client MUST supply a Certificate based on these algorithms.</p>
+<p id="rfc.section.5.6.p.2">When continuing with the TLS-KDH flow, then the client SHOULD take the TicketRequestFlags into consideration; it is not required however to implement all, because some flags may be forbidden by (unpublished) policy or turn out to be unavailable while requesting the Ticket.  In such cases, the client MAY simply continue without fulfilling the request flags, or it MAY choose to divert from a KDH-enhanced message flow by authenticating with another kind of Certificate, or not to present one at all.</p>
+<p id="rfc.section.5.6.p.3">When the server has not set the UniqueClientIdentity flag, then the RECOMMENDED client Certificate under TLS-KDH would be based on an anonymous Ticket <a href="#RFC6112">[RFC6112]</a>; however, when the server has set the UniqueClientIdentity flag, then an anonymous Ticket that uses the anonymous realm MUST NOT be sent.  A Ticket that is not anonymous may still be pseudonymous, including names based on NT-UID principal names [Section 6.2 of <a href="#RFC4120">[RFC4120]</a>] when the server has sent the UniqueClientIdentity flag; it is up to the client whether pseudonyms are short-lived or long-lived identities.</p>
+<p id="rfc.section.5.6.p.4">Under the present specification, the kerberos_sign CertificateType and the kerberos SignatureAlgorithm SHOULD NOT be used independently, but always in combination <a href="#ext.krb.x509">Section 3.3</a>.  If any of the messages preceding the client's Certificate deviated from the specifications for TLS-KDH, then these choices MUST NOT be made.  Only when these two choices are made do we continue to speak of a TLS-KDH message flow.</p>
+<p id="rfc.section.5.6.p.5">The impact of using an anonymous ticket is that the server cannot establish the identity of the client, except perhaps that the same service ticket may be used repeatedly during its short period of validity.  This means that the ability to trace the client is limited for both server and client.  Under X.509 authentication, the customary interpretation of not sending the CertificateRequest is that the server does not care for the client identity; anonymous tickets provide a mechanism for achieving a similar pattern under TLS-KDH.</p>
+<p id="rfc.section.5.6.p.6">The presence of a Ticket enables the server to conclude that the client has procured a Ticket through the formal pathways of Kerberos, ending in the server-side realm; the reason this can be assumed is that the ticket holds an encrypted part that the server can decrypt and thereby validate with its own key, as setup in its KDC for sharing in service tickets.  In other words, even an anonymous Ticket establishes that the server may trust that the client was checked along the way to the service.  As a result, the ECDH key exchange is known to be protected from a man-in-the-middle attack.</p>
+<p id="rfc.section.5.6.p.7">Briefly put, we can speak of mutual authentication in this specification, even when the client uses an anonymous ticket.  The thing that is missing under an anonymous ticket is simply a validated identity for the client.</p>
+<h1 id="rfc.section.5.7"><a href="#rfc.section.5.7">5.7.</a> <a href="#clientkex" id="clientkex">ClientKeyExhange</a></h1>
+<p id="rfc.section.5.7.p.1">Every TLS-KDH message flow MUST use ECDH, and since the keys MUST be ephemeral, the explicit form of the ClientECDiffieHellmanPublic for the case ec_diffie_hellman [Section 5.7 of <a href="#RFC4492">[RFC4492]</a>] MUST be used.</p>
+<h1 id="rfc.section.5.8"><a href="#rfc.section.5.8">5.8.</a> <a href="#certvfy" id="certvfy">CertificateVerify</a></h1>
+<p id="rfc.section.5.8.p.1">If CertificateVerify was preceded by a TLS-KDH message flow, then the CertificateVerify MUST follow the SignatureAlgorithm mentioned in the X.509 certificate, which will be kerberos.  This means that the CertificateVerify message MUST follow the descriptions of a Kerberos Authenticator <a href="#ext.krb.authsig">Section 3.2</a> for use with TLS.</p>
+<p id="rfc.section.5.8.p.2">In some cases, the Authenticator may be used to introduce a new client-generated key in the subkey field.  This MUST be done for KDH-only message flows, for which this subkey is needed to form the premaster secret.</p>
+<h1 id="rfc.section.5.9"><a href="#rfc.section.5.9">5.9.</a> <a href="#finished" id="finished">Finished</a></h1>
+<p id="rfc.section.5.9.p.1">For KDH-enhanced flows, the server can be authenticated through its Certificate, so that the usual Finished messages suffice.  For KDH-only flows, the Finished message is the first place where the server identity can be validated, prior to reporting successful authentication to the application running atop TLS.</p>
+<p id="rfc.section.5.9.p.2">As a result, the KDH-only CipherSuites have been defined with an elongated Finished message, for improved security.  This is possible since TLS 1.2.  The desired minimum length is defined with the introduction of the KDH-only CipherSuite.</p>
+<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#comparison" id="comparison">Comparison to Earlier Work</a></h1>
+<p id="rfc.section.6.p.1">An older specification <a href="#RFC2712">[RFC2712]</a> introduces Kerberos into TLS.  That specification is hereby deprecated because this new specification improves on it work in a number of ways: </p>
+
+<ul>
+  <li>The premaster secret is no longer sent to the server under encryption with the KDC-provided session key; instead, Perfect Forward Secrecy is supported through ECDHE;</li>
+  <li>The authenticator following the Kerberos ticket is made obligatory, as an intrinsic part of replay protection and the mutual authentication between TLS client and TLS server to protect all in-transit application data;</li>
+  <li>There is no need to implement a replay cache, which means that more efficient implementation is possible, certainly on highly active and/or replicated TLS-KDH server systems;</li>
+  <li>The mutual authentication of TLS client and TLS server is established with Kerberos-only CipherSuites that define a stronger Finished message size;</li>
+  <li>The service name is not statically set to the literal "host", but both the client and server TLS stacks assume an application context to provide the service name to be used;</li>
+  <li>The KDH-enhanced variation can be used with another mode of server authentication.</li>
+  <li>Support for modern TLS CipherSuites is added, and support for ones that are currently considered deprecated or insecure have been removed;</li>
+</ul>
+
+<p> </p>
+<h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#efficiency" id="efficiency">Efficiency Considerations</a></h1>
+<p id="rfc.section.7.p.1">The efficiency of the mechanism described here compares favourably with the more common approach of authentication through X.509 certificates based on public-key algorithms.</p>
+<p id="rfc.section.7.p.2">The Kerberos architecture is founded on symmetric cryptography, which makes it more efficient than the asymmetric architectures around X.509 public-key certificates. Furthermore, Kerberos' identity statements are short-lived, which is generally accepted to evade the need for withdrawal mechanisms based on chains of trust, CRLs <a href="#RFC3280">[RFC3280]</a>, OCSP <a href="#RFC6960">[RFC6960]</a>, DANE <a href="#RFC6698">[RFC6698]</a> and perhaps other mechanisms. As a result, the validity of a Kerberos ticket can be checked with relatively modest computational effort.</p>
+<p id="rfc.section.7.p.3">The inclusion of ephemeral ECDH is a relatively expensive asymmetric operation, but the same introduction is needed when Perfect Forward Secrecy is introduced alongside public-key authentication.</p>
+<p id="rfc.section.7.p.4">The one thing that is costly about Kerberos is its reliance on a replay cache.  Such caches store recent authentication attempts to avoid that they are being replayed; an accurate clock helps to release entries, but some care for clock skew between TLS-KDH client and server must be resolved with these caches.  Their volatile nature makes them a particularly difficult problem in highly active and/or replicated and/or distributed Kerberos services.</p>
+<p id="rfc.section.7.p.5">A replay cache is not required for any of the TLS-KDH protocol flows, because this specification requires an ephemeral ECDH key exchange.  This is of particular use to redundant (and possibly distributed) server farms, where sharing the time-critical information of the replay cache is a performance bottle neck.  Since this is a new specification, there is no need to implement backward compatibility with older mechanisms for which a replay cache might be needed.</p>
+<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#privacy" id="privacy">Privacy Considerations</a></h1>
+<p id="rfc.section.8.p.1">The information that is publicly shown in the TLS-KDH protocol flows consists of: </p>
+
+<ul>
+  <li>Supported protocol versions, TLS extensions and CipherSuites</li>
+  <li>For other than Kerberos-only CipherSuites, the server's Certificate</li>
+  <li>The server's principal name, host name and service name</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.8.p.2">A Kerberos ticket transmits less information in plaintext than a public-key X.509 client certificate; furthermore, DNS may have to reveal the realm name(s) of server-trusted KDC(s) but neither the TLS-KDH server nor any KDC publishes long-lasting key material for TLS or Kerberos, so parties looking for a cracking challenge are constrained to a brief period of attack on keys.</p>
+<p id="rfc.section.8.p.3">The TicketRequestFlags may provide information about Tickets present in the client, but that would take the risk of leaking information prior to authentication of the server, and in plaintext.</p>
+<h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> <a href="#security" id="security">Security Considerations</a></h1>
+<p id="rfc.section.9.p.1">For KDH-enhanced message flows, the server can be authenticated through its public-key X.509 Certificate.  For KDH-onnly message flows this is not possible, which is why a longer verify_data_size in the Finished messages is required; the ability to generate these messages properly proves that the other side has succeeded in decrypting the Kerberos-encrypted materials, and so, that it is the intended remote party.</p>
+<p id="rfc.section.9.p.2">In Kerberos, all key material is supplied by the KDC. This is a central point in each realm that is usually guarded well enough, but it is nonetheless a critical point in any infrastructure founded on Kerberos.  When client and server are in different realms, but have cross-signed directly or through a chain of KDC&#8217;s, then all intermediate KDC&#8217;s are potential places where the session key could be detected. The weakest KDC in the chain then defines the security of the entire chain.</p>
+<p id="rfc.section.9.p.3">Kerberos requires accurate clocks in order to operate securely; without them, once-used and since-forgotten credentials could be replayed by an attacker that has been able to recover an old service ticket&#8217;s session key. This problem is worsened in cross-realm scenario&#8217;s where clock synchronisation is hard to realise.  This is however resolved in all TLS-KDH flows by using ephemeral Elliptic-Curve Diffie-Hellman keys, thus forcing new master secrets on each connection and removing the need for a replay buffer.  Note however, that ticket validity times must still be checked.</p>
+<p id="rfc.section.9.p.4">Basic Kerberos security hinges on the secrecy of the user's password; if this password is guessed, then all captured traffic can be decoded, even in retrospect.  This means that it is highly advisable to combine Kerberos with Diffie-Hellman for Perfect Forward Secrecy. TLS-KDH implies this desirable property in all its CipherSuites.</p>
+<h1 id="rfc.section.10"><a href="#rfc.section.10">10.</a> <a href="#iana" id="iana">IANA Considerations</a></h1>
+<p id="rfc.section.10.p.1">TODO - for Kerberos: </p>
+
+<ul>
+  <li>ChecksumTypes SHA-xxx</li>
+  <li>AD-BACKEND-TICKETS</li>
+  <li>KDC_ERR_INCOMPLETE_BACKEND_TICKETS</li>
+</ul>
+<p id="rfc.section.10.p.2">TODO - for TLS: </p>
+
+<ul>
+  <li>ClientCertificateType "kerberos_sign"</li>
+  <li>SignatureAlgorithm  "kerberos"</li>
+  <li>CipherSuites TLS_ECDHE_KDH_xxx</li>
+  <li>ExtensionType for TicketRequestFlags</li>
+</ul>
+<h1 id="rfc.references"><a href="#rfc.references">11.</a> References</h1>
+<h1 id="rfc.references.1"><a href="#rfc.references.1">11.1.</a> Normative References</h1>
+<table>
+  <tbody>
+    <tr>
+      <td class="reference">
+        <b id="RFC1510">[RFC1510]</b>
+      </td>
+      <td class="top"><a>Kohl, J.</a> and <a>C. Neuman</a>, "<a href="http://tools.ietf.org/html/rfc1510">The Kerberos Network Authentication Service (V5)</a>", RFC 1510, DOI 10.17487/RFC1510, September 1993.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4120">[RFC4120]</b>
+      </td>
+      <td class="top"><a>Neuman, C.</a>, <a>Yu, T.</a>, <a>Hartman, S.</a> and <a>K. Raeburn</a>, "<a href="http://tools.ietf.org/html/rfc4120">The Kerberos Network Authentication Service (V5)</a>", RFC 4120, July 2005.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4343">[RFC4343]</b>
+      </td>
+      <td class="top"><a>Eastlake, D.</a>, "<a href="http://tools.ietf.org/html/rfc4343">Domain Name System (DNS) Case Insensitivity Clarification</a>", RFC 4343, January 2006.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4492">[RFC4492]</b>
+      </td>
+      <td class="top"><a>Blake-Wilson, S.</a>, <a>Bolyard, N.</a>, <a>Gupta, V.</a>, <a>Hawk, C.</a> and <a>B. Moeller</a>, "<a href="http://tools.ietf.org/html/rfc4492">Elliptic Curve Cryptography (ECC) Cipher Suites for Transport Layer Security (TLS)</a>", RFC 4492, May 2006.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5246">[RFC5246]</b>
+      </td>
+      <td class="top"><a>Dierks, T.</a> and <a>E. Rescorla</a>, "<a href="http://tools.ietf.org/html/rfc5246">The Transport Layer Security (TLS) Protocol Version 1.2</a>", RFC 5246, August 2008.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5280">[RFC5280]</b>
+      </td>
+      <td class="top"><a>Cooper, D.</a>, <a>Santesson, S.</a>, <a>Farrell, S.</a>, <a>Boeyen, S.</a>, <a>Housley, R.</a> and <a>W. Polk</a>, "<a href="http://tools.ietf.org/html/rfc5280">Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile</a>", RFC 5280, DOI 10.17487/RFC5280, May 2008.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6806">[RFC6806]</b>
+      </td>
+      <td class="top"><a>Hartman, S.</a>, <a>Raeburn, K.</a> and <a>L. Zhu</a>, "<a href="http://tools.ietf.org/html/rfc6806">Kerberos Principal Name Canonicalization and Cross-Realm Referrals</a>", RFC 6806, November 2012.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6112">[RFC6112]</b>
+      </td>
+      <td class="top"><a>Zhu, L.</a>, <a>Leach, P.</a> and <a>S. Hartman</a>, "<a href="http://tools.ietf.org/html/rfc6112">Anonymity Support for Kerberos</a>", RFC 6112, DOI 10.17487/RFC6112, April 2011.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC7627">[RFC7627]</b>
+      </td>
+      <td class="top"><a>Bhargavan, K.</a>, <a>Delignat-Lavaud, A.</a>, <a>Pironti, A.</a>, <a>Langley, A.</a> and <a>M. Ray</a>, "<a href="http://tools.ietf.org/html/rfc7627">Transport Layer Security (TLS) Session Hash and Extended Master Secret Extension</a>", RFC 7627, DOI 10.17487/RFC7627, September 2015.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="rfc.references.2"><a href="#rfc.references.2">11.2.</a> Informative References</h1>
+<table>
+  <tbody>
+    <tr>
+      <td class="reference">
+        <b id="RFC2712">[RFC2712]</b>
+      </td>
+      <td class="top"><a href="mailto:amedvins@excitecorp.com" title="Excite">Medvinsky, A.</a> and <a href="mailto:matt.hur@cybersafe.com" title="CyberSafe Corporation">M. Hur</a>, "<a href="http://tools.ietf.org/html/rfc2712">Addition of Kerberos Cipher Suites to Transport Layer Security (TLS)</a>", RFC 2712, October 1999.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC3280">[RFC3280]</b>
+      </td>
+      <td class="top"><a>Housley, R.</a>, <a>Polk, W.</a>, <a>Ford, W.</a> and <a>D. Solo</a>, "<a href="http://tools.ietf.org/html/rfc3280">Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile</a>", RFC 3280, April 2002.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4422">[RFC4422]</b>
+      </td>
+      <td class="top"><a>Melnikov, A.</a> and <a>K. Zeilenga</a>, "<a href="http://tools.ietf.org/html/rfc4422">Simple Authentication and Security Layer (SASL)</a>", RFC 4422, June 2006.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4559">[RFC4559]</b>
+      </td>
+      <td class="top"><a>Jaganathan, K.</a>, <a>Zhu, L.</a> and <a>J. Brezak</a>, "<a href="http://tools.ietf.org/html/rfc4559">SPNEGO-based Kerberos and NTLM HTTP Authentication in Microsoft Windows</a>", RFC 4559, June 2006.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5801">[RFC5801]</b>
+      </td>
+      <td class="top"><a>Josefsson, S.</a> and <a>N. Williams</a>, "<a href="http://tools.ietf.org/html/rfc5801">Using Generic Security Service Application Program Interface (GSS-API) Mechanisms in Simple Authentication and Security Layer (SASL): The GS2 Mechanism Family</a>", RFC 5801, DOI 10.17487/RFC5801, July 2010.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6698">[RFC6698]</b>
+      </td>
+      <td class="top"><a>Hoffman, P.</a> and <a>J. Schlyter</a>, "<a href="http://tools.ietf.org/html/rfc6698">The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA</a>", RFC 6698, August 2012.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6960">[RFC6960]</b>
+      </td>
+      <td class="top"><a>Santesson, S.</a>, <a>Myers, M.</a>, <a>Ankney, R.</a>, <a>Malpani, A.</a>, <a>Galperin, S.</a> and <a>C. Adams</a>, "<a href="http://tools.ietf.org/html/rfc6960">X.509 Internet Public Key Infrastructure Online Certificate Status Protocol - OCSP</a>", RFC 6960, June 2013.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC7542">[RFC7542]</b>
+      </td>
+      <td class="top"><a>DeKok, A.</a>, "<a href="http://tools.ietf.org/html/rfc7542">The Network Access Identifier</a>", RFC 7542, DOI 10.17487/RFC7542, May 2015.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="rfc.authors">
+  <a href="#rfc.authors">Author's Address</a>
+</h1>
+<div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Rick van Rein</span> 
+	  <span class="n hidden">
+		<span class="family-name">Van Rein</span>
+	  </span>
+	</span>
+	<span class="org vcardline">ARPA2.net</span>
+	<span class="adr">
+	  <span class="vcardline">Haarlebrink 5</span>
+
+	  <span class="vcardline">
+		<span class="locality">Enschede</span>,  
+		<span class="region">Overijssel</span> 
+		<span class="code">7544 WP</span>
+	  </span>
+	  <span class="country-name vcardline">The Netherlands</span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:rick@openfortress.nl">rick@openfortress.nl</a></span>
+
+  </address>
+</div>
+
+</body>
+</html>
