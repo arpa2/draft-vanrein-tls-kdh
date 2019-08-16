@@ -9,7 +9,7 @@
 <?rfc comments="yes" ?>
 <?rfc inline="yes" ?>
 
-<rfc ipr="trust200902" docName="draft-vanrein-tls-kdh-04" category="std">
+<rfc ipr="trust200902" docName="draft-vanrein-tls-kdh-05" category="std">
 
 <front>
 
@@ -44,6 +44,7 @@
 
 CHANGES FROM 04 TO 05:
 * Showed CAMELLIA-based Cipher Suites in the IANA Considerations as well
+* Remarks about post-quantum cryptography
 * TODO: Consider to drop TicketRequestFlags
 * TODO: Consider passing additional tickets through authzdata; notify needs too?
 * TODO: How secure is it to let the server submit its TGT?  Does KDC check enough?
@@ -84,7 +85,6 @@ CHANGES FROM 00 TO 01:
 
 </front>
 
-
 <middle>
 
 <section title="Introduction" anchor="intro">
@@ -112,6 +112,7 @@ will be referred to as TLS-KDH.</t>
 <t>A variation of the KDH-only flow does incorporate a server-side ticket;
 this can be used for user-to-user authentication, perhaps to be used in
 peer-to-peer protocols that use TLS-KDH as their security foundation.</t>
+<t>TODO: in that flow, the client MUST flag USE-SESSION-KEY, see RFC4120, 3.7 end</t>
 
 <t>Both TLS-KDH variations form a cryptographic binding between Kerberos
 and Elliptic-Curve Diffie-Hellman (ECDH), leading to the combined advantages of
@@ -186,6 +187,39 @@ checksum types to match the secure hash algorithms that are used in TLS.</t>
 processes Checksum Types MAY send either and MUST accept both as equivalent
 indications.</t>
 
+RAEBURN:
+Several of the encryption and checksum types in the registry are really just placeholders. At the time we set up the type registries, some were not known to be in use or to have complete specifications, but were present in the lists that had been handed down among the protocol developers, and were not known *not* to be in use either.
+
+VANREIN:
+Yeah, it's not the first time I run into the pragmatics of Kerberos ;-)
+
+RAEBURN CONTINUES:
+They probably should’ve been marked “reserved” or “deprecated” or something. As far as I’m aware, this includes the sha1 checksum type. Some unkeyed checksum types were in use, and the Kerberos crypto specs were written to maintain backwards compatibility with the existing code, but in general we’ve moved toward using only keyed checksums. Why does this protocol need to reverse that?
+
+VANREIN:
+Basically because (1) encryption does not seem awfully useful in the
+TLS-KDH context, (2) having the enc/hash combinations would complicate
+matters even more than a bare hash does, (3) with enc/hash combinations
+we are relying on two algorithms, potentially giving an extra angle of
+attack, and (4) security designs are usually best when they are clear by
+making them as simple as possible (but not simpler).
+
+REABURN RESPONDS TO VANREIN:
+These sound like complaints about Kerberos in general, not specific to an application protocol. But you’re using an application protocol spec to address them, and make this case behave differently (and need separate, if perhaps slightly simpler, analysis) from normal Kerberos behavior.
+
+RAEBURN:
+If we’re going to start registering unkeyed checksums, we should have some specification of how and when they’re used, that isn’t tied to TLS-KDH unless the unkeyed checksum types are intended to be used *only* with TLS-KDH.
+
+VANREIN:
+That would be fine with me. In fact, we could then discuss if SHA1
+should be given the same treat, because that too is a TLS-approved
+hashing algorithm as per IANA's TLS parameters registry; MD5 however has
+been cast out as insecure and should need no support.
+
+RAEBURN RESPONDS TO VANREIN:
+Which direction?  Either way — general use of unkeyed checksums, or registering application-specific checksums — I think it merits some working group discussion.
+
+
 <t>The following additional Checksum Types are introduced for use with TLS
 [Section 7.4.1.4.1 of <xref target="RFC5246"/>]:
 <list style="symbols">
@@ -200,11 +234,101 @@ indications.</t>
 
 <section title="Authenticators as Signatures" anchor="ext.krb.authsig">
 
+RAEBURN:
+The discussion of replay attacks in section 2.2 misses an important issue — if a service principal name (host/foo.example.com or whatever) is used for TLS-KDH and for other services, the replay detection mechanisms will look for cases where a TLS-KDH session is monitored by an eavesdropper and the authenticator reused later to another service. So while TLS-KDH may protect itself against replay attacks, it may open other applications up to replays. I think RFC 4120 touches on this. Basically, whether an application server needs to participate in replay detection is a higher-level issue that requires looking at all protocols using a given service principal.
+
 <t>Kerberos has a symmetric analogue to a signature, in the form of an Authenticator
 [Section 5.5.1 of <xref target="RFC4120"/>].  When used in TLS-KDH,
 the Authenticator MUST have a secure hash embedded
 in the cksum field.  The checksum type used in the context of TLS MUST be taken to
 match one of the entries in IANA's TLS HashAlgorithm Registry.</t>
+
+RAEBURN:
+You say, “the Authenticator MUST have a secure hash embedded in the cksum field”… but the cksum field is an optional checksum over data specified by the application (which in this case I assume would be TLS-KDH),
+
+VANREIN:
+Yes, TLS-KDH would be the application.
+
+RAEBURN CONTINUES:
+and I don’t see where you specify what that data is.
+
+VANREIN:
+In section 4.8; the Client Verify is setup as a Kerberos-encrypted
+Authenticator.
+
+RAEBURN RESPONDS TO VANREIN:
+Umm, I still don’t see it, sorry…. Section 4.8 (which discusses “CertificateVerify”; the term “ClientVerify” appears only once in the -04 document, in section 3.4) doesn’t refer to the checksum field; subkey and timestamp are discussed.
+
+RAEBURN CONTINUES:
+The field is usually omitted if there is no application data in that exchange that needs Kerberos-based protection.
+
+VANREIN:
+Here, it is vital to the protection of the entire TLS handshake
+preceding the Client Verify message. Kerberos' mutual authentication is
+used for bi-directional authentication of the preceding handshake
+messages, notably including the Key Exchange messages.
+
+(Since TLS has no place for something similar to AP-REP though, the
+Finished messages are used to assure that both ends have indeed gotten
+the right end of the stick.)
+
+TLS dictates what secure hashing algorithms are considerd usable for the
+handshake message hashing, which is why I am requesting them being
+registered in the IANA repository.
+
+RAEBURN RESPONDS TO VANREIN:
+Is TLS or Kerberos protecting this information?
+
+Actually… at a higher level, why are you separating the ticket and authenticator, instead of sending an AP-REQ message like most Kerberos applications (including GSSAPI) do? I’m not even sure off the top of my head if the MIT implementation exports interfaces for getting those independently.
+
+RAEBURN:
+Nor do I understand why the field needs to be computed with an unkeyed hash algorithm registered for use with TLS.
+
+VANREIN:
+Probably clear after the above, but just to make sure: TLS needs a
+"signature" on the hashes preceding Client Verify, if the connection is
+to be secured in both directions. There does not seem to be any added
+value of using a keyed algorithm (since the Authenticator itself is
+encrypted on the wire -- it needs to be because a subkey may be passed
+in it). If I am missing something then you are welcome to correct me of
+course!
+
+RAEBURN RESPONDS TO VANREIN:
+I can’t really argue much for keyed hashing in that specific place, except to say that, for consistency, Kerberos checksums are keyed (with derived keys, to avoid key re-use) everywhere. At least with the modern Kerberos cryptosystems. (There’s a brief mention in RFC 4120 about using unkeyed checksums, but I don’t think any place in the document actually permits it.)
+
+RAEBURN CONTINUES:
+
+As far as I recall off the top of my head, the Kerberos GSSAPI mechanism (RFC 1964 etc) is the only protocol that doesn’t just treat the authenticator and its checksum like a black box and let the implementation do its thing.
+
+VANREIN:
+In a sense, TLS parallels GSSAPI -- both are secure protocols built on
+top of Kerberos5 primitives.
+
+RAEBURN RESPONDS TO VANREIN:
+I would hope all application protocols built on top of Kerberos would be secure.  But the GSSAPI mechanism is sticking its nose where it doesn’t belong, rewriting part of the Kerberos spec such that a checksum field no longer holds a checksum.
+
+VANREIN CONTINUES:
+The reason I am prescribing these things is precisely that I am defining
+a protocol, and want maximum interoperability.
+
+RAEBURN RESPONDS TO VANREIN:
+If two Kerberos implementations have a common encryption type, both will have implemented the required associated checksum type, and that’s the normal choice for checksums. So interoperability shouldn’t be a problem.
+
+VANREIN CONTINUES:
+Note that "the implementation doing its thing" is still subject to
+parameters that are passed in and out, and I just wanted to spec what is
+needed. Or are you suggesting to lay easy on any additional fields that
+may be automatically included and easily ignored, or processed as the
+implementation sees fit?
+
+REABURN RESPONDS TO VANREIN:
+I think letting the Kerberos implementation do as it sees fit is generally the best approach when possible — while the implementation *may* already support parameters for whatever details you want to nail down, then again it may not, and could still be perfectly suitable for applications that just treat it as a black box. If an optional field is pointless for your application, but having it present doesn’t break anything, then specifying that it must be absent is unnecessary and requires that the Kerberos implementation give the application that level of control.
+
+RAEBURN CONTINUES:
+While I suppose GSSAPI could be interpreted as setting a precedent, it’s always seemed like a mistake to me, but maybe you’ve got an important reason for doing likewise?
+
+VANREIN:
+Maximising interoperability of a protocol.
 
 <t>The Authenticator is not sent in the plain, but encrypted with a Kerberos
 session key as EncryptedData [Section 5.2.9 of <xref target="RFC4120"/>]
@@ -214,8 +338,11 @@ service can pack and unpack the EncryptedData and process the Authenticator.</t>
 <t>A standard part of an Authenticator is a timestamp with microsecond
 accuracy.  In Kerberos, this is generally validated within a small window
 around the independently
-sycnchronised time of the TLS client and server.  It is customary to
+synchronised time of the TLS client and server.  It is customary to
 allow a time window of about 5 minutes around the server time.</t>
+
+RAEBURN:
+Bottom of page 3, spelling error: “sycnchronised”.
 
 <t>To avoid replay attacks, Kerberos solutions sometimes need to remember received
 Authenticators, or their time stamps, until the time window has passed.
@@ -234,6 +361,34 @@ premaster secret computation.</t>
 
 <t>Other optional fields in the Authenticator than specified above SHOULD NOT be produced
 and MUST be ignored by the recipient.</t>
+
+RAEBURN:
+“Other fields in the Authenticator than specified above SHOULD NOT be produced and MUST be ignored by the recipient.” … I hope you mean just the other *optional* fields… 
+
+VANREIN:
+Of course  so let me be very clear on that and reformulate to "Other
+optional fields...". Done, for 05.
+
+I might actually remove this statement altogether to be more permissive
+to arbitrary implementations, and only enforce the values in the fields
+that are needed for security reasons.
+
+RAEBURN CONTINUES:
+Though even then, I’m not sure why you would prohibit them, rather than leaving it to the implementor to see whether they run into use cases where they would make sense.
+
+VANREIN:
+Clear enough, and useful suggestion. I see no reason to be over-specific
+indeed, but would then need to warn the recipient to be generous in what
+to accept. That is not a bad thing per se, so I suppose I'll follow up
+on this. Thanks!
+
+RAEBURN CONTINUES:
+(Or, for example, I could imagine a Kerberos implementor choosing to keep their API simpler by always generating the seq-number field rather than making it one more thing the application has to enable or disable. After all, it does no harm except consuming a few more bytes on the wire.)
+
+VANREIN:
+Yes, fair enough. It would also apply to the time fields, which are a
+necessary part of the Authenticator, but not directly of use to TLS-KDH
+because it already has handshake entropy to protect against replay attacks.
 
 <t>The representation on the wire matches the DigitallySigned structure
 [Section 4.7 of <xref target="RFC5246"/>] with the signature algorithm
@@ -272,6 +427,9 @@ and is treated by TLS-KDH as a refusal to send the requested ticket.</t>
 </section>
 
 <section title="AuthorizationData for Backend Services" anchor="tls.ext.backend">
+
+RAEBURN:
+In section 2.4 you’ve also specified use of the “null” encryption system from RFC 1510. RFC 4120 made 1510 obsolete, and “null” was left out intentionally. So you’ve got a dependence on an obsolete RFC here. Section 2.4 kind of looks like a logically separate extension, but Microsoft has already put forth an extension for similar purposes, which I think has probably gotten widely implemented by now. Have you seen their work?
 
 <!--
 <t>DISCUSSION: This is an alternative to S4U2Proxy, which relies on the server realm
@@ -519,6 +677,9 @@ extended master secret computation [Section 4 of <xref target="RFC7627"/>.</t>
 </section>
 
 <section title="TicketRequestFlags Extension" anchor="tls.ext.tickreq">
+
+RAEBURN:
+Section 3.5, TicketRequestFlags extension: If this is a new extension, where you want to incorporate 32 initial Kerberos flags and then later update the spec for future Kerberos ticket flags, and you also want to specify flags of your own, why not just make two fields? One to hold existing and future Kerberos ticket flags, and one for the TLS-KDH flags? Micro-optimizing to squeeze out a few bytes seems like a waste if we now have two registries that new Kerberos ticket flags have to be added to (past the first 32), especially given that Kerberos’s DER format isn’t exactly compact.
 
 <t>Some clients may be able to offer more facilities in Tickets than others,
 and some servers need more than others.  To communicate this, a TLS Extension
@@ -875,7 +1036,10 @@ desired for the CipherSuite's symmetric key.</t>
 <t>For KDH-Only, the subkey is needed to form the pre-master secret on both
 ends, which in turn influences the master secret.  Through the Finished
 messages, the KDH-Only mode of operation performs mutual validation between
-the client and server.</t>
+the client and server.  This yields a form of encryption that prepares for
+Quantum Computing as we currently understand it; the ECDH exchange will be
+crackable, but hashing along Kerberos-protected secrets shared by the
+client and server will make it untractable to quantum analysis.</t>
 
 </section>
 
@@ -1057,6 +1221,17 @@ even in retrospect.
 This means that it is highly advisable to combine Kerberos with
 Diffie-Hellman for Forward Secrecy. TLS-KDH implies this desirable
 property in all its CipherSuites.</t>
+
+<t>KDH-Only is considered secure against Quantum Computing.  This is
+because the outcome of the (to-be-cracked) ECDH computation hashes
+together with entropy that is protected by Kerberos, which is itself
+secure from Quantum Computing, based on large-enough keys.
+KDH-Enhanced is not secure against Quantum Computing, but its hosting
+CipherSuite can modified to incorporate the same information as KDH-Only
+to achieve the same benefits; even with (to-be-cracked) public-key
+mechanisms, the authentication would be safe up to the moment of
+introduction and the encryption could be protected from reversal at
+a later date.</t>
 
 </section>
 
@@ -1327,7 +1502,10 @@ cat /tmp/ciphersuites.txt | grep 'TLS_\(EC\)\?DHE_' | grep -v '_KRB_' | sed -e '
 <abstract>
 <t>This specification extends Kerberos with primitives that create a
 cryptographic binding between Kerberos authentication and
-Diffie-Hellman encryption. This yields their combined advantages.</t>
+Diffie-Hellman encryption. This yields their combined advantages.
+The variant described as KDH-Only removes server certificates and
+end up being secure under our current understanding of Quamtum
+Computing.</t>
 </abstract>
 </front>
 </reference>
