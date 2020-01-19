@@ -62,7 +62,7 @@
 <!--
 
 CHANGES FROM 05 TO 06:
- *
+ * Had time to sink in; many small improvements
 
 RESTARTING IN 05:
  * Moving on to TLS 1.3 (was TLS 1.2)
@@ -282,11 +282,8 @@ struct {
 ]]></artwork></figure>
 
 <t>This structure is used as extension_data corresponding to the
-quantum_relief extension_type, registered by IANA under number
-TBD:QREXTTYPE, to occur only during ClientHello and ServerHello (i.e. CH and
-SH according to https://tools.ietf.org/html/rfc8446#section-4.2).  IANA also
-created registries for the QuantumReliefMethod and PeerNameType in their
-TBD:TLSExtensionsRegistry.</t>
+quantum_relief(TBD:QREXTTYPE) extension_type,
+to occur only during ClientHello and ServerHello.</t>
 
 </section>
 
@@ -346,17 +343,14 @@ Parameters.</t>
 
 </section>
 
-<section title="Certificate types">
+<section title="Certificate Types">
 
 <t>In order to be able to negotiate Kerberos Tickets as certificate types for
 the Certificate messages, a new certifcate type is introduced that can be used
 in the "client_certificate_type" and "server_certificate_type" extensions:
 <list style="symbols" hangIndent="6">
-	<t>Kerberos (TBD:KRBTKT-CERTTP)</t>
+	<t>Kerberos Ticket (TBD:KRBTKT-CERTTP)</t>
 </list></t>
-
-<t>This new certificate type is registered at IANA's TLS Certificate Types
-registry.</t>
 
 </section>
 
@@ -533,8 +527,8 @@ where || denotes concatenation.  The output of this procedure is a octet string 
 </section>
 
 <section title="Kerberos Ticket as Certificate and CertificateVerify">
-<!-- TODO deze alinea is naar sectie 4 verplaatst - - dit snapt Rick niet - - gaat het om de IANA Considerations sectie waar dit zou kunnen komen? - - dat geldt dan voor meer dingen en is een terechte opmerking -->
-<t>IANA has added Kerberos Tickets with value TBD:KRBTKT-CERTTP to the TLS Certificate Types list in the TLS Extensions Registry.  This can be negotiated independently as client_certificate_type and server_certificate_type, though the latter is impossible without a client certificate, even if it is anonymous or just a TGT; in TLS-KDH, this is available when the server accepts the quantum_relief extension.</t>
+
+<t>Kerberos Tickets(TBD:KRBTKT-CERTTP) can be negotiated independently as client_certificate_type and server_certificate_type <xref target="RFC7250"/>, though the latter is impossible without a client certificate; in TLS-KDH, a client certificate is available when the server accepts the client's quantum_relief extension.</t>
 
 <t>The contents of the Certificate message when the certificate type is negotiated as this "Kerberos" certificate type is a Kerberos Ticket <xref target="RFC4120"/>.</t>
 
@@ -574,7 +568,46 @@ extension, for which the qh_method value "kdh" MUST be supported, and the peerna
 
 <section title="IANA Considerations">
 
-<t>TODO</t>
+<t>IANA adds the following TLS ExtensionType Value as part of their Transport Layer Security Extensions registry:</t>
+
+<figure><artwork><![CDATA[
+Value         Extension Name  TLS 1.3  Recommended  Reference
+TBD:QREXTTYP  quantum_relief  CH, SH   Y            TBD:ThisSpec
+]]></artwork></figure>
+
+<t>IANA adds the following TLS Certificate Type as part of their Transport Layer Security Extensions registry:</t>
+
+<figure><artwork><![CDATA[
+Value              Name             Recommended  Reference
+TBD:KRBTKT-CERTTP  Kerberos Ticket  Y            TBD:ThisSpec
+]]></artwork></figure>
+
+<t>IANA creates a registry for the QuantumReliefMethod in the
+TBD: TLS Extensions registry, with the following initial entries
+and new entries to be assigned under a Specification Required
+policy.</t>
+
+<figure><artwork><![CDATA[
+Value        Method                    Reference
+-----------  ------------------------  ------------
+0            kdh                       TBD:ThisSpec
+1-65281      Unassigned
+65282-65535  Reserved for Private Use  TBD:ThisSpec
+]]></artwork></figure>
+
+<t>IANA creates a registry for the PeerNameType in the
+TBD: TLS Extensions registry, with the following initial entries
+and new entries to be assigned under a Specification Required
+policy.</t>
+
+<figure><artwork><![CDATA[
+Value        Name Type                 Reference
+-----------  ------------------------  ------------
+0            none                      TBD:ThisSpec
+1            krb5princrealm            TBD:ThisSpec
+2-65281      Unassigned
+65282-65535  Reserved for Private Use  TBD:ThisSpec
+]]></artwork></figure>
 
 </section>
 
