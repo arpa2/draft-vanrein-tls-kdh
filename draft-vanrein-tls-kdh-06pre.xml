@@ -13,11 +13,11 @@
 
 <front>
 
-	<title abbrev="TLS-KDH">TLS Quantum Hardening with TLS-KDH</title>
+	<title abbrev="TLS-KDH">Quantum Relief with TLS and Kerberos</title>
 
 	<author initials="R" surname="Van Rein" fullname="Rick van Rein">
 		<!-- <organization>OpenFortress B.V.</organization> -->
-		<organization>ARPA2.net</organization>
+		<organization>InternetWide.org</organization>
 		<address>
 			<postal>
 				<street>Haarlebrink 5</street>
@@ -32,16 +32,16 @@
 
 	<author initials="T" surname="Vrancken" fullname="Tom Vrancken">
 		<!-- <organization>OpenFortress B.V.</organization> -->
-		<organization>ARPA2.net</organization>
+		<organization>InternetWide.org</organization>
 		<address>
 			<postal>
-				<street>TODO</street>
+				<street>TBD:WHICH</street>
 				<city>Eindhoven</city>
 				<region>Noord-Brabant</region>
-				<code>TODO</code>
+				<code>TBD:WHICH</code>
 				<country>The Netherlands</country>
 			</postal>
-			<email>tom@arpa2.org</email>
+			<email>tom.vrancken@arpa2.org</email>
 		</address>
 	</author>
 
@@ -53,7 +53,7 @@
 		strong alternative to classic PKI-based authentication, and at the same
 		introduces a way to insert entropy into TLS' key schedule such that
 		the resulting protocol becomes resistant against attacks from quantum
-		computers. We call this Quantum Hardening, and specify it as part of a more
+		computers. We call this Quantum Relief, and specify it as part of a more
 		general framework to make it easier for other technologies to achieve
 		similar benefits.</t>
 <!-- kan niet, standards track: Deprecate RFC2712 -->
@@ -75,9 +75,9 @@ RESTARTING IN 05:
 CHANGES FROM 04 TO UNPUBLISHED 05:
 * Showed CAMELLIA-based Cipher Suites in the IANA Considerations as well
 * Remarks about post-quantum cryptography
-* TODO: Consider to drop TicketRequestFlags
-* TODO: Consider passing additional tickets through authzdata; notify needs too?
-* TODO: How secure is it to let the server submit its TGT?  Does KDC check enough?
+* Done: Consider to drop TicketRequestFlags
+* Done: Consider passing additional tickets through authzdata; notify needs too?
+* Done: How secure is it to let the server submit its TGT?  Does KDC check enough?
 
 CHANGES FROM 03 TO 04:
 * Forbidden KDH-Enhanced with subkey in Authenticator; required it in KDH-Only
@@ -86,7 +86,7 @@ CHANGES FROM 03 TO 04:
 * Server Certificate sent in KDH-Only, maybe empty, as with Client Certificate
 * Added 512-bit CipherSuites
 * Merged "Related Work" into "Comparison to Earlier Work"
-* Added deprecation of RFC 2712 (to abstract as textual TODO)
+* Added deprecation of RFC 2712 (to abstract as textual to-do)
 * Wrote Acknowledgements section
 * Redefined backend tickets, and removed questioning it
 * Ticket length 0 marks refusal to provide a ticket
@@ -119,48 +119,39 @@ CHANGES FROM 00 TO 01:
 
 <section title="Introduction" anchor="intro">
 
-<t>TODO: add some info/pros/cons about current PKI auth and why Krb is a good
-alternative.</t>
-
 <t>TLS protects many application protocols from many security problems.  To
 enable this, it habitually relies on public-key cryptography.  But in the
 foreseeable future, quantum computers are expected to destroy these public-key
-underpinnings.  TODO: fix this sentence: This is not a current problem for authentication, but it does endanger encrypted data being passed today, which may be captured and stored, ready for decryption as soon as quantum computers hit the playing field.</t>
+underpinnings.  This endangers TLS, because encrypted data may be captured and stored, ready for decryption as soon as quantum computers hit the playing field.</t>
 
 <t>Most present-day applications of TLS are threatened by quantum computers; some may not be able to live up to legal requirements for long-term encryption.  There even is a risk of future power imbalances between those who have a quantum computer and those who have not.</t>
 
 <t>The solution is to not rely solely on public-key cryptography, but instead mix in secret entropy that a future quantum computing entity cannot decipher.  In this light, Kerberos offers an interesting perspective, as it builds a symmetric-key infrastructure including cross-realm connectivity options.  Kerberos is considered safe from quantum computers, as long as its public-key extensions are avoided.</t>
 
-<t>We therefore specify a quantum_hardening extension that mixes secret entropy
+<t>We therefore specify a quantum_relief extension that mixes secret entropy
 from another source into the TLS key computations. This concrete mechanism,
-which relies on Kerberos for hardening against quantum computing and on
+which relies on Kerberos for relief against quantum computing and on
 (Elliptic-Curve) Diffie-Hellman for Perfect Forward Secrecy (and to stop the
 sphere of influence of the KDC administrator), shall be referred to as Kerberised Diffie-Hellman or KDH.  A definition is included for a KDH-Only Application Profile, to facilitate small and simple implementations.</t>
 
-<!-- IMO hoort deze alinea niet in de intro thuis maar verderop omdat dit al
-over het ontwerp vd oplossing gaat --
-<t>In the TLS 1.3 key schedule, the quantum_relief extension replaces the input from a PSK; the two extensions are not considered useful when combined.  In TLS 1.2, a similar result is achieved by enhancing the pre-master secret independently of the negotiated cipher suite.</t>
--->
 </section>
 
-<section title="Quantum Hardening mechanism" anchor="qh">
+<section title="Quantum Relief as a General Mechanism" anchor="qr">
 
 <t>The PSK mechanism in TLS 1.3 and 1.2 allows insertion of key material which is referenced by name alone.  A naming system is defined, but its interpretation resides under local policy, which is enough for internal use cases, but it is insufficient for general use between any two parties.</t>
 
 <t>Cryptographically however, the entropy from the PSK mechanism in TLS 1.3 is
 secret to external observers, and mixed with the DHE material using a series of
-HKDF-Extract and -Expand operations [TODO insert reference to TLS1.3 spec.
--relevantie sectie].  When used on their own, the DHE material can be reversed by quantum computers and any subsequent HKDF computations redone, uncovering the complete key schedule of TLS.  The extra source of entropy inserted for a PSK however, will have to be uncovered separately, and this may not be possible in all cases.</t>
+HKDF-Extract and -Expand operations [<xref target="RFC5869"/>].  When used on their own, the DHE material can be reversed by quantum computers and any subsequent HKDF computations redone, uncovering the complete key schedule of TLS.  The extra source of entropy inserted for a PSK however, will have to be uncovered separately, and this may not be possible in all cases.</t>
 
-<t>This specification therefore defines a quantum_hardening extension that
+<t>This specification therefore defines a quantum_relief extension that
 replaces the locally useful PSK scheme with a generally usable mechanism for
 the insertion of secret entropy into the TLS 1.3 key schedule at the position
-otherwise used by the PSK.
-<!-- IMO hoort dit thuis in de TLS-KDH sectie omdat we hier alleen nog over het
-generieke hardening mechanisme praten --
-As a result, TLS-KDH does not support 0-RTT data.</t>
--->
-<t>In order to provide sufficient quantum hardening the added entropy must meet
+otherwise used by the PSK; this sacrifices support for 0-RTT data in TLS 1.3.
+In TLS 1.2, an intermediate phase during the computation of the master secret
+inserts the extra entropy.</t>
+
+<t>In order to provide sufficient quantum relief the added entropy must meet
 the following conditions:
 <list style="symbols" hangIndent="6">
 <t>The amount of entropy must on its own suffice for the security level of the TLS connection.</t>
@@ -168,64 +159,73 @@ the following conditions:
 <t>Only quantum-proof mechanisms should be used for the generation of the entropy.</t>
 </list></t>
 
-<t>In terms of algorithms that are commonplace today, the third requirement is generally believed to be met by secure hashes and symmetric encryption.  The problem with these is sharing random information secretely and at the same time controlling who has access to these secrets.
-<!-- IMO hoort dit thuis in de TLS-KDH sectie omdat we hier alleen nog over het
-generieke hardening mechanisme praten --
-The infrastructure built by Kerberos provides a good balance between these requirements, as a result of key derivation to expand central secrets in an irreversible manner, so that they may be distributed to various pairs of parties.</t>
--->
+<t>In terms of algorithms that are commonplace today, the third requirement is generally believed to be met by secure hashes and symmetric encryption.  The problem with these is sharing random information secretely and at the same time controlling who has access to these secrets.</t>
 </section>
-<!--TODO add seperate section on TLS12 backward compat? -->
 
-<section title="TLS-KDH design" anchor="tls-kdh">
+<section title="TLS-KDH for Quantum Relief through Kerberos" anchor="tls-kdh">
 
 <t>TLS-KDH is designed to provide two things; (1) an alternative to X.509 PKI
-authentication, (2) Quantum Hardening TLS connections.</t>
+authentication, (2) Quantum Relief TLS connections.</t>
 
-<t>TODO: de beschrijvingen hieronder uitbreiden met wat meer info over hoe krb
-auth werkt (icm TLS) zodat we niet alleen focussen op het quantum hardening
-effect maar ook op het authenticatie mechanisme.</t>
+<t>The infrastructure of Kerberos provides a good balance between the requirements for a Quantum Relief mechanism, as a result of key derivation to hierarchical expansion of locally controlled secrets.</t>
 
-<section title="client-to-server flow" anchor="kdh-c2s">
+<t>In the TLS 1.3 key schedule, the quantum_relief extension replaces the input from a PSK; the two extensions are not considered useful when combined.
+In TLS 1.2, a similar result is achieved by enhancing the pre-master secret independently of the negotiated cipher suite.</t>
+
+<t>In addition to Quantum Relief, TLS-KDH can offer authentication based on
+Kerberos tickets.  This introduces new facilities into TLS, such as deferred
+authentication, anonymous realm users and centralised facilitation of realm
+crossover.</t>
+
+<section title="Injecting Kerberos-derived Entropy">
+<t>Whether a Ticket is supplied in the ClientHello or returned by a responding peer
+in the ServerHello, it yields a key only known to the two connecting parties.  This key is used in standard Kerberos encryption of the concatenated random data from ClientHello and ServerHello.  This means that both parties influence the entropy gathered and can derive a sequence of bytes that is invisible to anyone else.  The output from the encryption operation is plugged into the key schedule instead of the PSK input parameter.  This input is designed for this kind of loose entropy of arbitrary size.</t>
+</section>
+
+<section title="Client-to-Server Flow" anchor="kdh-c2s">
 <t>The flow of TLS 1.3 works best when encryption is provided early, and
 authentication is provided late.  These aspects are often combined in Kerberos,
-but KDH splits them to resemble TLS patterns more closely.  The TLS-KDH flow
+but KDH splits them to resemble TLS patterns more closely, and
+offer almost-orthogonal Kerberos versions for (1) additional secret entropy for encryption, (2) client authentication through Kerberos Tickets and (3) server authentication through Kerberos Tickets.  Only (1) provides Quantum Relief.  The server cannot initiate Kerberos, so (3) is not possible without (1).</t>
+
+<t>The TLS-KDH flow
 uses ClientHello and ServerHello for a Kerberos-protected exchange of entropy,
 but it completely ignores the client identity during this phase.  This allows clients to use an anonymous Ticket in the ClientHello message and consider authenticating with an identifying Ticket in later client Certificate and CertificateVerify messages.</t>
 
 <t>Server identity however, is observed in all Tickets, so any use of the Ticket’s contained key by the server suffices as proof of its identity.  This renders the server Certificate and CertificateVerify messages redundant if the server accepts the KDH extension, especially in TLS 1.3 because the Finished message follows immediately.  But redundancy can be a feature; it is certainly legitimate to still authenticate the server with an explicit Kerberos Ticket, X.509 certificate or other.</t>
 
 <t>When the server desires proof of client identity, it sends a CertificateRequest.  KDH introduces a certificate type for a Kerberos Ticket, relying on a Kerberos Authenticator as CertificateVerify message.  The server is also able to use this to prove being able to use a supplied Ticket with its identity.</t>
-<!-- TODO: deze alinea begrijp ik niet helemaal/zou ik denk ik naar de intro
-van deze sectie verplaatsen --
-<t>The result offers almost-orthogonal Kerberos versions for (1) additional secret entropy for encryption, (2) client authentication through Kerberos Tickets and (3) server authentication through Kerberos Tickets.  All these aspects can independently provide Quantum Relief.  The only dependency between these is that the server cannot initiate Kerberos, so (3) requires (1) or another Ticket source.</t>
--->
-<section title="peer-to-peer flow" anchor="kdh-p2p">
-<t>Besides the customary client-to-server flow there is also support for a peer-to-peer flow in TLS-KDH.  When this is used, the ClientHello requests a remote peer identity and sends a TGT, possibly with anonymous client name.  Without documenting it here, the TLS server is assumed to have some method of locating the remote client and proxying the entire TLS connection to its endpoint.  The remote peer then returns a Ticket based on the TGT, obtained through the user-to-user flow of Kerberos.  This return Ticket will reverse the client and server role relative to TLS, but for peer-to-peer connectivity that does not matter.  The remote peer, which is now the one processing the TLS connection from the server side, will authenticate itself through its use of this return Ticket and it can decide whether authentication of the initiating client is desired.  When the client would authenticate through a Kerberos Ticket, this would follow the client and server roles of Kerberos; as before, for peer-to-peer traffic this should not be problematic, even if it imposes a requirement on cross-realm connections that they must be bidirectional.</t>
 </section>
 
-<section title="Injecting Kerberos-based entropy in TLS' key schedule">
-<t>Whether a Ticket is supplied in the ClientHello or returned by a remote peer
-in the ServerHello, it yields a key only known to the two connecting parties.  This key is used in standard Kerberos encryption of the concatenated random data from ClientHello and ServerHello.  This means that both parties influence the entropy gathered and can derive a sequence of bytes that is invisible to anyone else.  The output from the encryption operation is plugged into the key schedule instead of the PSK input parameter.  This input is designed for this kind of loose entropy of arbitrary size.</t>
-</section>
+<section title="Peer-to-Peer Flow" anchor="kdh-p2p">
+
+<t>Besides the customary client-to-server flow there is also support for a peer-to-peer flow in TLS-KDH.  When this is used, the ClientHello sent to a TLS serverby an initiating peer requests a responding peer identity and sends a TGT.  This client may use an anonymous name for itself.</t>
+
+<t>Without documenting it here, the TLS server is assumed to have some method of locating a responding peer and proxying the entire TLS connection to its endpoint.  The only service performed by the TLS server is relaying the literal TLS connection between the initiating client/peer and this responding peer.  The TLS server is not involved in cryptographic computations for the TLS connection.</t>
+
+<t>The responding peer returns in its ServerHello a Ticket based on the TGT, obtained through the user-to-user flow of Kerberos.  This return Ticket will reverse the client and server role for Kerberos, but for peer-to-peer connectivity that does not matter.  The responding peer will authenticate itself to the initiating peer through its use of this return Ticket and it can decide whether authentication of the initiating client is desired.  When the client would authenticate through a Kerberos Ticket, this would follow the client and server roles of Kerberos; as before, for peer-to-peer traffic this should not be problematic, even if it imposes a requirement on cross-realm connections that they must be bidirectional.</t>
+
 </section>
 
-<section title="New Data Structures, Types and Procedures">
+</section>
 
-<t>The following data structures are introduced to define the Quantum Hardening
+<section title="New Data Types and Procedures">
+
+<t>The following data structures are introduced to define the Quantum Relief
 mechanism for TLS 1.3 and 1.2. Additionally, specific values and procedures are
 defined for the TLS-KDH mechanism that implements one specific form of quantum
-hardening for TLS.</t>
+relief for TLS.</t>
 
-<section title="Quantum Hardening Extension">
+<section title="Quantum Relief Extension">
 
-<t>This section defines a new TLS extension called quantum_hardening that
-enables quantum hardening for TLS as defined in <xref target="qr"/>. The extension is
+<t>This section defines a new TLS extension called quantum_relief that
+enables quantum relief for TLS as defined in <xref target="qr"/>. The extension is
 designed such that it can be applied generically. As a concrete quantum
-hardening implementation we herein define how this exentions must be used for
+relief implementation we herein define how this exentions must be used for
 TLS-KDH [<xref target="tls-kdh"/>]. Future mechanisms may extend this definition.</t>
 
-<t>In order to distinguish between different Quantum Hardening methods a
-QuantumHardeningMethod tag is defined to set KDH aside from possible future
+<t>In order to distinguish between different Quantum Relief methods a
+QuantumReliefMethod tag is defined to set KDH aside from possible future
 forms which, to be eligable, MUST assure they meet the conditions for providing
 proper entropy [<xref target="qr"/>].</t>
 
@@ -233,13 +233,14 @@ proper entropy [<xref target="qr"/>].</t>
 enum {
     kdh(0),
     (65535)
-} QuantumHardeningMethod;
+} QuantumReliefMethod;
 ]]></artwork></figure>
 
-<t>The value "kdh" is always used for the method of Quantum Hardening proposed
+<t>The value "kdh" is always used for the method of Quantum Relief proposed
 herein, which is based on Kerberos.</t>
 
-<t>A TLS ClientHello can additionally specify a name for a remote peer, for
+<t>A TLS ClientHello can additionally specify a name for a peer that it
+wants to respond, for
 which various application-independent forms may be anticipated. This is
 captured in yet another tag PeerNameType, of which only a type for unencrypted
 Kerberos names is currently defined (i.e. krb5princrealm).</t>
@@ -252,9 +253,9 @@ enum {
 } PeerNameType;
 ]]></artwork></figure>
 
-<t>The value "none" is used for standard client-to-server TLS connections.  The value "krb5princrealm" is used in a ClientHello to indicate a Kerberos PrincipalName and Realm [Section 5.2.2 of <xref target="RFC4120"/>] for the remote peer sought behind the TLS server.</t>
+<t>The value "none" is used for standard client-to-server TLS connections.  The value "krb5princrealm" is used in a ClientHello to indicate a Kerberos PrincipalName and Realm [Section 5.2.2 of <xref target="RFC4120"/>] for the responding peer sought behind the TLS server.</t>
 
-<t>The Quantum Hardening Extension is now defined as follows:</t>
+<t>The Quantum Relief Extension is now defined as follows:</t>
 
 <figure><artwork><![CDATA[
 struct {
@@ -270,21 +271,21 @@ struct {
                 opaque krb5realm<3..1023>;
             } krb5PrincipalRealm;
     }
-    QuantumHardeningMethod qh_method;
+    QuantumReliefMethod qh_method;
     select (qh_method) {
         case kdh:
             /* Empty, ticket or TGT */
             opaque opt_ticket<0..65535>;
     }
-} QuantumHardening;
+} QuantumRelief;
 ]]></artwork></figure>
 
 <t>This structure is used as extension_data corresponding to the
-quantum_hardening extension_type, registered by IANA under number
+quantum_relief extension_type, registered by IANA under number
 TBD:QREXTTYPE, to occur only during ClientHello and ServerHello (i.e. CH and
 SH according to https://tools.ietf.org/html/rfc8446#section-4.2).  IANA also
 created registries for the QuantumReliefMethod and PeerNameType in their
-TBD:TLSExtensionsRegistry. [TODO ref to IANA registry?]</t>
+TBD:TLSExtensionsRegistry.</t>
 
 </section>
 
@@ -317,7 +318,7 @@ Steps:
 <t>The name prefix "rfc3961" points to the generic descriptions for Kerberos
 key-based procedures <xref target="RFC3961"/> that are implemented with various
 algorithms.  Available algorithms are listed in the IANA Registry of Kerberos
-Parameters [TODO ref link?].</t>
+Parameters.</t>
 
 <t>The Key Usage values are numbers, for which the following are defined by this specification.  Their number ranges are deliberately chosen to not clash with those of Kerberos, but otherwise compliant to the application range [Section 7.5.1 of <xref target="RFC4120"/>].  The Key Usage values are referenced by name elsewhere in this specification.</t>
 
@@ -340,7 +341,7 @@ Parameters [TODO ref link?].</t>
 <t>The first name-string component string is the fixed string krbtgt.</t>
 </list></t>
 
-<t>To be a TGT, all these requirements MUST be met by a Ticket; a Ticket that meets some but not all these conditions is badly formed and the recipient SHOULD respond to it by reporting error TODO:WHICH and closing the connection.</t>
+<t>To be a TGT, all these requirements MUST be met by a Ticket; a Ticket that meets some but not all these conditions is badly formed and the recipient SHOULD respond to it by reporting error bad_certificate and closing the connection.</t>
 
 </section>
 
@@ -349,25 +350,25 @@ Parameters [TODO ref link?].</t>
 <t>In order to be able to negotiate Kerberos Tickets as certificate types for
 the Certificate messages, a new certifcate type is introduced that can be used
 in the "client_certificate_type" and "server_certificate_type" extensions:
-<list style="symbols" handIndent="6">
-	<t>Kerberos (TODO check)</t>
+<list style="symbols" hangIndent="6">
+	<t>Kerberos (TBD:KRBTKT-CERTTP)</t>
 </list></t>
 
 <t>This new certificate type is registered at IANA's TLS Certificate Types
-registry [TODO link https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-extensiontype-values-3]</t>
+registry.</t>
 
 </section>
 
 </section>
 
-<section title="Changes to TLS Messages and Behavior">
+<section title="Changes to TLS Messages and Behaviour">
 
 <t>Although TLS-KDH does not introduce any new messages for TLS, there are
 however a few modifications to the contents or the manner of processing of existing messages.  Unless specified otherwise, the modifications apply to TLS 1.3 and 1.2 alike.</t>
 
 <section title="ClientHello">
 
-<t>When this message contains the "quantum_hardening" extension, its
+<t>When this message contains the "quantum_relief" extension, its
 "qh_method" MUST be set to "kdh" under this specification.  Further
 requirements to this extension depend on the pattern of use being
 client-to-server [<xref target="kdh-c2s"/>] or peer-to-peer [<xref
@@ -376,38 +377,38 @@ target="kdh-p2p"/>].</t>
 <t>To initiate client-to-server traffic, the "peernametype" MUST be set to "none", and the "opt_ticket" MUST be a Ticket with the service name, host or domain name and Kerberos realm of the addressed service.  The client name in the "opt_ticket" MAY be an anonymous identity and the server MUST ignore the client identity in the "opt_ticket".  When the "server_name" extension is also sent, there SHOULD be restrictions enforced by the server on its relation with the service name in the "opt_ticket", but this may involve domain-to-hostname mappings, for instance through DNS SRV records under DNSSEC protection.</t>
 
 <t>To initiate peer-to-peer traffic that could be proxied through the TLS
-server to end at a remote peer, the "peernametype" MUST NOT be set to "none",
+server to end at a responding peer, the "peernametype" MUST NOT be set to "none",
 and the "opt_ticket" MUST be a TGT for the TLS client, suited for the ticket
 granting service of the TLS server’s realm; it is permitted for the client to
 use an anonymous identity in this TGT and the server MUST ignore the client
-identity in the "opt_ticket".  When the "peernametype" is set to "krb5princrealm", the "krb5princ" and "krb5realm" fields MUST be set to the Kerberos PrincipalName and Realm for the desired remote peer.  Future extensions may introduce alternative forms of remote peer identity and a TLS server SHOULD be open to the general idea of identity.</t>
+identity in the "opt_ticket".  When the "peernametype" is set to "krb5princrealm", the "krb5princ" and "krb5realm" fields MUST be set to the Kerberos PrincipalName and Realm for the desired responding peer.  Future extensions may introduce alternative forms of responding peer identity and a TLS server SHOULD be open to the general idea of identity.</t>
 
-<t>When a ClientHello message contains the "quantum_hardening" extension, it
+<t>When a ClientHello message contains the "quantum_relief" extension, it
 MUST NOT include any references to a PSK.  It MAY independently negotiate
-client and server certificate types [TODO ref to rfc7250?] and cipher suites.</t>
+client and server certificate types <xref target="RFC7250"/> and
+cipher suites.</t>
 
 </section>
 
 <section title="ServerHello">
 
-<t>When the server accepts the "quantum_hardening" extension, it replies with
-its own "quantum_hardening" extension and refrains from making any PSK references.  This specification defines a response to ClientHello extensions with "qh_method" set to "kdh", for which the ServerHello extension MUST be set to "kdh" also.</t>
+<t>When the server accepts the "quantum_relief" extension, it replies with
+its own "quantum_relief" extension and refrains from making any PSK references.  This specification defines a response to ClientHello extensions with "qh_method" set to "kdh", for which the ServerHello extension MUST be set to "kdh" also.</t>
 
 <t>When the ClientHello extension had its "peernametype" set to "none", the
 ServerHello extension responds to a client-to-server connection request.  The
-TLS data will be terminated on the server (TODO: wat bedoel je hier met
-data termination?) and the response extension MUST set the "opt_ticket" field to a zero-length byte string.</t>
+TLS data will be procesed on the server and the response extension MUST set the "opt_ticket" field to a zero-length byte string.</t>
 
-<t>When the ClientHello extension had its "peernametype" set to another value than "none", then the TLS server MUST use this to locate a remote peer, which may have registered through a mechanism not specified herein, and proxy the TLS traffic to this remote peer.  The TLS server continues to proxy this traffic until it closes the connection.</t>
+<t>When the ClientHello extension had its "peernametype" set to another value than "none", then the TLS server MUST use this to locate a responding peer, which may have registered through a mechanism not specified herein, and proxy the TLS traffic to this responding peer.  The TLS server continues to proxy this traffic until it closes the connection.</t>
 
-<t>When a remote peer, possibly after registering with a TLS server as a
+<t>When a responding peer, possibly after registering with a TLS server as a
 recipient for client-to-client TLS connections, receives a ClientHello with a
-"quantum_hardening" extension with "qh_method" set to "kdh" and a
+"quantum_relief" extension with "qh_method" set to "kdh" and a
 "peernametype" and "peername" that it recognises as its own and with a TGT in
 the "opt_ticket" field, it should engage in a user-to-user ticket request with
 the ticket granting service for its realm.  It MUST reject the connection if
 this procedure fails.  When a Ticket is obtained, it constructs a ServerHello
-with a "quantum_hardening" extension, sets "qh_method" to "kdh" and
+with a "quantum_relief" extension, sets "qh_method" to "kdh" and
 "peernametype" to "none", and "opt_ticket" to the just-obtained Ticket.  Furthermore, it continues to act as though the client had contacted it directly, while being forgiving to the proxied nature of the connection that carries the TLS traffic.  Specifically, there are no grounds for assuming anything about the client identity, which may be undesirable in a client-to-client connection.</t>
 
 </section>
@@ -418,10 +419,7 @@ with a "quantum_hardening" extension, sets "qh_method" to "kdh" and
 ServerHello and may indeed be toned down to an anonymous identity, any
 server-side requiring to know its client MAY send a CertificateRequest in order
 to verify the client's identity. The CertificateRequest MUST be send when a
-client_certificate_type has been negotiated [TODO ref to RFC7250]. When permitted by the TLS 1.3 client with the post_handshake_auth extension, this MAY also be sent at any later time.  Under TLS 1.2, TLS renegotiation permits a similar facility (with much broader impact).</t>
-
-<t>TODO: moeten we hier iets zeggen over of het verplicht is om als client te
-reageren met een Certificate en CertificateVerify bericht in het geval van tls-kdh?</t>
+client_certificate_type has been negotiated <xref target="RFC7250"/>. When permitted by the TLS 1.3 client with the post_handshake_auth extension, this MAY also be sent at any later time.  Under TLS 1.2, TLS renegotiation permits a similar facility (with broader impact).</t>
 
 <t>The handshake is not encrypted in TLS 1.2, and for TLS 1.3 in peer-to-peer mode the server-side identity is uncertain until the Finished messages.  In the interest of the privacy of client identity, it may be desirable to add server-side authentication even when it is not otherwise needed.</t>
 
@@ -430,7 +428,7 @@ reageren met een Certificate en CertificateVerify bericht in het geval van tls-k
 <section title="Server-sent Certificate and CertificateVerify">
 
 <t>The Certificate and CertificateVerify messages are not always required,
-because (1) the "quantum_hardening" extension captures the server identity, and (2) proof thereof is deferred to Finished, which under TLS 1.3 is available to the client before it sends the client Certificate.</t>
+because (1) the "quantum_relief" extension captures the server identity, and (2) proof thereof is deferred to Finished, which under TLS 1.3 is available to the client before it sends the client Certificate.</t>
 
 <t>Even in cases when it is not strictly required, a server MAY opt for sending
 server Certificate and CertificateVerify. However, the absence of the
@@ -440,7 +438,7 @@ Certificate and CertificateVerify messages are valid under TLS-KDH and as such c
 supported type for these messages, including the Kerberos Ticket certificate
 type defined herein.  When not negotiated, the default type is X.509.  Note
 that a server cannot initiate a Kerberos exchange, so a Kerberos type cannot be
-used when the server rejected the "quantum_hardening" extension or when the
+used when the server rejected the "quantum_relief" extension or when the
 extension did not provide a Ticket or TGT such as it does when the "qh_method" is "kdh".</t>
 
 </section>
@@ -450,18 +448,19 @@ extension did not provide a Ticket or TGT such as it does when the "qh_method" i
 <t>Under TLS 1.3, the server can request client authentication by sending a
 CertificateRequest message. It is possible for servers to do this at any time (provided that the client has sent the "post_handshake_auth" extension), and possibly multiple times; TLS 1.3 even defines how to handle overlapping requests for client authentication.</t>
 
+<t>Clients MAY choose to respond to a CertificateRequest by sending a
+Certificate and CertificateVerify, and the server MAY choose to close the
+connection if the client chooses otherwise.</t>
+
 <t>The "client_certificate_type" extension may be used to negotiate any
 supported type for
 these messages, including the Kerberos Ticket certificate type defined before.
 When not negotiated, the default type is X.509.  Note that a client can produce
-a Kerberos Ticket even when no "quantum_hardening" extension was negotiated
+a Kerberos Ticket even when no "quantum_relief" extension was negotiated
 during ClientHello and/or ServerHello, or even when another "qh_method" than
 "kdh" was agreed. However, a client MUST NOT send Certifcate and
 CertificateVerify messages if it did not receive a CertificateRequest from the
 server.</t>
-
-<t>TODO: moeten we hier nog iets zeggen over hoe de client mag/moet reageren
-als er een cert request komt?</t>
 
 </section>
 
@@ -492,7 +491,7 @@ key material in a Ticket is time-limited in the understanding that a client can 
 CertificateVerify through a new CertificateRequest, best sent sometime before expiry.  The client then acquires a fresh or prolonged Ticket and once exchanged the connection may continue up to the timeout of the new Ticket.</t>
 
 <t>The timeout is updated by every new Ticket supplied in the "opt_ticket"
-field of a "quantum_hardening" extension with "qh_method" set to "kdh", or by a Certificate of type Kerberos Ticket, provided that it is followed by a valid CertificateVerify.</t>
+field of a "quantum_relief" extension with "qh_method" set to "kdh", or by a Certificate of type Kerberos Ticket, provided that it is followed by a valid CertificateVerify.</t>
 
 <t>A server MUST NOT send data over a connection with a timed-out Ticket, but SHOULD request a fresh one or disconnect.  A client MUST NOT send data over a connection with a timed-out Ticket, but MAY await the arrival a fresh Ticket.  It is a good precaution to request a fresh Ticket a few minutes before the active one expires, to compensate for clock skew between the client and server.</t>
 
@@ -504,55 +503,42 @@ field of a "quantum_hardening" extension with "qh_method" set to "kdh", or by a 
 
 <section title="Cryptographic Updates">
 
-<t>The introduction of the Quantum Hardening extension (in combination with
+<t>The introduction of the Quantum Relief extension (in combination with
 TLS-KDH) leads to a few cryptographic changes to the TLS protocol.  Below, the
 three aspects introduced are discussed independently.  Separate treatment for
-TLS 1.3 and 1.2 is only necessary for Quantum Hardening encryption.</t>
+TLS 1.3 and 1.2 is only necessary for Quantum Relief encryption.</t>
 
-<section title="Quantum Hardening for Encryption in TLS 1.3">
+<section title="Quantum Relief for Encryption in TLS 1.3">
 
-<t>Under client-to-server TLS-KDH, the "opt_ticket" in the "quantum_hardening"
-extension in the ClientHello is used to supply external (quantum proof) key material.  Under peer-to-peer TLS-KDH, the TGT in the "opt_ticket" supplies no shared key material to the client and server (or remote peer), but the ServerHello returns a "quantum_hardening" extension with an "opt_ticket" field holding a Ticket that does supply a shared key to use.</t>
+<t>Under client-to-server TLS-KDH, the "opt_ticket" in the "quantum_relief"
+extension in the ClientHello is used to supply external (quantum proof) key material.  Under peer-to-peer TLS-KDH, the TGT in the "opt_ticket" supplies no shared key material to the client and server (or responding peer), but the ServerHello returns a "quantum_relief" extension with an "opt_ticket" field holding a Ticket that does supply a shared key to use.</t>
 
 <t>This key is used to compute Ticket-Encrypt (opt_ticket, usage,
 ClientHello.random || ServerHello.random) where || signifies concatenation, and
 usage is either KEYUSAGE_TLSKDH_CLIENT_QR for a Ticket supplied by the client,
 or KEYUSAGE_TLSKDH_SERVER_QR for a Ticket supplied by the server side (or
-remote peer).  The output of this computation is provided instead of the PSK on
-the left of the Key Schedule for TLS 1.3 [page 93 of <xref target="RFC8446"/>].
- Since none of the PSK facilities are used under TLS-KDH, this seeding does not
- arrive too late for the unfolding of the protocol. (TODO: wat bedoel je met
- deze laatste zin?)</t>
+responding peer).  The output of this computation is provided instead of the PSK on
+the left of the Key Schedule for TLS 1.3 [page 93 of <xref target="RFC8446"/>].  Had PSK facilities been used, then this seeding would have arrived too late; but since the PSK mechanism is overtaken by TLS-KDH, this problem does not occur.</t>
 
 <t>Other "qh_method" values than "kdh" are likely to come up with other computations.  There may be some that prefer to influence only the master key by replacing the 0 value for key input as it is shown in the TLS 1.3 key schedule.</t>
 
 </section>
 
-<section title="Quantum Hardening for Encryption in TLS 1.2">
+<section title="Quantum Relief for Encryption in TLS 1.2">
 
-<t>TLS 1.2 does not offer any form of encryption during the handshake, so the
-kdh method (TODO: wat bedoel je hier precies met de KDH method?) for TLS 1.2 can only be used to strengthen the Master Secret.  When
-the "quantum_hardening" extension is accepted by the server, a Ticket is
+<t>TLS 1.2 does not offer any form of encryption during the handshake, so Quantum Relief for TLS 1.2 can only be used to strengthen the Master Secret.  When
+the "quantum_relief" extension with the "kdh" method is accepted by the server, a Ticket is
 available while forming the ServerHello; it is in the ClientHello for
-client-to-server mode and in the ServerHello for peer-to-peer mode.  This
-Ticket qrt (TODO: wat is qrt?) is used to compute Ticket-Encrypt (qrt,
-KEYUSAGE_TLS12KDH_PREMASTER_QH, ClientHello.random || ServerHello.random),
-where || denotes concatenation.  The output of this procedure is a octet string.  It is represented in a TLS type
-
-<figure><artwork><![CDATA[
-opaque premaster_prefix<0..65535>
-]]></artwork></figure>
-
-and, in that form, prepended to the pre-master secret that the cipher suite defines.  This prepended form is then used instead of the normal pre-master secret during the computation of the master key.  Note that this is only done when client and server agreed to use the "quantum_hardening" extension with "kdh" as its method.</t>
-
-<t>TODO: Tom, dit is arbitrair.  Hergebruik van code of structuren kan mogelijk soepeler, ik hoor het dan wel.</t>
+client-to-server mode and in the ServerHello for peer-to-peer mode.  Call this
+Ticket qrt and use it to compute Ticket-Encrypt (qrt, KEYUSAGE_TLS12KDH_PREMASTER_QH, ClientHello.random || ServerHello.random),
+where || denotes concatenation.  The output of this procedure is a octet string which is prepended to what the cipher-suite defines as its pre-master secret.  This prepended form is then used instead of the normal pre-master secret during the computation of the master key.</t>
 
 </section>
 
 <section title="Kerberos Ticket as Certificate and CertificateVerify">
-<!-- TODO deze alinea is naar sectie 4 verplaatst --
+<!-- TODO deze alinea is naar sectie 4 verplaatst - - dit snapt Rick niet - - gaat het om de IANA Considerations sectie waar dit zou kunnen komen? - - dat geldt dan voor meer dingen en is een terechte opmerking -->
 <t>IANA has added Kerberos Ticket with value TBD:KRBTKT-CERTTP to the TLS Certificate Types list in the TLS Extensions Registry.  This can be negotiated independently as client_certificate_type and server_certificate_type, though the latter is impossible without a client certificate, even if it is anonymous or just a TGT; in TLS-KDH, this is available when the server accepts the quantum_relief extension.</t>
--->
+
 <t>The contents of the Certificate message when the certificate type is negotiated as Kerberos is a Kerberos Ticket <xref target="RFC4120"/>.</t>
 
 <t>The contents of the corresponding CertificateVerify message uses this Ticket
@@ -569,10 +555,6 @@ and including the preceding Certificate message.  For TLS 1.3, this customary ha
 <t>The default use of TLS involves authentication based on X.509 certificates.
 In some scenarios such a PKI is not available or not desirable.  For this
 reason, this section defines an alternative, KDH-Only Application Profile.</t>
-<!-- NOTE voor rick: ik heb het stukje over RSA weggehaald omdat dit volgens
-mij niet de enige optie is binnen default TLS. Verder heb ik het stuk over
-burden en simplicity herschreven om potentiele discussies over of dit wel of
-niet waar is voor X.509 te voorkomen. -->
 
 <t>TLS-KDH-compliant applications MUST implement the TLS_AES_128_GCM_SHA256 [GCM] cipher suite and SHOULD implement the TLS_AES_256_GCM_SHA384 [GCM] and TLS_CHACHA20_POLY1305_SHA256 [RFC8439] cipher suites.</t>
 
@@ -582,8 +564,20 @@ type.  They also MUST treat X.509 as the default certificate type, but they MAY 
 <t>TLS-KDH-compliant applications MUST support key exchanges with secp256r1
 (NIST P-256) and SHOULD support key exchanges with X25519 [RFC7748].</t>
 
-<t>TLS-KDH-compliant applications MUST support the quantum_hardening TLS
+<t>TLS-KDH-compliant applications MUST support the quantum_relief TLS
 extension, for which the qh_method value "kdh" MUST be supported, and the peernametype value "none" MUST and "krb5princrealm" SHOULD be supported.</t>
+
+</section>
+
+<section title="Security Considerations">
+
+<t>TODO</t>
+
+</section>
+
+<section title="IANA Considerations">
+
+<t>TODO</t>
 
 </section>
 
@@ -654,10 +648,11 @@ Computing.</t>
 <!-- <?rfc include="reference.RFC.5246.xml"?> -->
 <!-- <?rfc include="reference.RFC.5280.xml"?> -->
 <!-- <?rfc include="reference.RFC.5746.xml"?> -->
+<?rfc include="reference.RFC.5869.xml"?>
 <!-- <?rfc include="reference.RFC.6066.xml"?> -->
 <!-- <?rfc include="reference.RFC.6806.xml"?> -->
 <!-- <?rfc include="reference.RFC.6112.xml"?> -->
-<!-- <?rfc include="reference.RFC.7250.xml"?> -->
+<?rfc include="reference.RFC.7250.xml"?>
 <!-- <?rfc include="reference.RFC.7627.xml"?> -->
 <?rfc include="reference.RFC.8446.xml"?>
 
