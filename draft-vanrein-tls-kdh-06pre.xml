@@ -571,7 +571,72 @@ extension, for which the qh_method value "kdh" MUST be supported, and the peerna
 
 <section title="Security Considerations">
 
-<t>TODO</t>
+<t>Quantum Relief is an alternative to the PSK mechanism, which may have
+similar benefits for local setups, but is not subject of discussion here.
+The loss of PSK facilities means that no Early Data can be sent, which can
+be resolved by sending the same data later.  It is a loss of efficiency,
+but not of security.</t>
+
+<section title="Encryption">
+
+<t>To establish that encryption has successfully been established, each
+party must validate encrypted data received from the other.  This is at
+least the case when a proper Finished message arrives, which provides
+ample entropy to be certain, incorporating the identities exchanged
+throughout the handshake.</t>
+
+<t>In TLS 1.3, the parties may send encrypted data which may provide
+ample entropy as well.  The transcript hash does not include the entropy
+derived with the Quantum Relief extension, and so authentication cannot
+be used as proof of having established encryption unless it is as a
+provider of verifiable entropy that is wrapped in handshake encryption.</t>
+
+<t>The late establishment of encryption has an impact on the privacy of
+client identity.  This identity is unprotected in TLS 1.2, but under TLS 1.3
+its privacy is protected with encryption.  To ensure that the right
+party is communicating remotely, the Finished message SHOULD be processed
+before sending the client's Certificate.</t>
+
+</section>
+
+<section title="Server Authentication">
+
+<t>The identity of the server under generic Quantum Relief needs to
+wait for the arrival of the server's Certificate and CertificateVery
+messages.  Specifically for TLS-KDH, the ability to decrypt a Ticket
+(for the client-to-server flow) or to produce a Ticket from a TGT
+(for the peer-to-peer flow) provides the same proof.  Clients MAY use
+this, but MUST also validate a Certificate and CertificateVerify if
+the server sends them.</t>
+
+<t>Under TLS-KDH, the server produces a Ticket with identities for
+both client and server.  The client MUST be able to extract the
+secret from the Ticket, as an assurance that it is the designated
+receiver for this identity claim.  The verification of the
+CertificateVerify assures this, as well as the binding to the
+TLS flow through the transcript hash.</t>
+
+</section>
+
+<section title="Client Authentication">
+
+<t>The server MUST NOT process any client identity in the QuantumRelief
+extension, because that may be either an anonymous identity or a
+pseudonym, to avoid public visibility.  When client identity is needed
+by the server, it MUST ask for it with a CertificateRequest.</t>
+
+<t>The client Certificate and CertificateVerify provide the proper
+identity for the client, which MAY differ from any identity passed
+before.</t>
+
+<t>Under TLS-KDH, the client produces a Ticket with identities for
+both client and server.  The server MUST be able to extract the
+secret from the Ticket, as an assurance that it is the designated
+receiver for this identity claim.  The verification of the
+CertificateVerify assures this, as well as the binding to the
+TLS flow through the transcript hash.</t>
+
+</section>
 
 </section>
 
