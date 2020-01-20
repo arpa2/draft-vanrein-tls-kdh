@@ -1,0 +1,12 @@
++ Read current document (Tom, Rick)
++ Process comments (Rick, Tom?)
+- Agree on submission text
+- Upload as Internet Draft 06
+- Ask Eric Rescorla for the proper steps to take for an Independent Submission
+- Post to TLS WG, specifically asking about "Recommended: Y" status
+- Post to Kitten WG, specifically asking about (anonymous) user-to-user
+- Look for people from both WGs to support us at the RFC Editor
+- Request early IANA allocations, tls-reg-review@ietf.org [RFC8447]
+- Finish implementation
+- Submit to RFC Editor, rfc-ise@rfc-editor.org, see notes
+- Continue editing until publication

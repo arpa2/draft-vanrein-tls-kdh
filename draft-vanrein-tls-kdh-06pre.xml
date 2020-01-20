@@ -579,7 +579,7 @@ but not of security.</t>
 
 <section title="Encryption">
 
-<t>To establish that encryption has successfully been established, each
+<t>To establish that encryption has successfully been established, a
 party must validate encrypted data received from the other.  This is at
 least the case when a proper Finished message arrives, which provides
 ample entropy to be certain, incorporating the identities exchanged
