@@ -1,0 +1,824 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head profile="http://www.w3.org/2006/03/hcard http://dublincore.org/documents/2008/08/04/dc-html/">
+  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+
+  <title>Quantum Relief with TLS and Kerberos</title>
+
+  <style type="text/css" title="Xml2Rfc (sans serif)">
+  /*<![CDATA[*/
+	  a {
+	  text-decoration: none;
+	  }
+      /* info code from SantaKlauss at http://www.madaboutstyle.com/tooltip2.html */
+      a.info {
+          /* This is the key. */
+          position: relative;
+          z-index: 24;
+          text-decoration: none;
+      }
+      a.info:hover {
+          z-index: 25;
+          color: #FFF; background-color: #900;
+      }
+      a.info span { display: none; }
+      a.info:hover span.info {
+          /* The span will display just on :hover state. */
+          display: block;
+          position: absolute;
+          font-size: smaller;
+          top: 2em; left: -5em; width: 15em;
+          padding: 2px; border: 1px solid #333;
+          color: #900; background-color: #EEE;
+          text-align: left;
+      }
+	  a.smpl {
+	  color: black;
+	  }
+	  a:hover {
+	  text-decoration: underline;
+	  }
+	  a:active {
+	  text-decoration: underline;
+	  }
+	  address {
+	  margin-top: 1em;
+	  margin-left: 2em;
+	  font-style: normal;
+	  }
+	  body {
+	  color: black;
+	  font-family: verdana, helvetica, arial, sans-serif;
+	  font-size: 10pt;
+	  max-width: 55em;
+	  
+	  }
+	  cite {
+	  font-style: normal;
+	  }
+	  dd {
+	  margin-right: 2em;
+	  }
+	  dl {
+	  margin-left: 2em;
+	  }
+	
+	  ul.empty {
+	  list-style-type: none;
+	  }
+	  ul.empty li {
+	  margin-top: .5em;
+	  }
+	  dl p {
+	  margin-left: 0em;
+	  }
+	  dt {
+	  margin-top: .5em;
+	  }
+	  h1 {
+	  font-size: 14pt;
+	  line-height: 21pt;
+	  page-break-after: avoid;
+	  }
+	  h1.np {
+	  page-break-before: always;
+	  }
+	  h1 a {
+	  color: #333333;
+	  }
+	  h2 {
+	  font-size: 12pt;
+	  line-height: 15pt;
+	  page-break-after: avoid;
+	  }
+	  h3, h4, h5, h6 {
+	  font-size: 10pt;
+	  page-break-after: avoid;
+	  }
+	  h2 a, h3 a, h4 a, h5 a, h6 a {
+	  color: black;
+	  }
+	  img {
+	  margin-left: 3em;
+	  }
+	  li {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  ol p {
+	  margin-left: 0em;
+	  }
+	  p {
+	  margin-left: 2em;
+	  margin-right: 2em;
+	  }
+	  pre {
+	  margin-left: 3em;
+	  background-color: lightyellow;
+	  padding: .25em;
+	  }
+	  pre.text2 {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f0f0f0;
+	  width: 69em;
+	  }
+	  pre.inline {
+	  background-color: white;
+	  padding: 0em;
+	  }
+	  pre.text {
+	  border-style: dotted;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  width: 69em;
+	  }
+	  pre.drawing {
+	  border-style: solid;
+	  border-width: 1px;
+	  background-color: #f8f8f8;
+	  padding: 2em;
+	  }
+	  table {
+	  margin-left: 2em;
+	  }
+	  table.tt {
+	  vertical-align: top;
+	  }
+	  table.full {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.headers {
+	  border-style: outset;
+	  border-width: 1px;
+	  }
+	  table.tt td {
+	  vertical-align: top;
+	  }
+	  table.full td {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.tt th {
+	  vertical-align: top;
+	  }
+	  table.full th {
+	  border-style: inset;
+	  border-width: 1px;
+	  }
+	  table.headers th {
+	  border-style: none none inset none;
+	  border-width: 1px;
+	  }
+	  table.left {
+	  margin-right: auto;
+	  }
+	  table.right {
+	  margin-left: auto;
+	  }
+	  table.center {
+	  margin-left: auto;
+	  margin-right: auto;
+	  }
+	  caption {
+	  caption-side: bottom;
+	  font-weight: bold;
+	  font-size: 9pt;
+	  margin-top: .5em;
+	  }
+	
+	  table.header {
+	  border-spacing: 1px;
+	  width: 95%;
+	  font-size: 10pt;
+	  color: white;
+	  }
+	  td.top {
+	  vertical-align: top;
+	  }
+	  td.topnowrap {
+	  vertical-align: top;
+	  white-space: nowrap; 
+	  }
+	  table.header td {
+	  background-color: gray;
+	  width: 50%;
+	  }
+	  table.header a {
+	  color: white;
+	  }
+	  td.reference {
+	  vertical-align: top;
+	  white-space: nowrap;
+	  padding-right: 1em;
+	  }
+	  thead {
+	  display:table-header-group;
+	  }
+	  ul.toc, ul.toc ul {
+	  list-style: none;
+	  margin-left: 1.5em;
+	  margin-right: 0em;
+	  padding-left: 0em;
+	  }
+	  ul.toc li {
+	  line-height: 150%;
+	  font-weight: bold;
+	  font-size: 10pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  ul.toc li li {
+	  line-height: normal;
+	  font-weight: normal;
+	  font-size: 9pt;
+	  margin-left: 0em;
+	  margin-right: 0em;
+	  }
+	  li.excluded {
+	  font-size: 0pt;
+	  }
+	  ul p {
+	  margin-left: 0em;
+	  }
+	
+	  .comment {
+	  background-color: yellow;
+	  }
+	  .center {
+	  text-align: center;
+	  }
+	  .error {
+	  color: red;
+	  font-style: italic;
+	  font-weight: bold;
+	  }
+	  .figure {
+	  font-weight: bold;
+	  text-align: center;
+	  font-size: 9pt;
+	  }
+	  .filename {
+	  color: #333333;
+	  font-weight: bold;
+	  font-size: 12pt;
+	  line-height: 21pt;
+	  text-align: center;
+	  }
+	  .fn {
+	  font-weight: bold;
+	  }
+	  .hidden {
+	  display: none;
+	  }
+	  .left {
+	  text-align: left;
+	  }
+	  .right {
+	  text-align: right;
+	  }
+	  .title {
+	  color: #990000;
+	  font-size: 18pt;
+	  line-height: 18pt;
+	  font-weight: bold;
+	  text-align: center;
+	  margin-top: 36pt;
+	  }
+	  .vcardline {
+	  display: block;
+	  }
+	  .warning {
+	  font-size: 14pt;
+	  background-color: yellow;
+	  }
+	
+	
+	  @media print {
+	  .noprint {
+		display: none;
+	  }
+	
+	  a {
+		color: black;
+		text-decoration: none;
+	  }
+	
+	  table.header {
+		width: 90%;
+	  }
+	
+	  td.header {
+		width: 50%;
+		color: black;
+		background-color: white;
+		vertical-align: top;
+		font-size: 12pt;
+	  }
+	
+	  ul.toc a::after {
+		content: leader('.') target-counter(attr(href), page);
+	  }
+	
+	  ul.ind li li a {
+		content: target-counter(attr(href), page);
+	  }
+	
+	  .print2col {
+		column-count: 2;
+		-moz-column-count: 2;
+		column-fill: auto;
+	  }
+	  }
+	
+	  @page {
+	  @top-left {
+		   content: "Internet-Draft"; 
+	  } 
+	  @top-right {
+		   content: "December 2010"; 
+	  } 
+	  @top-center {
+		   content: "Abbreviated Title";
+	  } 
+	  @bottom-left {
+		   content: "Doe"; 
+	  } 
+	  @bottom-center {
+		   content: "Expires June 2011"; 
+	  } 
+	  @bottom-right {
+		   content: "[Page " counter(page) "]"; 
+	  } 
+	  }
+	
+	  @page:first { 
+		@top-left {
+		  content: normal;
+		}
+		@top-right {
+		  content: normal;
+		}
+		@top-center {
+		  content: normal;
+		}
+	  }
+  /*]]>*/
+  </style>
+
+  <link href="#rfc.toc" rel="Contents"/>
+<link href="#rfc.section.1" rel="Chapter" title="1 Introduction"/>
+<link href="#rfc.section.2" rel="Chapter" title="2 Quantum Relief as a General Mechanism"/>
+<link href="#rfc.section.2.1" rel="Chapter" title="2.1 Peer-to-Peer Flow"/>
+<link href="#rfc.section.3" rel="Chapter" title="3 TLS-KDH for Quantum Relief through Kerberos"/>
+<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Injecting Kerberos-derived Entropy"/>
+<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Client-to-Server Flow"/>
+<link href="#rfc.section.3.3" rel="Chapter" title="3.3 Peer-to-Peer Flow"/>
+<link href="#rfc.section.4" rel="Chapter" title="4 New Data Types and Procedures"/>
+<link href="#rfc.section.4.1" rel="Chapter" title="4.1 Quantum Relief Extension"/>
+<link href="#rfc.section.4.2" rel="Chapter" title="4.2 Ticket-based Encryption Procedure"/>
+<link href="#rfc.section.4.3" rel="Chapter" title="4.3 Kerberos Ticket and TGT"/>
+<link href="#rfc.section.4.4" rel="Chapter" title="4.4 Certificate Types"/>
+<link href="#rfc.section.5" rel="Chapter" title="5 Changes to TLS Messages and Behaviour"/>
+<link href="#rfc.section.5.1" rel="Chapter" title="5.1 ClientHello"/>
+<link href="#rfc.section.5.2" rel="Chapter" title="5.2 ServerHello"/>
+<link href="#rfc.section.5.3" rel="Chapter" title="5.3 Server-sent CertificateRequest"/>
+<link href="#rfc.section.5.4" rel="Chapter" title="5.4 Server-sent Certificate and CertificateVerify"/>
+<link href="#rfc.section.5.5" rel="Chapter" title="5.5 Client-sent Certificate and CertificateVerify"/>
+<link href="#rfc.section.5.6" rel="Chapter" title="5.6 Length of Finished"/>
+<link href="#rfc.section.5.7" rel="Chapter" title="5.7 Selection of Cipher Suites"/>
+<link href="#rfc.section.5.8" rel="Chapter" title="5.8 Tickets and Connection Expiration"/>
+<link href="#rfc.section.6" rel="Chapter" title="6 Cryptographic Modes"/>
+<link href="#rfc.section.6.1" rel="Chapter" title="6.1 Quantum Relief for Encryption in TLS 1.3"/>
+<link href="#rfc.section.6.2" rel="Chapter" title="6.2 Quantum Relief for Encryption in TLS 1.2"/>
+<link href="#rfc.section.6.3" rel="Chapter" title="6.3 Kerberos Ticket as Certificate and CertificateVerify"/>
+<link href="#rfc.section.7" rel="Chapter" title="7 KDH-Only Application Profile"/>
+<link href="#rfc.section.8" rel="Chapter" title="8 Security Considerations"/>
+<link href="#rfc.section.8.1" rel="Chapter" title="8.1 Encryption"/>
+<link href="#rfc.section.8.2" rel="Chapter" title="8.2 Server Authentication"/>
+<link href="#rfc.section.8.3" rel="Chapter" title="8.3 Client Authentication"/>
+<link href="#rfc.section.9" rel="Chapter" title="9 IANA Considerations"/>
+<link href="#rfc.references" rel="Chapter" title="10 Normative References"/>
+<link href="#rfc.appendix.A" rel="Chapter" title="A Acknowledgements"/>
+<link href="#rfc.authors" rel="Chapter"/>
+
+
+  <meta name="generator" content="xml2rfc version 2.5.1 - http://tools.ietf.org/tools/xml2rfc" />
+  <link rel="schema.dct" href="http://purl.org/dc/terms/" />
+
+  <meta name="dct.creator" content="Van Rein, R. and T. Vrancken" />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-vanrein-tls-kdh-06" />
+  <meta name="dct.issued" scheme="ISO8601" content="2020-1-22" />
+  <meta name="dct.abstract" content="This specification describes a mechanism to use Kerberos authentication within the TLS protocol. This gives users of TLS a strong alternative to classic PKI-based authentication, and at the same introduces a way to insert entropy into TLS' key schedule such that the resulting protocol becomes resistant against attacks from quantum computers. We call this Quantum Relief, and specify it as part of a more general framework to make it easier for other technologies to achieve similar benefits." />
+  <meta name="description" content="This specification describes a mechanism to use Kerberos authentication within the TLS protocol. This gives users of TLS a strong alternative to classic PKI-based authentication, and at the same introduces a way to insert entropy into TLS' key schedule such that the resulting protocol becomes resistant against attacks from quantum computers. We call this Quantum Relief, and specify it as part of a more general framework to make it easier for other technologies to achieve similar benefits." />
+
+</head>
+
+<body>
+
+  <table class="header">
+    <tbody>
+    
+    	<tr>
+  <td class="left">Network Working Group</td>
+  <td class="right">R. Van Rein</td>
+</tr>
+<tr>
+  <td class="left">Internet-Draft</td>
+  <td class="right">T. Vrancken</td>
+</tr>
+<tr>
+  <td class="left">Intended status: Informational</td>
+  <td class="right">InternetWide.org</td>
+</tr>
+<tr>
+  <td class="left">Expires: July 25, 2020</td>
+  <td class="right">January 22, 2020</td>
+</tr>
+
+    	
+    </tbody>
+  </table>
+
+  <p class="title">Quantum Relief with TLS and Kerberos<br />
+  <span class="filename">draft-vanrein-tls-kdh-06</span></p>
+  
+  <h1 id="rfc.abstract">
+  <a href="#rfc.abstract">Abstract</a>
+</h1>
+<p>This specification describes a mechanism to use Kerberos authentication within the TLS protocol. This gives users of TLS a strong alternative to classic PKI-based authentication, and at the same introduces a way to insert entropy into TLS' key schedule such that the resulting protocol becomes resistant against attacks from quantum computers. We call this Quantum Relief, and specify it as part of a more general framework to make it easier for other technologies to achieve similar benefits.</p>
+<h1 id="rfc.status">
+  <a href="#rfc.status">Status of This Memo</a>
+</h1>
+<p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
+<p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
+<p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
+<p>This Internet-Draft will expire on July 25, 2020.</p>
+<h1 id="rfc.copyrightnotice">
+  <a href="#rfc.copyrightnotice">Copyright Notice</a>
+</h1>
+<p>Copyright (c) 2020 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
+<p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
+
+  
+  <hr class="noprint" />
+  <h1 class="np" id="rfc.toc"><a href="#rfc.toc">Table of Contents</a></h1>
+  <ul class="toc">
+
+  	<li>1.   <a href="#rfc.section.1">Introduction</a></li>
+<li>2.   <a href="#rfc.section.2">Quantum Relief as a General Mechanism</a></li>
+<ul><li>2.1.   <a href="#rfc.section.2.1">Peer-to-Peer Flow</a></li>
+</ul><li>3.   <a href="#rfc.section.3">TLS-KDH for Quantum Relief through Kerberos</a></li>
+<ul><li>3.1.   <a href="#rfc.section.3.1">Injecting Kerberos-derived Entropy</a></li>
+<li>3.2.   <a href="#rfc.section.3.2">Client-to-Server Flow</a></li>
+<li>3.3.   <a href="#rfc.section.3.3">Peer-to-Peer Flow</a></li>
+</ul><li>4.   <a href="#rfc.section.4">New Data Types and Procedures</a></li>
+<ul><li>4.1.   <a href="#rfc.section.4.1">Quantum Relief Extension</a></li>
+<li>4.2.   <a href="#rfc.section.4.2">Ticket-based Encryption Procedure</a></li>
+<li>4.3.   <a href="#rfc.section.4.3">Kerberos Ticket and TGT</a></li>
+<li>4.4.   <a href="#rfc.section.4.4">Certificate Types</a></li>
+</ul><li>5.   <a href="#rfc.section.5">Changes to TLS Messages and Behaviour</a></li>
+<ul><li>5.1.   <a href="#rfc.section.5.1">ClientHello</a></li>
+<li>5.2.   <a href="#rfc.section.5.2">ServerHello</a></li>
+<li>5.3.   <a href="#rfc.section.5.3">Server-sent CertificateRequest</a></li>
+<li>5.4.   <a href="#rfc.section.5.4">Server-sent Certificate and CertificateVerify</a></li>
+<li>5.5.   <a href="#rfc.section.5.5">Client-sent Certificate and CertificateVerify</a></li>
+<li>5.6.   <a href="#rfc.section.5.6">Length of Finished</a></li>
+<li>5.7.   <a href="#rfc.section.5.7">Selection of Cipher Suites</a></li>
+<li>5.8.   <a href="#rfc.section.5.8">Tickets and Connection Expiration</a></li>
+</ul><li>6.   <a href="#rfc.section.6">Cryptographic Modes</a></li>
+<ul><li>6.1.   <a href="#rfc.section.6.1">Quantum Relief for Encryption in TLS 1.3</a></li>
+<li>6.2.   <a href="#rfc.section.6.2">Quantum Relief for Encryption in TLS 1.2</a></li>
+<li>6.3.   <a href="#rfc.section.6.3">Kerberos Ticket as Certificate and CertificateVerify</a></li>
+</ul><li>7.   <a href="#rfc.section.7">KDH-Only Application Profile</a></li>
+<li>8.   <a href="#rfc.section.8">Security Considerations</a></li>
+<ul><li>8.1.   <a href="#rfc.section.8.1">Encryption</a></li>
+<li>8.2.   <a href="#rfc.section.8.2">Server Authentication</a></li>
+<li>8.3.   <a href="#rfc.section.8.3">Client Authentication</a></li>
+</ul><li>9.   <a href="#rfc.section.9">IANA Considerations</a></li>
+<li>10.   <a href="#rfc.references">Normative References</a></li>
+<li>Appendix A.   <a href="#rfc.appendix.A">Acknowledgements</a></li>
+<li><a href="#rfc.authors">Authors' Addresses</a></li>
+
+
+  </ul>
+
+  <h1 id="rfc.section.1"><a href="#rfc.section.1">1.</a> <a href="#intro" id="intro">Introduction</a></h1>
+<p id="rfc.section.1.p.1">TLS protects many application protocols from many security problems.  To enable this, it habitually relies on public-key cryptography.  But in the foreseeable future, quantum computers are expected to destroy these public-key underpinnings.  This endangers TLS, because encrypted data may be captured and stored, ready for decryption as soon as quantum computers hit the playing field.</p>
+<p id="rfc.section.1.p.2">With present-day applications of TLS threatened by quantum computers, some may not be able to live up to user's legal requirements for long-term encryption.  There even is a risk of future power imbalances between those who have a quantum computer and those who have not.</p>
+<p id="rfc.section.1.p.3">One solution is to not rely solely on public-key cryptography, but instead mix in secret entropy that a future quantum computing entity cannot decipher.  In this light, Kerberos offers an interesting perspective, as it builds a symmetric-key infrastructure including cross-realm connectivity options.  Kerberos is considered safe from quantum computers, as long as its public-key extensions are avoided.</p>
+<p id="rfc.section.1.p.4">Herein, we specify a quantum_relief extension that mixes secret entropy from another source into the TLS key computations. This concrete mechanism, which relies on Kerberos for relief against quantum computing and on (Elliptic-Curve) Diffie-Hellman for Perfect Forward Secrecy (and to stop the sphere of influence of the KDC administrator), shall be referred to as Kerberised Diffie-Hellman or KDH.  A definition is included for a KDH-Only Application Profile, to facilitate small and simple implementations.</p>
+<h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#qr" id="qr">Quantum Relief as a General Mechanism</a></h1>
+<p id="rfc.section.2.p.1">The PSK mechanism in TLS 1.3 and 1.2 allows insertion of key material which is referenced by name alone.  A naming system is defined, but its interpretation resides under local policy, which is enough for internal use cases, but it is insufficient for general use between any two parties.</p>
+<p id="rfc.section.2.p.2">Cryptographically however, the entropy from the PSK mechanism in TLS 1.3 is secret to external observers, and mixed with the DHE material using a series of HKDF-Extract and -Expand operations [<a href="#RFC5869">[RFC5869]</a>].  When used on their own, the DHE material can be reversed by quantum computers and any subsequent HKDF computations redone, uncovering the complete key schedule of TLS.  The extra source of entropy inserted for a PSK however, will have to be uncovered separately, and this will not be possible in the general case.</p>
+<p id="rfc.section.2.p.3">This specification therefore defines a quantum_relief extension that replaces the locally useful PSK scheme with a generally usable mechanism for the insertion of secret entropy into the TLS 1.3 key schedule at the position otherwise used by the PSK; this sacrifices support for 0-RTT data in TLS 1.3.  In TLS 1.2, an extension to the computation of the master secret inserts the extra entropy.</p>
+<p id="rfc.section.2.p.4">In order to provide sufficient Quantum Relief the added entropy must meet the following conditions: </p>
+
+<ul>
+  <li>The amount of entropy must on its own suffice for the security level of the TLS connection.</li>
+  <li>The entropy should only be known to parties that are not expected to operate a quantum computer (for example because they are nearby, contractually bound or otherwise within batting range).</li>
+  <li>Only quantum-proof mechanisms should be used for the generation of the entropy.</li>
+</ul>
+<p id="rfc.section.2.p.5">In terms of algorithms that are commonplace today, the third requirement is generally believed to be met by secure hashes and symmetric encryption.  The problem with these is sharing random information secretely and at the same time controlling who has access to these secrets.</p>
+<h1 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a> <a href="#qr-p2p" id="qr-p2p">Peer-to-Peer Flow</a></h1>
+<p id="rfc.section.2.1.p.1">Besides the customary client-to-server flow there is also support for a peer-to-peer flow under Quantum Relief.  When this is used, the ClientHello sent to a TLS server by an initiating peer holds a peernametype other than "none" followed by a corresponding name for the responding peer.</p>
+<p id="rfc.section.2.1.p.2">Without documenting it here, the TLS server is assumed to have some method of locating a responding peer with this information, and proxying the entire TLS connection to its endpoint.  The only service performed by the TLS server is relaying the literal TLS connection between the initiating client/peer and this responding peer.  The TLS server is not involved in cryptographic computations for the TLS connection.</p>
+<h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#tls-kdh" id="tls-kdh">TLS-KDH for Quantum Relief through Kerberos</a></h1>
+<p id="rfc.section.3.p.1">TLS-KDH is a mode of using TLS that was designed to provide two things, (1) an alternative to PKIX credentials in TLS <a href="#RFC5280">[RFC5280]</a> and (2) Quantum Relief for TLS connections.</p>
+<p id="rfc.section.3.p.2">The infrastructure of Kerberos provides a good balance between the requirements for a Quantum Relief mechanism, as a result of key derivation to hierarchical expansion of locally controlled secrets.</p>
+<p id="rfc.section.3.p.3">In the TLS 1.3 key schedule, the quantum_relief extension replaces the input from a PSK; the two extensions are not considered useful when combined.  In TLS 1.2, a similar result is achieved by enhancing the pre-master secret independently of the negotiated cipher suite.</p>
+<p id="rfc.section.3.p.4">In addition to Quantum Relief, TLS-KDH can offer authentication based on Kerberos tickets.  This introduces new facilities into TLS, such as deferred authentication, anonymous realm users and centralised facilitation of realm crossover.</p>
+<h1 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a> Injecting Kerberos-derived Entropy</h1>
+<p id="rfc.section.3.1.p.1">Whether a Ticket is supplied in the ClientHello or returned by a responding peer in the ServerHello, it yields a key only known to the two connecting parties.  This key is used in standard Kerberos encryption of the concatenated random data from ClientHello and ServerHello.  This means that both parties influence the entropy gathered and can derive a sequence of bytes that is unknown to anyone else.  The output from the encryption operation is plugged into the key schedule instead of the PSK input parameter.  This input is suited for entropy of arbitrary size.</p>
+<h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#kdh-c2s" id="kdh-c2s">Client-to-Server Flow</a></h1>
+<p id="rfc.section.3.2.p.1">The flow of TLS 1.3 works best when encryption is provided early, and authentication is provided late.  These aspects are often combined in Kerberos, but KDH splits them to resemble TLS patterns more closely, offering separate Kerberos-based protocol fragments for (1) additional secret entropy for encryption, (2) client authentication through Kerberos Tickets and (3) server authentication through Kerberos Tickets.  Only (1) provides Quantum Relief.  The server cannot initiate Kerberos, so (3) without (1) is not possible.  When (2) is used without (1), Quantum Relief is not achieved.</p>
+<p id="rfc.section.3.2.p.2">The TLS-KDH flow uses ClientHello and ServerHello for a Kerberos-protected exchange of entropy, but it completely ignores the client identity during this phase.  This allows clients to use an anonymous Ticket in the ClientHello message and consider authenticating with an identifying Ticket in later client Certificate and CertificateVerify messages.</p>
+<p id="rfc.section.3.2.p.3">Server identity however, is observed in all Tickets, so any use of the Ticket&#8217;s contained key by the server suffices as proof of its identity.  This renders the server Certificate and CertificateVerify messages redundant if the server accepts the KDH extension, especially in TLS 1.3 because the Finished message follows immediately.  But redundancy can be a feature; it is certainly legitimate to also authenticate the server with an explicit Kerberos Ticket, a PKIX certificate or other form.</p>
+<p id="rfc.section.3.2.p.4">When the server desires proof of client identity, it sends a CertificateRequest.  KDH introduces a certificate type for a Kerberos Ticket, relying on a Kerberos Authenticator as CertificateVerify message.  The server is also able to use this to prove being able to use a supplied Ticket with its identity.</p>
+<h1 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a> <a href="#kdh-p2p" id="kdh-p2p">Peer-to-Peer Flow</a></h1>
+<p id="rfc.section.3.3.p.1">TLS-KDH supports the peer-to-peer flow when the QuantumRelief extensions specifies "krb5princrealm" as peernametype, followed by a TGT from the initiating peer.  This initiating peer MAY use an anonymous name for itself in the TGT.</p>
+<p id="rfc.section.3.3.p.2">The responding peer returns in its ServerHello a Ticket based on this TGT, obtained through the user-to-user flow of Kerberos.  This return Ticket will reverse the client and server role for Kerberos compared to TLS, but for peer-to-peer connectivity that is not an issue.  The responding peer will authenticate itself to the initiating peer through its use of this return Ticket and it can decide whether authentication of the initiating client is desired.</p>
+<p id="rfc.section.3.3.p.3">If and when the TLS client authenticates through a Kerberos Ticket, it uses the responding peer name as the service name and its own name as the client name, in line with the TLS roles for client and server.</p>
+<h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> New Data Types and Procedures</h1>
+<p id="rfc.section.4.p.1">The following data structures are introduced to define the Quantum Relief mechanism for TLS 1.3 and 1.2. Additionally, specific values and procedures are defined for the TLS-KDH mechanism that implements one specific form of quantum relief for TLS.</p>
+<h1 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a> Quantum Relief Extension</h1>
+<p id="rfc.section.4.1.p.1">This section defines a new TLS extension called quantum_relief that enables quantum relief for TLS as defined in <a href="#qr">Section 2</a>. The extension is designed such that it can be applied generically. As a concrete quantum relief implementation we herein define how this exentions must be used for TLS-KDH [<a href="#tls-kdh">Section 3</a>]. Future mechanisms may extend this definition.</p>
+<p id="rfc.section.4.1.p.2">In order to distinguish between different Quantum Relief methods a QuantumReliefMethod tag is defined to set KDH aside from possible future forms which, to be eligable, MUST assure they meet the conditions for providing proper entropy [<a href="#qr">Section 2</a>].</p>
+<pre>
+enum {
+    kdh(0),
+    (65535)
+} QuantumReliefMethod;
+</pre>
+<p id="rfc.section.4.1.p.3">The value "kdh" is used for the TLS-KDH form of Quantum Relief defined herein.</p>
+<p id="rfc.section.4.1.p.4">A TLS ClientHello can additionally specify a name for a peer that it wants to respond, for which various application-independent forms may be anticipated. This is captured in yet another tag PeerNameType, of which only a type for unencrypted Kerberos names is currently defined (i.e. krb5princrealm).</p>
+<pre>
+enum {
+    none(0),
+    krb5princrealm(1),
+    (65535)
+} PeerNameType;
+</pre>
+<p id="rfc.section.4.1.p.5">The value "none" is used for client-to-server TLS connections.  The value "krb5princrealm" is used in a ClientHello to indicate a Kerberos PrincipalName and Realm [Section 5.2.2 of <a href="#RFC4120">[RFC4120]</a>] for the responding peer sought behind the TLS server in peer-to-peer TLS connections.</p>
+<p id="rfc.section.4.1.p.6">The Quantum Relief Extension is now defined as follows:</p>
+<pre>
+struct {
+    PeerNameType peernametype;
+    select (peernametype) {
+        case none:
+            /* No peer name type */
+            Empty;
+        case krb5princrealm:
+            /* PrincipalName and Realm, resp. */
+            struct {
+                opaque krb5princ&lt;3..1023&gt;;
+                opaque krb5realm&lt;3..1023&gt;;
+            } krb5PrincipalRealm;
+    }
+    QuantumReliefMethod qh_method;
+    select (qh_method) {
+        case kdh:
+            /* Empty, ticket or TGT */
+            opaque opt_ticket&lt;0..65535&gt;;
+    }
+} QuantumRelief;
+</pre>
+<p id="rfc.section.4.1.p.7">This structure is used as extension_data corresponding to the quantum_relief(TBD:QREXTTYPE) extension_type, to occur only during ClientHello and ServerHello.</p>
+<h1 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a> Ticket-based Encryption Procedure</h1>
+<p id="rfc.section.4.2.p.1">The TLS-KDH messages and cryptographic computations require the use of the key concealed in a Ticket to produce a binary object that cryptographically binds its input to the key.  It is variably used as a source of entropy and as proof, but it is always obtained through a standard encryption procedure for Kerberos.</p>
+<pre>
+Signature:
+ o = Ticket-Encrypt (t, u, h)
+
+Input:
+ - Ticket t
+ - KeyUsage u
+ - Hash h
+
+Output:
+ - OctetString o
+
+Steps:
+ 1. base-key     = t.enc-part.key
+ 2. specific-key = rfc3961.key-derivation (base-key, u)
+ 3. init-state   = rfc3961.initial-cipher-state (
+                   specific-key, DIRECTION_ENCRYPT)
+ 4. (state,o)    = rfc3961.encrypt (specific-key, init-state)
+</pre>
+<p id="rfc.section.4.2.p.2">Not shown in the procedure, there is a need to decrypt the enc-part of the Ticket before the key concealed in it can be extracted.  This is where proof of identity comes into play; only the two parties connected by the Ticket should be able to perform this decryption.</p>
+<p id="rfc.section.4.2.p.3">The name prefix "rfc3961" points to the generic descriptions for Kerberos key-based procedures <a href="#RFC3961">[RFC3961]</a> that are implemented with various algorithms.  Available algorithms are listed in the IANA Registry of Kerberos Parameters.</p>
+<p id="rfc.section.4.2.p.4">The Key Usage values are numbers, for which the following are defined by this specification.  Their number ranges are deliberately chosen to not clash with those of Kerberos, but otherwise compliant to the application range [Section 7.5.1 of <a href="#RFC4120">[RFC4120]</a>].  The Key Usage values are referenced by name elsewhere in this specification.</p>
+<pre>
+2008 = KEYUSAGE_TLS12KDH_PREMASTER_QH
+2018 = KEYUSAGE_TLSKDH_CLIENT_QH
+2019 = KEYUSAGE_TLSKDH_SERVER_QH
+2020 = KEYUSAGE_TLSKDH_SERVER_VFY
+2021 = KEYUSAGE_TLSKDH_CLIENT_VFY
+</pre>
+<h1 id="rfc.section.4.3"><a href="#rfc.section.4.3">4.3.</a> Kerberos Ticket and TGT</h1>
+<p id="rfc.section.4.3.p.1">Where this text speaks of a TGT, short for Ticket Granting Ticket, it imposes the following requirements to the PrincipalName in the sname field of a Ticket: </p>
+
+<ul>
+  <li>The name-type is set to NT-SRV-INST or 2</li>
+  <li>The name-string consists of two component strings</li>
+  <li>The first name-string component string is the fixed string krbtgt</li>
+</ul>
+<p id="rfc.section.4.3.p.2">To be a TGT, all these requirements MUST be met by a Ticket; a Ticket that should be a TGT but does not meet all these conditions is badly formed and the recipient MUST respond to it by reporting error bad_certificate and closing the connection.</p>
+<h1 id="rfc.section.4.4"><a href="#rfc.section.4.4">4.4.</a> Certificate Types</h1>
+<p id="rfc.section.4.4.p.1">In order to be able to negotiate Kerberos Tickets as certificate types for the Certificate messages, a new certifcate type is introduced that can be used in the "client_certificate_type" and "server_certificate_type" extensions: </p>
+
+<ul>
+  <li>Kerberos Ticket (TBD:KRBTKT-CERTTP)</li>
+</ul>
+<h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> Changes to TLS Messages and Behaviour</h1>
+<p id="rfc.section.5.p.1">Although TLS-KDH does not introduce any new messages for TLS, there are however a few modifications to the contents or the manner of processing of existing messages.  Unless specified otherwise, the modifications apply to TLS 1.3 and 1.2 alike.</p>
+<h1 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> ClientHello</h1>
+<p id="rfc.section.5.1.p.1">When this message contains the "quantum_relief" extension, its "qh_method" MUST be set to "kdh" under this specification.  Further requirements to this extension depend on the pattern of use being client-to-server [<a href="#kdh-c2s">Section 3.2</a>] or peer-to-peer [<a href="#kdh-p2p">Section 3.3</a>].</p>
+<p id="rfc.section.5.1.p.2">To initiate client-to-server traffic, the "peernametype" MUST be set to "none", and the "opt_ticket" MUST be a Ticket with the service name, host or domain name and Kerberos realm of the addressed service.  The client name in the "opt_ticket" MAY be an anonymous identity and the server MUST ignore the client identity in the "opt_ticket".  When the "server_name" extension is also sent, there SHOULD be restrictions enforced by the server on its relation with the service name in the "opt_ticket", but this may involve domain-to-hostname mappings, for instance through DNS SRV records under DNSSEC protection.</p>
+<p id="rfc.section.5.1.p.3">To initiate peer-to-peer traffic that could be proxied through the TLS server to end at a responding peer, the "peernametype" MUST NOT be set to "none", and the "opt_ticket" MUST be a TGT for the TLS client, suited for the ticket granting service of the TLS server&#8217;s realm; it is permitted for the client to use an anonymous identity in this TGT and the server MUST ignore the client identity in the "opt_ticket".  When the "peernametype" is set to "krb5princrealm", the "krb5princ" and "krb5realm" fields MUST be set to the Kerberos PrincipalName and Realm for the desired responding peer.  Future extensions may introduce alternative forms of responding peer identity and a TLS server SHOULD be open to the general idea of identity.</p>
+<p id="rfc.section.5.1.p.4">When a ClientHello message contains the "quantum_relief" extension, it MUST NOT include any references to a PSK.  It MAY independently negotiate client and server certificate types <a href="#RFC7250">[RFC7250]</a> and cipher suites.</p>
+<h1 id="rfc.section.5.2"><a href="#rfc.section.5.2">5.2.</a> ServerHello</h1>
+<p id="rfc.section.5.2.p.1">When the server accepts the "quantum_relief" extension, it replies with its own "quantum_relief" extension and refrains from making any PSK references.  This specification defines a response to ClientHello extensions with "qh_method" set to "kdh", for which the ServerHello extension MUST be set to "kdh" also.</p>
+<p id="rfc.section.5.2.p.2">When the ClientHello extension had its "peernametype" set to "none", the ServerHello extension responds to a client-to-server connection request.  The TLS data will be procesed on the server and the response extension MUST set the "opt_ticket" field to a zero-length byte string.</p>
+<p id="rfc.section.5.2.p.3">When the ClientHello extension had its "peernametype" set to another value than "none", then the TLS server SHOULD use this to locate a responding peer, which may have registered through a mechanism not specified herein, and proxy the TLS traffic to this responding peer.  The TLS server continues to proxy TLS traffic until the connection closes.  When such peer-to-peer connectivity is not supported by a TLS server or when the peer name could not be resolved or when the responding peer is unresponsible, the TLS server MUST send a handshake_failure alert and close the connection.</p>
+<p id="rfc.section.5.2.p.4">When a responding peer, possibly after registering with a TLS server as a recipient for peer-to-peer TLS connections, receives a ClientHello with a "quantum_relief" extension with "qh_method" set to "kdh" and a "peernametype" and "peername" that it recognises as its own and with a TGT in the "opt_ticket" field, it should engage in a user-to-user ticket request with the ticket granting service for its realm.  It MUST reject the connection if this procedure fails.  When a Ticket is obtained, it constructs a ServerHello with a "quantum_relief" extension, sets "qh_method" to "kdh" and "peernametype" to "none", and "opt_ticket" to the just-obtained Ticket.  Furthermore, it continues to act as though the client had contacted it directly, while being forgiving to the proxied nature of the connection that carries the TLS traffic.  There are no grounds for assuming anything about the client identity.</p>
+<h1 id="rfc.section.5.3"><a href="#rfc.section.5.3">5.3.</a> Server-sent CertificateRequest</h1>
+<p id="rfc.section.5.3.p.1">Since client identity is ignored by the server or responding peer during ClientHello and ServerHello and may indeed be toned down to an anonymous identity, a server-side requiring to know its client MAY send a CertificateRequest in order to verify the client's identity. The CertificateRequest MUST be sent when a client_certificate_type has been negotiated <a href="#RFC7250">[RFC7250]</a>. When permitted by the TLS 1.3 client with the post_handshake_auth extension, this MAY also be sent at any later time.  Under TLS 1.2, TLS renegotiation permits a similar facility.</p>
+<h1 id="rfc.section.5.4"><a href="#rfc.section.5.4">5.4.</a> Server-sent Certificate and CertificateVerify</h1>
+<p id="rfc.section.5.4.p.1">The Certificate and CertificateVerify messages are not always required, because (1) the "quantum_relief" extension captures the server identity, and (2) proof thereof is deferred to Finished, which under TLS 1.3 is available to the client before it sends the client Certificate.  Even in cases when it is not strictly required, a server MAY opt for sending server Certificate and CertificateVerify.</p>
+<p id="rfc.section.5.4.p.2">The "server_certificate_type" extension may be used to negotiate any supported type for these messages, including the Kerberos Ticket certificate type defined herein.  When not negotiated, the default type is a PKIX certificate <a href="#RFC5280">[RFC5280]</a>.  Note that a server cannot initiate a Kerberos exchange, so a Kerberos type cannot be used when the client did not send (or the server rejected) a "quantum_relief" extension or when the extension did not provide a Ticket or TGT such as it does when the "qh_method" is "kdh".</p>
+<h1 id="rfc.section.5.5"><a href="#rfc.section.5.5">5.5.</a> Client-sent Certificate and CertificateVerify</h1>
+<p id="rfc.section.5.5.p.1">Under TLS 1.3, the server can request client authentication by sending a CertificateRequest message. It is possible for servers to do this at any time (provided that the client has sent the "post_handshake_auth" extension), and possibly multiple times; TLS 1.3 even defines how to handle overlapping requests for client authentication.</p>
+<p id="rfc.section.5.5.p.2">Clients MAY choose to respond to a CertificateRequest by sending a Certificate and CertificateVerify, and the server MAY choose to close the connection if the client chooses otherwise.</p>
+<p id="rfc.section.5.5.p.3">The "client_certificate_type" extension may be used to negotiate any supported type for these messages, including the Kerberos Ticket certificate type defined before.  When not negotiated, the default type is X.509.  Note that a client can produce a Kerberos Ticket even when no "quantum_relief" extension was negotiated during ClientHello and/or ServerHello, or even when another "qh_method" than "kdh" was agreed. However, a client MUST NOT send Certifcate and CertificateVerify messages if it did not receive a CertificateRequest from the server.</p>
+<h1 id="rfc.section.5.6"><a href="#rfc.section.5.6">5.6.</a> Length of Finished</h1>
+<p id="rfc.section.5.6.p.1">Under TLS 1.3, the Finished message is as long as the transcript hash.  Under TLS 1.2, this is negotiable.  For TLS-KDH under TLS 1.2 the client MUST request the "verify_data" length within the Finished message to be as long as the output length of the hash being used to compute it, and the server MUST accept this.</p>
+<h1 id="rfc.section.5.7"><a href="#rfc.section.5.7">5.7.</a> Selection of Cipher Suites</h1>
+<p id="rfc.section.5.7.p.1">Under TLS 1.3, all current cipher suites incorporate (Elliptic-Curve) Diffie-Hellman.  Under TLS 1.2 this is optional.  For TLS-KDH the client MUST offer cipher suites that include these forms (i.e. ECDHE) of key agreement and the server MUST NOT select a cipher suite without any of these forms of key agreement.</p>
+<h1 id="rfc.section.5.8"><a href="#rfc.section.5.8">5.8.</a> Tickets and Connection Expiration</h1>
+<p id="rfc.section.5.8.p.1">Tickets in Kerberos represent a key-based connection between two peers.  The key material in a Ticket is time-limited in the understanding that a client can always request a new Ticket if so desired.  Expiration of a Ticket SHOULD be matched with a teardown of the service.  In terms of TLS-KDH, that means that the connection SHOULD NOT exist beyond the life time of a Ticket.  Each side can independently close down the TLS connection with an certificate_expired alert.</p>
+<p id="rfc.section.5.8.p.2">To avoid this, it is possible to request a new client Certificate and CertificateVerify through a new CertificateRequest, best sent sometime before expiry.  The client then acquires a fresh or prolonged Ticket and once exchanged the connection may continue up to the timeout of the new Ticket.</p>
+<p id="rfc.section.5.8.p.3">The timeout is updated by every new Ticket supplied in the "opt_ticket" field of a "quantum_relief" extension with "qh_method" set to "kdh", or by a Certificate of type Kerberos Ticket, provided that it is followed by a valid CertificateVerify.</p>
+<p id="rfc.section.5.8.p.4">A server MUST NOT send data over a connection with a timed-out Ticket, but SHOULD request a fresh one or disconnect.  A client MUST NOT send data over a connection with a timed-out Ticket according to its local clock, but it MAY await the arrival a fresh Ticket.  Data arriving over a connection with a timed-out Ticket is considered a failure to refresh a ticket.  It is a good precaution to request a fresh Ticket a few minutes before the active one expires, to compensate for clock skew between TLS end points.</p>
+<p id="rfc.section.5.8.p.5">Kerberos supports Tickets with future validity times, intended for such things as nightly batch jobs that require authentication.  By default, a TLS stack MUST reject such Tickets until they start being valid.  It is however possible for applications to override this behaviour and treat the connection especially after being informed of the future time at which it becomes valid.</p>
+<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> Cryptographic Modes</h1>
+<p id="rfc.section.6.p.1">The introduction of the Quantum Relief extension (in combination with TLS-KDH) leads to a few cryptographic changes to the TLS protocol.  Below, the three modes introduced are discussed independently.  Separate treatment for TLS 1.3 and 1.2 is only necessary for Quantum Relief encryption.  The aspects of client and server authentication with Kerberos Tickets use the same data structures and are discussed together.</p>
+<h1 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a> Quantum Relief for Encryption in TLS 1.3</h1>
+<p id="rfc.section.6.1.p.1">Under client-to-server TLS-KDH, the "opt_ticket" in the "quantum_relief" extension in the ClientHello is used to supply external (quantum proof) key material.  Under peer-to-peer TLS-KDH, the TGT in the "opt_ticket" supplies no shared key material to the client and server (or responding peer), but the ServerHello returns a "quantum_relief" extension with an "opt_ticket" field holding a Ticket that does supply a shared key to use.</p>
+<p id="rfc.section.6.1.p.2">This key is used to compute Ticket-Encrypt (opt_ticket, usage, ClientHello.random || ServerHello.random) where || signifies concatenation, and usage is either KEYUSAGE_TLSKDH_CLIENT_QR for a Ticket supplied by the client, or KEYUSAGE_TLSKDH_SERVER_QR for a Ticket supplied by the server side (or responding peer).  The output of this computation is provided instead of the PSK on the left of the Key Schedule for TLS 1.3 [page 93 of <a href="#RFC8446">[RFC8446]</a>].  Note how the ServerHello is involved in this computation, and not just the ClientHello; had PSK facilities been used, then this seeding would have arrived too late to provide the binder_key, client_early_traffic_secret and early_exporter_master_key.  But replacing the locally oriented PSK mechanism with TLS-KDH, means that there is no facility for early data or other PSK facilities, so these keys need not be computed.</p>
+<p id="rfc.section.6.1.p.3">Other "qh_method" values than "kdh" are likely to come up with other computations.  There may be some that prefer to influence only the master key by replacing the 0 value for key input as it is shown in the TLS 1.3 key schedule.</p>
+<h1 id="rfc.section.6.2"><a href="#rfc.section.6.2">6.2.</a> Quantum Relief for Encryption in TLS 1.2</h1>
+<p id="rfc.section.6.2.p.1">TLS 1.2 does not offer any form of encryption during the handshake, so Quantum Relief for TLS 1.2 can only be used to strengthen the Master Secret.  When the "quantum_relief" extension with the "kdh" method is accepted by the server, a Ticket is available while forming the ServerHello; it is in the ClientHello for client-to-server mode and in the ServerHello for peer-to-peer mode.  Call this Ticket qrt and use it to compute Ticket-Encrypt (qrt, KEYUSAGE_TLS12KDH_PREMASTER_QH, ClientHello.random || ServerHello.random), where || denotes concatenation.  The output of this procedure is a octet string which is prepended to what the cipher-suite defines as its pre-master secret.  This prepended form is then used instead of the normal pre-master secret during the computation of the master key.</p>
+<h1 id="rfc.section.6.3"><a href="#rfc.section.6.3">6.3.</a> Kerberos Ticket as Certificate and CertificateVerify</h1>
+<p id="rfc.section.6.3.p.1">Kerberos Tickets(TBD:KRBTKT-CERTTP) can be negotiated independently as client_certificate_type and server_certificate_type <a href="#RFC7250">[RFC7250]</a>, though the latter is impossible without a client certificate; in TLS-KDH, a client certificate is available when the server accepts the client's quantum_relief extension.</p>
+<p id="rfc.section.6.3.p.2">The contents of the Certificate message when the certificate type is negotiated as this "Kerberos" certificate type is a Kerberos Ticket <a href="#RFC4120">[RFC4120]</a>.</p>
+<p id="rfc.section.6.3.p.3">The contents of the corresponding CertificateVerify message uses this Ticket k5crt to compute Ticket-Encrypt (k5crt, KEYUSAGE_CLIENT_VFY, th) for a client CertificateVerify message or Ticket-Encrypt (k5crt, KEYUSAGE_SERVER_VFY, th) for a server CertificateVerify message, where th is the customary hash up to and including the preceding Certificate message.  For TLS 1.3, this customary hash uses the transcript hash; for TLS 1.2, the hash algorithm must match the Certificate signing algorithm, which in case of a Kerberos Ticket means its MAC hashing algorithm without reductions in the size of the hash output.</p>
+<h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> KDH-Only Application Profile</h1>
+<p id="rfc.section.7.p.1">The default use of TLS involves authentication based on X.509 certificates.  In some scenarios such a PKI is not available or not desirable.  For this reason, the remainder of this section defines an alternative, KDH-Only Application Profile as minimally being TLS-KDH compliant.</p>
+<p id="rfc.section.7.p.2">TLS-KDH-compliant applications MUST implement the TLS_AES_128_GCM_SHA256 [GCM] cipher suite and SHOULD implement the TLS_AES_256_GCM_SHA384 [GCM] and TLS_CHACHA20_POLY1305_SHA256 [RFC8439] cipher suites.</p>
+<p id="rfc.section.7.p.3">TLS-KDH-compliant applications MUST support the Kerberos Ticket certificate type.  They also MUST treat X.509 as the default certificate type, but they MAY refuse any attempt to use it, either by negotiating an explicit alternative or failing to negotiate an alternative.</p>
+<p id="rfc.section.7.p.4">TLS-KDH-compliant applications MUST support key exchanges with secp256r1 (NIST P-256) and SHOULD support key exchanges with X25519 [RFC7748].</p>
+<p id="rfc.section.7.p.5">TLS-KDH-compliant applications MUST support the quantum_relief TLS extension, for which the qh_method value "kdh" MUST be supported, and the peernametype value "none" MUST and "krb5princrealm" SHOULD be supported.</p>
+<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> Security Considerations</h1>
+<p id="rfc.section.8.p.1">Quantum Relief is an alternative to the PSK mechanism, which may have similar benefits for local setups, but is not subject of discussion here.  The loss of PSK facilities means that no Early Data can be sent, which can be resolved by sending the same data later.  It is a loss of efficiency, but not of security.</p>
+<h1 id="rfc.section.8.1"><a href="#rfc.section.8.1">8.1.</a> Encryption</h1>
+<p id="rfc.section.8.1.p.1">To establish that encryption has successfully been established, a party must validate encrypted data received from the other.  This is at least the case when a proper Finished message arrives, which provides ample entropy to be certain, incorporating the identities exchanged throughout the handshake.</p>
+<p id="rfc.section.8.1.p.2">In TLS 1.3, the parties may send encrypted data which may provide ample entropy as well.  The transcript hash does not include the entropy derived with the Quantum Relief extension, and so authentication cannot be used as proof of having established encryption unless it is as a provider of verifiable entropy that is wrapped in handshake encryption.</p>
+<p id="rfc.section.8.1.p.3">The late establishment of encryption has an impact on the privacy of client identity.  This identity is unprotected in TLS 1.2, but under TLS 1.3 its privacy is protected with encryption.  To ensure that the right party is communicating remotely, the Finished message SHOULD be processed before sending the client's Certificate.</p>
+<h1 id="rfc.section.8.2"><a href="#rfc.section.8.2">8.2.</a> Server Authentication</h1>
+<p id="rfc.section.8.2.p.1">The identity of the server under generic Quantum Relief needs to wait for the arrival of the server's Certificate and CertificateVery messages.  Specifically for TLS-KDH, the ability to decrypt a Ticket (for the client-to-server flow) or to produce a Ticket from a TGT (for the peer-to-peer flow) provides the same proof.  Clients MAY use this, but MUST also validate a Certificate and CertificateVerify if the server sends them.</p>
+<p id="rfc.section.8.2.p.2">Under TLS-KDH, the server produces a Ticket with identities for both client and server.  The client MUST be able to extract the secret from the Ticket, as an assurance that it is the designated receiver for this identity claim.  The verification of the CertificateVerify assures this, as well as the binding to the TLS flow through the transcript hash.</p>
+<h1 id="rfc.section.8.3"><a href="#rfc.section.8.3">8.3.</a> Client Authentication</h1>
+<p id="rfc.section.8.3.p.1">The server MUST NOT process any client identity in the QuantumRelief extension, because that may be either an anonymous identity or a pseudonym, to avoid public visibility.  When client identity is needed by the server, it MUST ask for it with a CertificateRequest.</p>
+<p id="rfc.section.8.3.p.2">The client Certificate and CertificateVerify provide the proper identity for the client, which MAY differ from any identity passed before.</p>
+<p id="rfc.section.8.3.p.3">Under TLS-KDH, the client produces a Ticket with identities for both client and server.  The server MUST be able to extract the secret from the Ticket, as an assurance that it is the designated receiver for this identity claim.  The verification of the CertificateVerify assures this, as well as the binding to the TLS flow through the transcript hash.</p>
+<h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> IANA Considerations</h1>
+<p id="rfc.section.9.p.1">IANA adds the following TLS ExtensionType Value as part of their Transport Layer Security Extensions registry:</p>
+<pre>
+Value         Extension Name  TLS 1.3  Recommended  Reference
+TBD:QREXTTYP  quantum_relief  CH, SH   Y            TBD:ThisSpec
+</pre>
+<p id="rfc.section.9.p.2">IANA adds the following TLS Certificate Type as part of their Transport Layer Security Extensions registry:</p>
+<pre>
+Value              Name             Recommended  Reference
+TBD:KRBTKT-CERTTP  Kerberos Ticket  Y            TBD:ThisSpec
+</pre>
+<p id="rfc.section.9.p.3">IANA creates a registry for the QuantumReliefMethod in the TBD: TLS Extensions registry, with the following initial entries and new entries to be assigned under a Specification Required policy.</p>
+<pre>
+Value        Method                    Reference
+-----------  ------------------------  ------------
+0            kdh                       TBD:ThisSpec
+1-65281      Unassigned
+65282-65535  Reserved for Private Use  TBD:ThisSpec
+</pre>
+<p id="rfc.section.9.p.4">IANA creates a registry for the PeerNameType in the TBD: TLS Extensions registry, with the following initial entries and new entries to be assigned under a Specification Required policy.</p>
+<pre>
+Value        Name Type                 Reference
+-----------  ------------------------  ------------
+0            none                      TBD:ThisSpec
+1            krb5princrealm            TBD:ThisSpec
+2-65281      Unassigned
+65282-65535  Reserved for Private Use  TBD:ThisSpec
+</pre>
+<h1 id="rfc.references"><a href="#rfc.references">10.</a> Normative References</h1>
+<table>
+  <tbody>
+    <tr>
+      <td class="reference">
+        <b id="RFC3961">[RFC3961]</b>
+      </td>
+      <td class="top"><a>Raeburn, K.</a>, "<a href="http://tools.ietf.org/html/rfc3961">Encryption and Checksum Specifications for Kerberos 5</a>", RFC 3961, DOI 10.17487/RFC3961, February 2005.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC4120">[RFC4120]</b>
+      </td>
+      <td class="top"><a>Neuman, C.</a>, <a>Yu, T.</a>, <a>Hartman, S.</a> and <a>K. Raeburn</a>, "<a href="http://tools.ietf.org/html/rfc4120">The Kerberos Network Authentication Service (V5)</a>", RFC 4120, DOI 10.17487/RFC4120, July 2005.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5280">[RFC5280]</b>
+      </td>
+      <td class="top"><a>Cooper, D.</a>, <a>Santesson, S.</a>, <a>Farrell, S.</a>, <a>Boeyen, S.</a>, <a>Housley, R.</a> and <a>W. Polk</a>, "<a href="http://tools.ietf.org/html/rfc5280">Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile</a>", RFC 5280, DOI 10.17487/RFC5280, May 2008.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5869">[RFC5869]</b>
+      </td>
+      <td class="top"><a>Krawczyk, H.</a> and <a>P. Eronen</a>, "<a href="http://tools.ietf.org/html/rfc5869">HMAC-based Extract-and-Expand Key Derivation Function (HKDF)</a>", RFC 5869, DOI 10.17487/RFC5869, May 2010.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC7250">[RFC7250]</b>
+      </td>
+      <td class="top"><a>Wouters, P.</a>, <a>Tschofenig, H.</a>, <a>Gilmore, J.</a>, <a>Weiler, S.</a> and <a>T. Kivinen</a>, "<a href="http://tools.ietf.org/html/rfc7250">Using Raw Public Keys in Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)</a>", RFC 7250, DOI 10.17487/RFC7250, June 2014.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC8446">[RFC8446]</b>
+      </td>
+      <td class="top"><a>Rescorla, E.</a>, "<a href="http://tools.ietf.org/html/rfc8446">The Transport Layer Security (TLS) Protocol Version 1.3</a>", RFC 8446, DOI 10.17487/RFC8446, August 2018.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="rfc.appendix.A"><a href="#rfc.appendix.A">Appendix A.</a> <a href="#ack" id="ack">Acknowledgements</a></h1>
+<p id="rfc.section.A.p.1">This specification could not have matured without the insights of various commenters.  In order of appearance, we owe thanks to Simo Sorce, Ilari Liusvaara, Watson Ladd, Benjamin Kaduk, Nikos Mavragiannopoulos, Kenneth Raeburn.  </p>
+<p id="rfc.section.A.p.2">Part of this work was conducted under a grant from the programme "[veilig] door innovatie" from the government of the Netherlands.  It has also been liberally supported by the NLnet Foundation.</p>
+<h1 id="rfc.authors">
+  <a href="#rfc.authors">Authors' Addresses</a>
+</h1>
+<div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Rick van Rein</span> 
+	  <span class="n hidden">
+		<span class="family-name">Van Rein</span>
+	  </span>
+	</span>
+	<span class="org vcardline">InternetWide.org</span>
+	<span class="adr">
+	  <span class="vcardline">Haarlebrink 5</span>
+
+	  <span class="vcardline">
+		<span class="locality">Enschede</span>,  
+		<span class="region">Overijssel</span> 
+		<span class="code">7544 WP</span>
+	  </span>
+	  <span class="country-name vcardline">The Netherlands</span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:rick@openfortress.nl">rick@openfortress.nl</a></span>
+
+  </address>
+</div><div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Tom Vrancken</span> 
+	  <span class="n hidden">
+		<span class="family-name">Vrancken</span>
+	  </span>
+	</span>
+	<span class="org vcardline">InternetWide.org</span>
+	<span class="adr">
+	  <span class="vcardline">TBD:WHICH</span>
+
+	  <span class="vcardline">
+		<span class="locality">Eindhoven</span>,  
+		<span class="region">Noord-Brabant</span> 
+		<span class="code">TBD:WHICH</span>
+	  </span>
+	  <span class="country-name vcardline">The Netherlands</span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:tom.vrancken@arpa2.org">tom.vrancken@arpa2.org</a></span>
+
+  </address>
+</div>
+
+</body>
+</html>

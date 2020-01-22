@@ -9,7 +9,7 @@
 <?rfc comments="yes" ?>
 <?rfc inline="yes" ?>
 
-<rfc ipr="trust200902" docName="draft-vanrein-tls-kdh-06" category="info">
+<rfc ipr="trust200902" docName="draft-vanrein-tls-kdh-07" category="info">
 
 <front>
 
@@ -45,7 +45,7 @@
 		</address>
 	</author>
 
-	<date day="16" month="August" year="2091"/>
+	<date day="22" month="January" year="2200"/>
 
 	<abstract>
 		<t>This specification describes a mechanism to use Kerberos
@@ -60,6 +60,9 @@
 	</abstract>
 
 <!--
+
+CHANGES FROM 06 TO 07:
+
 
 CHANGES FROM 05 TO 06:
  * Had time to sink in; many small improvements
