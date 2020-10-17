@@ -272,6 +272,12 @@ enum {
 
 <figure><artwork><![CDATA[
 struct {
+    QuantumReliefMethod qh_method;
+    select (qh_method) {
+        case kdh:
+            /* Empty, ticket or TGT */
+            opaque opt_ticket<0..65535>;
+    }
     PeerNameType peernametype;
     select (peernametype) {
         case none:
@@ -283,12 +289,6 @@ struct {
                 opaque krb5princ<3..1023>;
                 opaque krb5realm<3..1023>;
             } krb5PrincipalRealm;
-    }
-    QuantumReliefMethod qh_method;
-    select (qh_method) {
-        case kdh:
-            /* Empty, ticket or TGT */
-            opaque opt_ticket<0..65535>;
     }
 } QuantumRelief;
 ]]></artwork></figure>
