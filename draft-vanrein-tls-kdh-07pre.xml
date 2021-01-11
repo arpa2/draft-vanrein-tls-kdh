@@ -244,7 +244,8 @@ proper entropy [<xref target="qr"/>].</t>
 
 <figure><artwork><![CDATA[
 enum {
-    kdh(0),
+    none(0),
+    kdh(1),
     (65535)
 } QuantumReliefMethod;
 ]]></artwork></figure>
