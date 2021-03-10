@@ -132,12 +132,12 @@ underpinnings.  This endangers TLS, because encrypted data may be captured and s
 
 <t>One solution is to not rely solely on public-key cryptography, but instead mix in secret entropy that a future quantum computing entity cannot decipher.  In this light, Kerberos offers an interesting perspective, as it builds a symmetric-key infrastructure including cross-realm connectivity options.  Kerberos is considered safe from quantum computers, as long as its public-key extensions are avoided.</t>
 
-<t>Herein, we specify a TLS extension called "quantum_relief" [<xref="qr-ext"/>] that facilitates mixing in secret entropy
+<t>Herein, we specify a TLS extension called "quantum_relief" [<xref target="qr-ext" />] that facilitates mixing in secret entropy
 from another source into the TLS key computations. Additionally, we define a concrete mechanism
 that provides (1) a source of secret entropy and (2) an alternative authentication mechanism. This mechanism, which
 relies on Kerberos for relief against quantum computing and on
 (Elliptic-Curve) Diffie-Hellman for Perfect Forward Secrecy (and to stop the
-sphere of influence of the KDC administrator), shall be referred to as Kerberised Diffie-Hellman or KDH [<xref="tls-kdh"/>].  A definition is included for a KDH-Only Application Profile, to facilitate small and simple implementations.</t>
+sphere of influence of the KDC administrator), shall be referred to as Kerberised Diffie-Hellman or KDH [<xref target="tls-kdh" />].  A definition is included for a KDH-Only Application Profile, to facilitate small and simple implementations.</t>
 
 </section>
 
@@ -168,10 +168,8 @@ the following conditions:
 
 <t>In terms of algorithms that are commonplace today, the third requirement is generally believed to be met by secure hashes and symmetric encryption.  The problem with these is sharing random information secretely and at the same time controlling who has access to these secrets.</t>
 
-TODO beschrijf het generieke mechanisme. wat spreekt het af? wat initieert het?
-
 <section title="Peer-to-Peer Flow" anchor="qr-p2p">
-//TODO (re)move?
+<!--//TODO (re)move?-->
 <t>Besides the customary client-to-server flow there is also support for a peer-to-peer flow under Quantum Relief.  When this is used, the ClientHello sent to a TLS server by an initiating peer holds a peernametype other than "none" followed by a corresponding name for the responding peer.</t>
 
 <t>Without documenting it here, the TLS server is assumed to have some method of locating a responding peer with this information, and proxying the entire TLS connection to its endpoint.  The only service performed by the TLS server is relaying the literal TLS connection between the initiating client/peer and this responding peer.  The TLS server is not involved in cryptographic computations for the TLS connection.</t>
@@ -344,7 +342,7 @@ introduced by the TLS-KDH mechanism.</t>
 <section title="The quantum_relief KDH method">
 
 <t>TLS-KDH defines a concrete Quantum Relief method for the quantum_relief extension that is
-defined in <xref="qr-ext"/>. The necessary data type extensions are defined here.</t>
+defined in <xref target="qr-ext" />. The necessary data type extensions are defined here.</t>
 
 <figure><artwork><![CDATA[
 enum {
