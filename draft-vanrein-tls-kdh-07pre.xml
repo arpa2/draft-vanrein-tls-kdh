@@ -189,9 +189,10 @@ The extension is designed such that it can be applied generically. Its purpose i
 <t>Initiate / execute the negotiated method</t>
 <t>Inject the secret entropy, which is produced by the negotiated Quantum Relief method, into the TLS key schedule</t>
 </list>
+</t>
 
-A concrete Quantum Relief method that leverages this quantum_relief extension is TLS-KDH,
-which is defined in <xref target="tls-kdh"/>. Future mechanisms may be added by extending
+<t>A concrete Quantum Relief method that leverages this quantum_relief extension is TLS-KDH,
+which is defined in <xref target="tls-kdh" />. Future mechanisms may be added by extending
 the data structures defined for the quantum_relief extension.</t>
 
 <section title="Extension data structures">
