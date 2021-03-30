@@ -322,9 +322,9 @@ but it completely ignores the client identity during this phase.  This allows cl
 <section title="Peer-to-Peer Flow" anchor="kdh-p2p">
 
 <t>TLS-KDH also supports a peer-to-peer flow. Here, instead of sending a regular Ticket, a client sends a Ticket Granting Ticket (TGT) to the server. The server then acts
-as a proxy to relay the message to the destined peer. The initiating peer (i.e., the client) MAY use an anonymous name for itself in the TGT.</t>
+as a proxy that relays TLS traffic to the destined peer and back. The initiating peer (i.e., the client) MAY use an anonymous name for itself in the TGT.</t>
 
-<t>The server returns, on behalf of the responding peer, in its ServerHello a Ticket based on this TGT, obtained through the user-to-user flow of Kerberos.  This returned Ticket will reverse the client and server role for Kerberos compared to TLS, but for peer-to-peer connectivity that is not an issue.  The responding peer will authenticate itself to the initiating peer through its use of this returned Ticket and it can decide whether authentication of the initiating client is desired.</t>
+<t>Through the server, the responding peer returns a ServerHello with a Ticket based on this TGT, obtained through the user-to-user flow of Kerberos.  This returned Ticket will reverse the client and server role for Kerberos compared to TLS, but for peer-to-peer connectivity that is not an issue.  The responding peer will authenticate itself to the initiating peer through its use of this returned Ticket and it can decide whether authentication of the initiating client is desired.</t>
 
 <t>If and when the TLS client authenticates through a Kerberos Ticket, it uses the responding peer name as the service name and its own name as the client name, in line with the TLS roles for client and server.</t>
 
