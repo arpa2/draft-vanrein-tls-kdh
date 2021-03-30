@@ -169,10 +169,9 @@ the following conditions:
 <t>In terms of algorithms that are commonplace today, the third requirement is generally believed to be met by secure hashes and symmetric encryption.  The problem with these is sharing random information secretely and at the same time controlling who has access to these secrets.</t>
 
 <section title="Peer-to-Peer Flow" anchor="qr-p2p">
-<!--//TODO (re)move?-->
 <t>Besides the customary client-to-server flow there is also support for a peer-to-peer flow under Quantum Relief.  When this is used, the ClientHello sent to a TLS server by an initiating peer holds a peernametype other than "none" followed by a corresponding name for the responding peer.</t>
 
-<t>Without documenting it here, the TLS server is assumed to have some method of locating a responding peer with this information, and proxying the entire TLS connection to its endpoint.  The only service performed by the TLS server is relaying the literal TLS connection between the initiating client/peer and this responding peer.  The TLS server is not involved in cryptographic computations for the TLS connection.</t>
+<t>Without documenting it here, the TLS server is assumed to have some method of designating a peer with this information, and will proxies the TLS connection to its peer.  The TLS server is not involved in cryptographic computations for the relayed TLS connection; its only task is to relay TLS data from the client to the designated peer and vice versa.</t>
 
 </section>
 
@@ -230,13 +229,14 @@ struct {
     QuantumReliefMethod qr_method;
     select (qr_method) {
         case none:
-            /* Don't send this extension */
+            /* Do not send this extension */
+            Empty;
     }
     PeerNameType peernametype;
     select (peernametype) {
         case none:
             /* No peer name type */
-            Empty; //TODO
+            Empty;
     }
 } QuantumRelief;
 ]]></artwork></figure>
@@ -330,9 +330,9 @@ as a proxy to relay the message to the destined peer. The initiating peer (i.e.,
 
 </section> <!-- Peer-to-Peer Flow -->
 
-<section title="Injecting Kerberos-derived Entropy"><!-- TODO: needs rewriting -->
+<section title="Injecting Kerberos-derived Entropy">
 <t>Whether a Ticket is supplied in the ClientHello or returned by a responding peer
-in the ServerHello, it yields a key only known to the two connecting parties.  This key is used in standard Kerberos encryption of the concatenated random data from ClientHello and ServerHello. <!-- TODO: ik begrijp de vorige zin niet -->  This means that both parties influence the entropy gathered and can derive a sequence of bytes that is unknown to anyone else.  The output from the encryption operation is plugged into the key schedule instead of the PSK input parameter.  This input is suited for entropy of arbitrary size.</t>
+in the ServerHello, it yields a key only known to the two connecting parties.  This key is applied to the concatenated random data from ClientHello and ServerHello to derive a new secret.  This means that both parties influence the entropy gathered and can derive a sequence of bytes that is unknown to anyone else.  The output from the encryption operation is plugged into the key schedule instead of the PSK input parameter.  This input is suited for entropy of arbitrary size.</t>
 </section> <!-- Injecting Kerberos-derived Entropy -->
 
 <section title="New Data Types and Procedures">
@@ -396,8 +396,10 @@ struct {
 </section> <!-- The quantum_relief KDH method -->
 
 <section title="Ticket-based Encryption Procedure">
-<!-- TODO wat is het doel van deze sectie? -->
-<t>The TLS-KDH messages and cryptographic computations require the use of the key concealed in a Ticket to produce a binary object that cryptographically binds its input to the key.  It is variably used as a source of entropy and as proof, but it is always obtained through a standard encryption procedure for Kerberos.</t>
+
+<t>This section describes the procedure for encryption based on Kerberos primitives.  The procedure is referenced in other sections, for proofs and as a source of entropy.</t>
+
+<t>The TLS-KDH messages and cryptographic computations require Kerberos through their use of the key concealed in a Ticket.  The definition below produces a binary object that cryptographically binds its input to the key.</t>
 
 <figure><artwork><![CDATA[
 Signature:
@@ -440,13 +442,13 @@ Parameters.</t>
 
 <section title="Kerberos Ticket and TGT">
 
-<t>Where this text speaks of a TGT, short for Ticket Granting Ticket, it imposes the following requirements to the PrincipalName in the sname field of a Ticket:
+<t>Where this text speaks of a TGT, short for Ticket Granting Ticket, it imposes the following requirements to the PrincipalName [Section 5.2.2 of <xref target="RFC4120"/>] in the sname field of a Ticket:
 <list style="symbols" hangIndent="6">
 <t>The name-type is set to NT-SRV-INST or 2</t>
 <t>The name-string consists of two component strings</t>
 <t>The first name-string component string is the fixed string krbtgt</t>
 </list>
-<!-- TODO voorbeeld string invoegen? -->
+<!-- TOmDO: geen voorbeeld, want DER hier dumpen helpt denk ik niet echt -->
 </t>
 
 <t>To be a TGT, all these requirements MUST be met by a Ticket; a Ticket that should be a TGT but does not meet all these conditions is badly formed and the recipient MUST respond to it by reporting error bad_certificate and closing the connection.</t>
@@ -494,16 +496,16 @@ identity in the "opt_ticket".  When the "peernametype" is set to "krb5princrealm
 <section title="ServerHello">
 
 <t>This specification defines a response to ClientHello extensions with "qr_method" set to "kdh",
-for which the ServerHello extension MUST be set to "kdh" also.</t>
+for which the accepting ServerHello extension MUST also be set to "kdh".</t>
 
 <t>When the ClientHello extension had its "peernametype" set to "none", the
 ServerHello extension responds to a client-to-server connection request.  The
-TLS data will be processed on the server and the response extension MUST set the "opt_ticket" field to a zero-length byte string.</t><!-- TODO welke data wordt hier bedoeld? -->
+TLS data will be processed on the server and the response extension MUST set the "opt_ticket" field to a zero-length byte string containing the server's service ticket.</t>
 
-<t>When the ClientHello extension had its "peernametype" set to another value than "none", then the TLS server SHOULD use this to locate a designated peer, which may have registered through a mechanism not specified herein, and proxy the TLS traffic to this designated peer.  The TLS server continues to proxy TLS traffic until the connection closes.  When such peer-to-peer connectivity is not supported by a TLS server or when the peer name could not be resolved or when the responding peer is unresponsible, the TLS server MUST send a handshake_failure alert and close the connection.</t>
+<t>When the ClientHello extension had its "peernametype" set to another value than "none", then the TLS server SHOULD use this to locate a designated peer, which may have registered through a mechanism not specified herein, and proxy the TLS traffic to this designated peer.  The TLS server continues to proxy TLS traffic until the connection closes.  When such peer-to-peer connectivity is not supported by a TLS server or when the peer name could not be resolved to a designated peer or when the designated peer is unresponsible, the TLS server MUST send a handshake_failure alert and close the connection.</t>
 
 <t>When a designated peer, possibly after registering with a TLS server as a
-recipient for peer-to-peer TLS connections, receives a ClientHello with a <!-- TODO check: het lijkt me niet dat de peer een clienthello ontvangt toch? de tls server zal alleen de TGT forwarden toch? -->
+recipient for peer-to-peer TLS connections, receives a ClientHello with a
 "quantum_relief" extension with "qr_method" set to "kdh" and a
 "peernametype" and "peername" that it recognises as its own and with a TGT in
 the "opt_ticket" field, it SHOULD engage in a user-to-user ticket request with
@@ -564,8 +566,9 @@ authentication, a client Certificate message is mandatory in order for both part
 to authenticate. If the client does not provide a ticket via a Certificate message
 then the server MUST abort the handshake.</t>
 
-<t>Note that under TLS-KDH a CertificateVerify message consists of a Kerberos Authenticator.
-The Authenticator serves as the Kerberos equivalent of a digital signature.</t><!-- TODO verwijzen naar uitleg en requirements van een authenticator -->
+<t>Note that under TLS-KDH a CertificateVerify message consists of a Kerberos Authenticator
+[Section 5.5.1 of <xref target="RFC4120"/>].
+The Authenticator serves as the Kerberos equivalent of a digital signature.</t>
 
 <t>The "client_certificate_type" extension may be used to negotiate any
 supported type for
@@ -610,7 +613,7 @@ field of a "quantum_relief" extension with "qr_method" set to "kdh", or by a Cer
 
 <t>A server MUST NOT send data over a connection with a timed-out Ticket, but SHOULD request a fresh one or disconnect.  A client MUST NOT send data over a connection with a timed-out Ticket according to its local clock, but it MAY await the arrival a fresh Ticket.  Data arriving over a connection with a timed-out Ticket is considered a failure to refresh a ticket.  It is a good precaution to request a fresh Ticket a few minutes before the active one expires, to compensate for clock skew between TLS endpoints.</t>
 
-<t>Kerberos supports Tickets with future validity times, intended for such things as nightly batch jobs that require authentication.  By default, a TLS stack MUST reject such Tickets until they start being valid.  It is however possible for applications to override this behaviour and treat the connection especially after being informed of the future time at which it becomes valid.</t> <!-- TODO treat it how? ik snap die zin niet helemaal -->
+<t>Kerberos supports Tickets with future validity times, intended for such things as nightly batch jobs that require authentication.  By default, a TLS stack should reject such Tickets until they start being valid.  Specific applications may however be aware of this enhancement and deliberately override this default behaviour; an example would be an application that schedules such nightly jobs.</t>
 
 </section> <!-- Tickets and Connection Expiration -->
 
@@ -632,8 +635,11 @@ data structures and are discussed together.</t>
 <t>Under client-to-server TLS-KDH, the "opt_ticket" in the "quantum_relief"
 extension in the ClientHello is used to supply external (quantum proof) key material.  Under peer-to-peer TLS-KDH, the TGT in the "opt_ticket" supplies no shared key material to the client and server (or responding peer), but the ServerHello returns a "quantum_relief" extension with an "opt_ticket" field holding a Ticket that does supply a shared key to use.</t>
 
-<t>This key is used to compute Ticket-Encrypt (opt_ticket, usage, <!-- TODO is er een manier om een functie call of berekening helder weer te geven? ipv inline -->
-ClientHello.random || ServerHello.random) where || signifies concatenation, and
+<t>This key is used to compute
+<figure><artwork><![CDATA[
+Ticket-Encrypt (opt_ticket, usage, ClientHello.random || ServerHello.random)
+]]></artwork></figure>
+where || signifies concatenation, and
 usage is either KEYUSAGE_TLSKDH_CLIENT_QR for a Ticket supplied by the client,
 or KEYUSAGE_TLSKDH_SERVER_QR for a Ticket supplied by the server side (or
 responding peer).  The output of this computation is provided instead of the PSK on
@@ -649,22 +655,29 @@ the left of the Key Schedule for TLS 1.3 [page 93 of <xref target="RFC8446"/>]. 
 the "quantum_relief" extension with the "kdh" method is accepted by the server, a Ticket is
 available while forming the ServerHello; it is in the ClientHello for
 client-to-server mode and in the ServerHello for peer-to-peer mode.  Call this
-Ticket qrt and use it to compute Ticket-Encrypt (qrt, KEYUSAGE_TLS12KDH_PREMASTER_QH, ClientHello.random || ServerHello.random),
+Ticket qrt and use it to compute
+<figure><artwork><![CDATA[
+Ticket-Encrypt (qrt, KEYUSAGE_TLS12KDH_PREMASTER_QH, ClientHello.random || ServerHello.random)
+]]></artwork></figure>
 where || denotes concatenation.  The output of this procedure is an octet string which is prepended to what the cipher-suite defines as its pre-master secret.  This prepended form is then used instead of the normal pre-master secret during the computation of the master key.</t><!-- wellicht kunnen we de formules hier nog wat duidelijk beschrijven? -->
 
 </section> <!-- Quantum Relief for Encryption in TLS 1.2 -->
 
 <section title="Kerberos Ticket as Certificate and CertificateVerify">
 
-<t>Kerberos Tickets(TBD:KRBTKT-CERTTP) can be negotiated independently as client_certificate_type and server_certificate_type <xref target="RFC7250"/>, though the latter is impossible without a client certificate; in TLS-KDH, a client certificate is available when the server accepts the client's quantum_relief extension.</t>
-<!-- TODO wellicht even uitleggen waarom dit onmogelijk is? -->
+<t>Kerberos Tickets(TBD:KRBTKT-CERTTP) can be negotiated independently as client_certificate_type and server_certificate_type <xref target="RFC7250"/>; in TLS-KDH, a client certificate is available when the server accepts the client's quantum_relief extension.</t>
 
-<t>The contents of the Certificate message when the certificate type is negotiated as this "Kerberos" certificate type is a Kerberos Ticket <xref target="RFC4120"/>.</t>
-<!-- TODO moeten we hier nog expliciet het formaat aangeven waarin dit ticket geformateerd moet zijn? -->
+<t>The contents of the Certificate message when the certificate type is negotiated as this "Kerberos" certificate type is a Kerberos Ticket [Section 5.3 of <xref target="RFC4120"/>] in the customary DER encoding.</t>
 
 <t>The contents of the corresponding CertificateVerify message uses this Ticket
-k5crt to compute Ticket-Encrypt (k5crt, KEYUSAGE_CLIENT_VFY, th) for a client
-CertificateVerify message or Ticket-Encrypt (k5crt, KEYUSAGE_SERVER_VFY, th)
+k5crt to compute
+<figure><artwork><![CDATA[
+Ticket-Encrypt (k5crt, KEYUSAGE_CLIENT_VFY, th)
+]]></artwork></figure>
+for a client CertificateVerify message or
+<figure><artwork><![CDATA[
+Ticket-Encrypt (k5crt, KEYUSAGE_SERVER_VFY, th)
+]]></artwork></figure>
 for a server CertificateVerify message, where th is the customary hash up to
 and including the preceding Certificate message.  For TLS 1.3, this customary hash uses the transcript hash; for TLS 1.2, the hash algorithm must match the Certificate signing algorithm, which in case of a Kerberos Ticket means its MAC hashing algorithm without reductions in the size of the hash output.</t>
 <!-- TODO ik denk dat we nog ergens moeten vertellen hoe een authenticator eruit ziet en hoe die gemaakt dient te worden op basis van de transcript hashes -->
