@@ -292,7 +292,7 @@ cipher suites.</t>
 
 </t>
 
-<t>The infrastructure of Kerberos provides a good balance between the requirements for a Quantum Relief mechanism, as a result of key derivation to hierarchical expansion of locally controlled secrets.</t> <!-- deze zin begrijp ik niet -->
+<t>The key derivation mechanisms in Kerberos are helpful in a Quantum Relief mechanism; locally controlled secrets are gradually adapted to more specific uses in a non-reversible manner.  The various uses cannot use one token to derive another, whether it is for TLS-KDH or another secure service.</t>
 
 <t>To achieve Quantum Relief, (external) secret entropy needs to be generated and inserted into the TLS key schedule.
 In the TLS 1.3 key schedule, the quantum_relief extension inserts this entropy at the position where normally the PSK is input;
