@@ -252,7 +252,7 @@ be followed.</t>
 
 <t>A TLS client MUST only advertise a Quantum Relief method that it is capable of and willing
 to perform. The default Quantum Relief method is none(0) and in that case the quantum_relief
-extension MUST not be send. In case another Quantum Relief method is set, the client
+extension MUST NOT be sent. In case another Quantum Relief method is set, the client
 SHOULD wait with the execution of this method until it receives a method confirmation from
 the server in the ServerHello. In case the server sends no confirmation or replies with a different
 Quantum Relief method than was advertised, no Quantum Relief method MUST be executed. In that case,
@@ -260,7 +260,7 @@ the client MAY decide to either continue or abort the handshake.</t>
 
 <t>A TLS server MUST only accept a Quantum Relief method that it is capable of and willing to perform.
 In case a server accepts the method that was advertised by the client, it MAY initiate the execution of
-this method. Addtionally, it MUST confirm this method to the client in its ServerHello message.
+this method. When it does, it MUST confirm this method to the client in its ServerHello message.
 Furthermore, it MUST NOT make any PSK references.
 In case a server does not accept the method that was advertised by the client, it MUST refrain from
 sending this extension.</t>
@@ -522,8 +522,8 @@ server-side requiring to know its client MAY send a CertificateRequest in order
 to verify the client's identity.</t>
 
 <t>When engaging in KDH-only authentication, the server MUST send a CertificateRequest with
-wich it requests a Kerberos Ticket from the client in order mutually authenticate each other.
-If the client does not provide such ticket, authentication can not take place and the handshake
+which it requests a Kerberos Ticket from the client in order to mutually authenticate each other.
+If the client does not provide such a ticket, authentication can not take place and the handshake
 MUST be aborted. Note that the client is still allowed to provide an anonymous ticket. This may,
 however, result in authentication being rejected by the server.</t>
 
