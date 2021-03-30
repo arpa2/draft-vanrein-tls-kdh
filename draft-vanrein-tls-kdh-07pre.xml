@@ -750,8 +750,13 @@ messages.  Specifically for TLS-KDH, the ability to decrypt a Ticket
 this to validate server identity, but MUST also validate a
 Certificate and CertificateVerify if the server sends them.</t>
 
-<t>Under TLS-KDH, the server produces a Ticket with identities for <!-- TODO de client produceert het ticket toch? Hebben we hier cli/srv niet omgewisseld? -->
-both client and server.  The client MUST be able to extract the
+<t>Under the peer-to-peer flow, the designated peer produces a Ticket
+with Kerberos roles reversed relative to TLS roles.  The Ticket
+produced mentions the designated peer as a Kerberos client to the 
+service of the TGT-sending party, which is the TLS client.  This is
+neither a problem to the peer-to-peer flow of TLS-KDH, nor to the
+user-to-user mechanism [Section 3.7 of <xref target="RFC4120"/>]
+of Kerberos.  The TLS client MUST be able to extract the
 secret from the Ticket, as an assurance that it is the designated
 receiver for this identity claim.  The verification of the
 CertificateVerify assures this, as well as the binding to the
