@@ -210,7 +210,7 @@ enum {
 <t>A TLS ClientHello can additionally specify a name for a peer that it
 wants to respond, for which various application-independent forms may be anticipated.
 This is captured in yet another tag called PeerNameType.</t>
-<!-- NB. Ik denk dat de SNI extensie een geschikt alternatief biedt. Er wordt tevens hard gewerkt om deze exentensie te beveiligen. -->
+<!-- TOmDO: SNI is generiek opgezet maar later ingeperkt tot hostname-only om kortzichtige implementaties te ondersteunen.  Encryptie zoals ik gezien heb betreft algemene velden, niet slechts SNI. -->
 <figure><artwork><![CDATA[
 enum {
     none(0),
