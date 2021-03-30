@@ -169,7 +169,7 @@ the following conditions:
 <t>In terms of algorithms that are commonplace today, the third requirement is generally believed to be met by secure hashes and symmetric encryption.  The problem with these is sharing random information secretely and at the same time controlling who has access to these secrets.</t>
 
 <section title="Peer-to-Peer Flow" anchor="qr-p2p">
-<t>Besides the customary client-to-server flow there is also support for a peer-to-peer flow under Quantum Relief.  When this is used, the ClientHello sent to a TLS server by an initiating peer holds a peernametype other than "none" followed by a corresponding name for the responding peer.</t>
+<t>Besides the customary client-to-server flow there is also support for a peer-to-peer flow under Quantum Relief.  When this is used, the ClientHello sent to a TLS server by an initiating peer holds a peernametype other than "none" followed by a corresponding name for the designated peer.</t>
 
 <t>Without documenting it here, the TLS server is assumed to have some method of designating a peer with this information, and will proxies the TLS connection to its peer.  The TLS server is not involved in cryptographic computations for the relayed TLS connection; its only task is to relay TLS data from the client to the designated peer and vice versa.</t>
 
@@ -324,14 +324,14 @@ but it completely ignores the client identity during this phase.  This allows cl
 <t>TLS-KDH also supports a peer-to-peer flow. Here, instead of sending a regular Ticket, a client sends a Ticket Granting Ticket (TGT) to the server. The server then acts
 as a proxy that relays TLS traffic to the destined peer and back. The initiating peer (i.e., the client) MAY use an anonymous name for itself in the TGT.</t>
 
-<t>Through the server, the responding peer returns a ServerHello with a Ticket based on this TGT, obtained through the user-to-user flow of Kerberos.  This returned Ticket will reverse the client and server role for Kerberos compared to TLS, but for peer-to-peer connectivity that is not an issue.  The responding peer will authenticate itself to the initiating peer through its use of this returned Ticket and it can decide whether authentication of the initiating client is desired.</t>
+<t>Through the server, the designated peer returns a ServerHello with a Ticket based on this TGT, obtained through the user-to-user flow of Kerberos.  This returned Ticket will reverse the client and server role for Kerberos compared to TLS, but for peer-to-peer connectivity that is not an issue.  The designated peer will authenticate itself to the initiating peer through its use of this returned Ticket and it can decide whether authentication of the initiating client is desired.</t>
 
-<t>If and when the TLS client authenticates through a Kerberos Ticket, it uses the responding peer name as the service name and its own name as the client name, in line with the TLS roles for client and server.</t>
+<t>If and when the TLS client authenticates through a Kerberos Ticket, it uses the designated peer name as the service name and its own name as the client name, in line with the TLS roles for client and server.</t>
 
 </section> <!-- Peer-to-Peer Flow -->
 
 <section title="Injecting Kerberos-derived Entropy">
-<t>Whether a Ticket is supplied in the ClientHello or returned by a responding peer
+<t>Whether a Ticket is supplied in the ClientHello or returned by a designated peer
 in the ServerHello, it yields a key only known to the two connecting parties.  This key is applied to the concatenated random data from ClientHello and ServerHello to derive a new secret.  This means that both parties influence the entropy gathered and can derive a sequence of bytes that is unknown to anyone else.  The output from the encryption operation is plugged into the key schedule instead of the PSK input parameter.  This input is suited for entropy of arbitrary size.</t>
 </section> <!-- Injecting Kerberos-derived Entropy -->
 
@@ -364,7 +364,7 @@ enum {
 } PeerNameType;
 ]]></artwork></figure>
 
-<t>In these two types, the value "none" is used for regular client-to-server TLS connections.  The value "krb5princrealm" is used in a ClientHello to indicate a Kerberos PrincipalName and Realm [Section 5.2.2 of <xref target="RFC4120"/>] for the responding peer sought behind the TLS server in peer-to-peer TLS connections.</t>
+<t>In these two types, the value "none" is used for regular client-to-server TLS connections.  The value "krb5princrealm" is used in a ClientHello to indicate a Kerberos PrincipalName and Realm [Section 5.2.2 of <xref target="RFC4120"/>] for the designated peer sought behind the TLS server in peer-to-peer TLS connections.</t>
 
 <t>The quantum_relief extension with support for the KDH method is now defined as follows:</t>
 
@@ -485,11 +485,11 @@ target="kdh-p2p"/>].</t>
 <t>To initiate client-to-server traffic, the "peernametype" MUST be set to "none", and the "opt_ticket" MUST be a Ticket with the service name, host or domain name and Kerberos realm of the addressed service.  The client name in the "opt_ticket" MAY be an anonymous identity and the server MUST ignore the client identity in the "opt_ticket".  When the "server_name" extension is also sent, there SHOULD be restrictions enforced by the server on its relation with the service name in the "opt_ticket", but this may involve domain-to-hostname mappings, for instance through DNS SRV records under DNSSEC protection.</t>
 
 <t>To initiate peer-to-peer traffic that could be proxied through the TLS
-server to end at a responding peer, the "peernametype" MUST NOT be set to "none",
+server to end at a designated peer, the "peernametype" MUST NOT be set to "none",
 and the "opt_ticket" MUST be a TGT for the TLS client, suited for the ticket
 granting service of the TLS server’s realm; it is permitted for the client to
 use an anonymous identity in this TGT and the server MUST ignore the client
-identity in the "opt_ticket".  When the "peernametype" is set to "krb5princrealm", the "krb5princ" and "krb5realm" fields MUST be set to the Kerberos PrincipalName and Realm for the desired responding peer.  Future extensions may introduce alternative forms of responding peer identities and a TLS server SHOULD be open to the general idea of identity.</t>
+identity in the "opt_ticket".  When the "peernametype" is set to "krb5princrealm", the "krb5princ" and "krb5realm" fields MUST be set to the Kerberos PrincipalName and Realm for the designated peer.  Future extensions may introduce alternative forms of designated peer identities and a TLS server SHOULD be open to the general idea of identity.</t>
 
 </section> <!-- ClientHello -->
 
@@ -518,7 +518,7 @@ with a "quantum_relief" extension, sets "qr_method" to "kdh" and
 
 <section title="Server-sent CertificateRequest">
 
-<t>Since client identity is ignored by the server or responding peer during ClientHello and
+<t>Since client identity is ignored by the server or designated peer during ClientHello and
 ServerHello and may indeed be toned down to an anonymous identity, a
 server-side requiring to know its client MAY send a CertificateRequest in order
 to verify the client's identity.</t>
@@ -640,7 +640,7 @@ data structures and are discussed together.</t>
 <section title="Quantum Relief for Encryption in TLS 1.3">
 
 <t>Under client-to-server TLS-KDH, the "opt_ticket" in the "quantum_relief"
-extension in the ClientHello is used to supply external (quantum proof) key material.  Under peer-to-peer TLS-KDH, the TGT in the "opt_ticket" supplies no shared key material to the client and server (or responding peer), but the ServerHello returns a "quantum_relief" extension with an "opt_ticket" field holding a Ticket that does supply a shared key to use.</t>
+extension in the ClientHello is used to supply external (quantum proof) key material.  Under peer-to-peer TLS-KDH, the TGT in the "opt_ticket" supplies no shared key material to the client and server (or designated peer), but the ServerHello returns a "quantum_relief" extension with an "opt_ticket" field holding a Ticket that does supply a shared key to use.</t>
 
 <t>This key is used to compute
 </t><t><figure><artwork><![CDATA[
@@ -649,7 +649,7 @@ Ticket-Encrypt (opt_ticket, usage, ClientHello.random || ServerHello.random)
 where || signifies concatenation, and
 usage is either KEYUSAGE_TLSKDH_CLIENT_QR for a Ticket supplied by the client,
 or KEYUSAGE_TLSKDH_SERVER_QR for a Ticket supplied by the server side (or
-responding peer).  The output of this computation is provided instead of the PSK on
+designated peer).  The output of this computation is provided instead of the PSK on
 the left of the Key Schedule for TLS 1.3 [page 93 of <xref target="RFC8446"/>].  Note how the ServerHello is involved in this computation, and not just the ClientHello; had PSK facilities been used, then this seeding would have arrived too late to provide the binder_key, client_early_traffic_secret and early_exporter_master_key.  But replacing the locally oriented PSK mechanism with TLS-KDH, means that there is no facility for early data or other PSK facilities, so these keys need not be computed.</t>
 
 <t>Other "qr_method" values than "kdh" are likely to come up with other computations.  There may be some that prefer to influence only the master key by replacing the 0 value for key input as it is shown in the TLS 1.3 key schedule.</t>
