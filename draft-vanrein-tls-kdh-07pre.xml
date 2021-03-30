@@ -687,7 +687,7 @@ Ticket-Encrypt (k5crt, KEYUSAGE_SERVER_VFY, th)
 ]]></artwork></figure>
 for a server CertificateVerify message, where th is the customary hash up to
 and including the preceding Certificate message.  For TLS 1.3, this customary hash uses the transcript hash; for TLS 1.2, the hash algorithm must match the Certificate signing algorithm, which in case of a Kerberos Ticket means its MAC hashing algorithm without reductions in the size of the hash output.</t>
-<!-- TODO ik denk dat we nog ergens moeten vertellen hoe een authenticator eruit ziet en hoe die gemaakt dient te worden op basis van de transcript hashes -->
+<!-- TOmDO In een eerdere versie had ik voorgeschreven hoe de Authenticator er uit moet zien; dit is afgeraden door Ken Rayburn tijdens een overlegronde; laat dat aan applicaties over, dwing libraries niet om iets te doen wat ze onnatuurlijk vinden, er is al eens over nagedacht hoe dit in code moet en compatible blijft -->
 </section> <!-- Kerberos Ticket as Certificate and CertificateVerify -->
 
 </section> <!-- Cryptographic Modes -->
