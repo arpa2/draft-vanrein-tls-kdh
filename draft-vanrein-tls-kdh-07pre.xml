@@ -504,7 +504,7 @@ TLS data will be processed on the server and the response extension MUST set the
 
 <t>When the ClientHello extension had its "peernametype" set to another value than "none", then the TLS server SHOULD use this to locate a designated peer, which may have registered through a mechanism not specified herein, and proxy the TLS traffic to this designated peer.  The TLS server continues to proxy TLS traffic until the connection closes.  When such peer-to-peer connectivity is not supported by a TLS server or when the peer name could not be resolved to a designated peer or when the designated peer is unresponsible, the TLS server MUST send a handshake_failure alert and close the connection.</t>
 
-<t>When a designated peer, possibly after registering with a TLS server as a
+<t>When a designated peer, possibly after out-of-band registration with a TLS server as a
 recipient for peer-to-peer TLS connections, receives a ClientHello with a
 "quantum_relief" extension with "qr_method" set to "kdh" and a
 "peernametype" and "peername" that it recognises as its own and with a TGT in
@@ -743,12 +743,12 @@ before sending the client's Certificate.</t>
 <section title="Server Authentication">
 
 <t>The identity of the server under generic Quantum Relief needs to
-wait for the arrival of the server's Certificate and CertificateVery
+wait for the arrival of the server's Certificate and CertificateVerify
 messages.  Specifically for TLS-KDH, the ability to decrypt a Ticket
 (for the client-to-server flow) or to produce a Ticket from a TGT
-(for the peer-to-peer flow) provides the same proof.  Clients MAY use
-this, but MUST also validate a Certificate and CertificateVerify if
-the server sends them.</t>
+(for the peer-to-peer flow) provides the same proof.  Clients MAY trust
+this to validate server identity, but MUST also validate a
+Certificate and CertificateVerify if the server sends them.</t>
 
 <t>Under TLS-KDH, the server produces a Ticket with identities for <!-- TODO de client produceert het ticket toch? Hebben we hier cli/srv niet omgewisseld? -->
 both client and server.  The client MUST be able to extract the
