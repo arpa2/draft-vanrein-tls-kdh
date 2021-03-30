@@ -218,7 +218,7 @@ enum {
 } PeerNameType;
 ]]></artwork></figure>
 
-<t>The value "none" is used for regular client-to-server TLS connections. Additional values and
+<t>The value "none" in both types is used for regular client-to-server TLS connections. Additional values and
 their corresponding data structures may be defined if a mechanism requires access to a peer in a
 different way, e.g., in peer-to-peer TLS connections.</t>
 
@@ -364,7 +364,7 @@ enum {
 } PeerNameType;
 ]]></artwork></figure>
 
-<t>In the context of TLS-KDH, the value "none" is used for regular client-to-server TLS connections.  The value "krb5princrealm" is used in a ClientHello to indicate a Kerberos PrincipalName and Realm [Section 5.2.2 of <xref target="RFC4120"/>] for the responding peer sought behind the TLS server in peer-to-peer TLS connections.</t>
+<t>In these two types, the value "none" is used for regular client-to-server TLS connections.  The value "krb5princrealm" is used in a ClientHello to indicate a Kerberos PrincipalName and Realm [Section 5.2.2 of <xref target="RFC4120"/>] for the responding peer sought behind the TLS server in peer-to-peer TLS connections.</t>
 
 <t>The quantum_relief extension with support for the KDH method is now defined as follows:</t>
 
