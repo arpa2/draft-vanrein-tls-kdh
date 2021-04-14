@@ -523,18 +523,13 @@ ServerHello, and may indeed be toned down to an anonymous identity, a
 server-side requiring to know its client MAY send a CertificateRequest in order
 to verify the client's identity.</t>
 
-<!-- TOmDO: The term "KDH-only authentication" is gone.  Please check this formulation. -->
-<t>When the "server_certificate_type" extension was negotiated to the Kerberos Ticket
-certificate type, then the server MUST send a CertificateRequest with
+<t>When engaging in KDH-only authentication, the server MUST send a CertificateRequest with
 which it requests a Kerberos Ticket from the client in order to mutually authenticate each other.
 If the client does not provide such a ticket, authentication can not take place and the handshake
 MUST be aborted. Note that the client is still allowed to provide an anonymous ticket. This may,
 however, result in authentication being rejected by the server.</t>
 
-<!-- TOmDO: The term "KDH-enhanced authentication" is gone.  Please check this formulation.
-     Note the nice mirrorring server/client with above!  Why did we say SHOULD not MUST? -->
-<t>When the "client_certificate_type" extension was negotiated to the Kerberos Ticket
-certificate type, then the server SHOULD send a CertificateRequest to
+<t>When engaging in KDH-enhanced authentication, the server SHOULD send a CertificateRequest to
 request for a ticket with which the (regular) server authentication (e.g., X.509) can be enhanced.
 The client MAY decline this offer and it is up to the server whether to accept this or not.</t>
 
@@ -564,12 +559,10 @@ extension did not provide a Ticket or TGT such as it does when the "qr_method" i
 <t>Under TLS 1.3, the server can request client authentication by sending a
 CertificateRequest message. It is possible for servers to do this at any time (provided that the client has sent the "post_handshake_auth" extension), and possibly multiple times; TLS 1.3 even defines how to handle overlapping requests for client authentication.</t>
 
-<!-- TOmDO: The term "KDH-only authentication" is gone.  Please check this formulation. -->
 <t>Clients MAY choose to respond to a CertificateRequest by sending a
 Certificate and CertificateVerify, and the server MAY choose to close the
-connection if the client chooses otherwise. When the "server_certificate_type"
-extension was negotiated to the Kerberos Ticket certificate type,
-then a client Certificate message is mandatory in order for both parties
+connection if the client chooses otherwise. When engaging in KDH-only
+authentication, a client Certificate message is mandatory in order for both parties
 to authenticate. If the client does not provide a ticket via a Certificate message
 then the server MUST abort the handshake.</t>
 
