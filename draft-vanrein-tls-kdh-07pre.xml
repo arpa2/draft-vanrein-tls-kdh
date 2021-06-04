@@ -45,7 +45,7 @@
 		</address>
 	</author>
 
-	<date day="TODO" month="May" year="2021"/>
+	<date day="1" month="May" year="2021"/>
 
 	<abstract>
 		<t>This specification describes a mechanism to use Kerberos
@@ -171,7 +171,7 @@ the following conditions:
 <section title="Peer-to-Peer Flow" anchor="qr-p2p">
 <t>Besides the customary client-to-server flow there is also support for a peer-to-peer flow under Quantum Relief.  When this is used, the ClientHello sent to a TLS server by an initiating peer holds a peernametype other than "none" followed by a corresponding name for the designated peer.</t>
 
-<t>Without documenting it here, the TLS server is assumed to have some method of designating a peer with this information, and will proxies the TLS connection to its peer.  The TLS server is not involved in cryptographic computations for the relayed TLS connection; its only task is to relay TLS data from the client to the designated peer and vice versa.</t>
+<t>Without documenting it here, the TLS server is assumed to have some method of designating a peer with this information, and will proxy the TLS connection to this peer.  The TLS server is not involved in cryptographic computations for the relayed TLS connection; its only task is to relay TLS data from the client to the designated peer and vice versa.</t>
 
 </section>
 
